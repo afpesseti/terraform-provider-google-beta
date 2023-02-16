@@ -14,6 +14,9 @@ test: lint generate
 testacc: lint generate
 	TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 go test $(TEST) -v $(TESTARGS) -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc"
 
+testacc-logtrace: lint generate
+	TF_ACC=1 TF_SCHEMA_PANIC_ON_ERROR=1 TF_LOG=DEBUG TF_ACC_LOG_PATH=/home/afpesseti/CIANDT/cloud-armor/network-edge-and-ddos-config/terraform-provider-google-beta/acc.log go test $(TEST) -v $(TESTARGS) -timeout 240m -ldflags="-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc"
+
 fmt:
 	@echo "==> Fixing source code with gofmt..."
 	gofmt -w -s ./$(DIR_NAME)

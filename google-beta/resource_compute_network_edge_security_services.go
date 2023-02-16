@@ -50,7 +50,7 @@ func resourceComputeNetworkEdgeSecurityServices() *schema.Resource {
 
 			"security_policy": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: `The resource URL for the network edge security service associated with this network edge security service.`,
 			},
@@ -246,7 +246,11 @@ func resourceNetworkEdgeSecurityServicesImporter(d *schema.ResourceData, meta in
 		return nil, err
 	}*/
 
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEdgeSecurityServices/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+	/*if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEdgeSecurityServices/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+		return nil, err
+	}*/
+
+	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEdgeSecurityServices/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)","(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 
