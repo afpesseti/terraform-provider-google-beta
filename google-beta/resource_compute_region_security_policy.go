@@ -834,28 +834,3 @@ func resourceComputeRegionSecurityPoliciesImporter(d *schema.ResourceData, meta 
 
 	return []*schema.ResourceData{d}, nil
 }
-
-// Change
-func expandSecurityPolicyDdosProtectionConfig(configured []interface{}) *compute.SecurityPolicyDdosProtectionConfig {
-	if len(configured) == 0 || configured[0] == nil {
-		return nil
-	}
-
-	data := configured[0].(map[string]interface{})
-	return &compute.SecurityPolicyDdosProtectionConfig{
-		DdosProtection: data["ddos_protection"].(string),
-	}
-}
-
-// Change
-func flattenSecurityPolicyDdosProtectionConfig(conf *compute.SecurityPolicyDdosProtectionConfig) []map[string]interface{} {
-	if conf == nil {
-		return nil
-	}
-
-	data := map[string]interface{}{
-		"ddos_protection": conf.DdosProtection,
-	}
-
-	return []map[string]interface{}{data}
-}
