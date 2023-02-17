@@ -250,7 +250,7 @@ func resourceNetworkEdgeSecurityServicesImporter(d *schema.ResourceData, meta in
 		return nil, err
 	}*/
 
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEdgeSecurityServices/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)","(?P<name>[^/]+)"}, d, config); err != nil {
+	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEdgeSecurityServices/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}
 

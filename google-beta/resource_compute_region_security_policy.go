@@ -500,6 +500,14 @@ func resourceComputeRegionSecurityPolicy() *schema.Resource {
 					},
 				},
 			},
+			"region": {
+				Type:             schema.TypeString,
+				Computed:         true,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				Description:      `URL of the region where the resource resides.`,
+			},
 		},
 
 		UseJSONNumber: true,
@@ -533,6 +541,10 @@ func resourceComputeRegionSecurityPoliciesCreate(d *schema.ResourceData, meta in
 		securityPolicy.Type = v.(string)
 	}
 
+	if v, ok := d.GetOk("region"); ok {
+		securityPolicy.Region = v.(string)
+	}
+
 	if v, ok := d.GetOk("rule"); ok {
 		securityPolicy.Rules = expandSecurityPolicyRules(v.(*schema.Set).List())
 	}
@@ -558,25 +570,34 @@ func resourceComputeRegionSecurityPoliciesCreate(d *schema.ResourceData, meta in
 
 	client := config.NewComputeClient(userAgent)
 
+	fmt.Print("--------------------------------------------STARTING TO INSERT!!!-----------------------------------------")
 	op, err := client.RegionSecurityPolicies.Insert(project, region, securityPolicy).Do()
-
+	fmt.Print("--------------------------------------------INSERT RESULT!!!-----------------------------------------")
+	fmt.Println(err != nil)
 	if err != nil {
+		fmt.Print("-------------------------------------------DEURUIIIIM!!-----------------------------------------")
+		fmt.Println(err)
 		return errwrap.Wrapf("Error creating RegionSecurityPolicies: {{err}}", err)
 	}
 
+	fmt.Print("-------------------------------------------Keep!!-----------------------------------------")
 	//id, err := replaceVars(d, config, "projects/{{project}}/global/regionSecurityPolicies/{{name}}")
 	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}")
 	if err != nil {
+		fmt.Print("-------------------------------------------DEURUIIIIM PARTE 02!!-----------------------------------------")
+		fmt.Println(err)
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
 	err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Creating RegionSecurityPolicies %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
+		fmt.Print("-------------------------------------------DEURUIIIIM PARTE 03!!-----------------------------------------")
+		fmt.Println(err)
 		return err
 	}
 
-	return resourceComputeSecurityPolicyRead(d, meta)
+	return resourceComputeRegionSecurityPoliciesRead(d, meta)
 }
 
 func resourceComputeRegionSecurityPoliciesRead(d *schema.ResourceData, meta interface{}) error {
@@ -600,52 +621,75 @@ func resourceComputeRegionSecurityPoliciesRead(d *schema.ResourceData, meta inte
 
 	client := config.NewComputeClient(userAgent)
 
+	fmt.Print("--------------------------------------------INSERT READ!!!-----------------------------------------")
+
 	securityPolicy, err := client.RegionSecurityPolicies.Get(project, region, sp).Do()
 	if err != nil {
+		fmt.Print("-------------------------------------------DEURUIIIIM READ 01!!-----------------------------------------")
+		fmt.Println(err)
 		return handleNotFoundError(err, d, fmt.Sprintf("RegionSecurityPoliciesService %q", d.Id()))
 	}
 
 	if err := d.Set("name", securityPolicy.Name); err != nil {
+		fmt.Printf("Error setting name: %s", err)
 		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("description", securityPolicy.Description); err != nil {
+		fmt.Printf("Error setting description: %s", err)
 		return fmt.Errorf("Error setting description: %s", err)
 	}
+	if err := d.Set("region", securityPolicy.Region); err != nil {
+		fmt.Printf("Error setting region: %s", err)
+		return fmt.Errorf("Error setting region: %s", err)
+	}
 	if err := d.Set("type", securityPolicy.Type); err != nil {
+		fmt.Printf("Error setting type: %s", err)
 		return fmt.Errorf("Error setting type: %s", err)
 	}
 	if err := d.Set("rule", flattenSecurityPolicyRules(securityPolicy.Rules)); err != nil {
+		fmt.Printf("Error setting rule: %s", err)
 		return err
 	}
 	if err := d.Set("fingerprint", securityPolicy.Fingerprint); err != nil {
+		fmt.Printf("Error setting fingerprint: %s", err)
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
+		fmt.Printf("Error setting project: %s", err)
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("self_link", ConvertSelfLinkToV1(securityPolicy.SelfLink)); err != nil {
+		fmt.Printf("Error setting self_link: %s", err)
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	//Change
 	if err := d.Set("ddos_protection_config", flattenSecurityPolicyDdosProtectionConfig(securityPolicy.DdosProtectionConfig)); err != nil {
+		fmt.Printf("Error setting ddos_protection_config: %s", err)
 		return fmt.Errorf("Error setting ddos_protection_config: %s", err)
 	}
 	if err := d.Set("advanced_options_config", flattenSecurityPolicyAdvancedOptionsConfig(securityPolicy.AdvancedOptionsConfig)); err != nil {
+		fmt.Printf("Error setting advanced_options_config: %s", err)
 		return fmt.Errorf("Error setting advanced_options_config: %s", err)
 	}
 
 	if err := d.Set("adaptive_protection_config", flattenSecurityPolicyAdaptiveProtectionConfig(securityPolicy.AdaptiveProtectionConfig)); err != nil {
+		fmt.Printf("Error setting adaptive_protection_config: %s", err)
 		return fmt.Errorf("Error setting adaptive_protection_config: %s", err)
 	}
 
 	if err := d.Set("recaptcha_options_config", flattenSecurityPolicyRecaptchaOptionConfig(securityPolicy.RecaptchaOptionsConfig)); err != nil {
+		fmt.Printf("Error setting recaptcha_options_config: %s", err)
 		return fmt.Errorf("Error setting recaptcha_options_config: %s", err)
 	}
+
+	fmt.Print("--------------------------------------------TUDO RIGHT COM O READ!!!-----------------------------------------")
 
 	return nil
 }
 
 func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta interface{}) error {
+	fmt.Print("--------------------------------------------INSERT UPDATE!!!-----------------------------------------")
+
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -666,6 +710,11 @@ func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta in
 
 	securityPolicy := &compute.SecurityPolicy{
 		Fingerprint: d.Get("fingerprint").(string),
+	}
+
+	if d.HasChange("region") {
+		securityPolicy.Region = d.Get("region").(string)
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "Region")
 	}
 
 	if d.HasChange("type") {
@@ -701,14 +750,18 @@ func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta in
 	if len(securityPolicy.ForceSendFields) > 0 {
 		client := config.NewComputeClient(userAgent)
 
+		fmt.Print("--------------------------------------------CONTINUE UPDATE!!!-----------------------------------------")
+
 		op, err := client.RegionSecurityPolicies.Patch(project, region, sp, securityPolicy).Do()
 
 		if err != nil {
+			fmt.Printf("Error updating RegionSecurityPolicy %q: {{err}}", sp)
 			return errwrap.Wrapf(fmt.Sprintf("Error updating RegionSecurityPolicy %q: {{err}}", sp), err)
 		}
 
 		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating RegionSecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
+			fmt.Println("Error updating RegionSecurityPolicy222222")
 			return err
 		}
 	}
@@ -778,10 +831,11 @@ func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta in
 		}
 	}
 
-	return resourceComputeSecurityPolicyRead(d, meta)
+	return resourceComputeRegionSecurityPoliciesRead(d, meta)
 }
 
 func resourceComputeRegionSecurityPoliciesDelete(d *schema.ResourceData, meta interface{}) error {
+	fmt.Print("--------------------------------------------START DELETE!!!-----------------------------------------")
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -816,18 +870,40 @@ func resourceComputeRegionSecurityPoliciesDelete(d *schema.ResourceData, meta in
 }
 
 func resourceComputeRegionSecurityPoliciesImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	fmt.Print("--------------------------------------------START import!!!-----------------------------------------")
+
 	config := meta.(*Config)
 	/*if err := parseImportId([]string{"projects/(?P<project>[^/]+)/global/regionSecurityPolicies/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
 		return nil, err
 	}*/
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/securityPolicies/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<region>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
+
+	if err := parseImportId([]string{
+		"projects/(?P<project>[^/]+)/global/regionSecurityPolicies/(?P<name>[^/]+)",
+		"(?P<project>[^/]+)/(?P<name>[^/]+)",
+		"(?P<region>[^/]+)/(?P<name>[^/]+)",
+		"(?P<name>[^/]+)",
+	}, d, config); err != nil {
 		return nil, err
 	}
+
+	/*if err := parseImportId([]string{
+		"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/securityPolicies/(?P<name>[^/]+)",
+		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
+		"(?P<region>[^/]+)/(?P<name>[^/]+)",
+		"(?P<name>[^/]+)",
+	}, d, config); err != nil {
+		fmt.Print("-------------------------------------------DEU RUIM NO IMPORT MEO!!-----------------------------------------")
+		fmt.Print(err)
+		return nil, err
+	}*/
+
+	fmt.Print("-------------------------------------------IMPORT NO POS!!-----------------------------------------")
 
 	// Replace import id for the resource id
 	//id, err := replaceVars(d, config, "projects/{{project}}/global/regionSecurityPolicies/{{name}}")
 	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}")
 	if err != nil {
+		fmt.Print("-------------------------------------------IMPORT NO ID ERRO!!-----------------------------------------")
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
