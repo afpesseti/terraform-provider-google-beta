@@ -56,11 +56,18 @@ func resourceComputeNetworkEdgeSecurityServices() *schema.Resource {
 				Description: `Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking. This field will be ignored when inserting a NetworkEdgeSecurityService.`,
 			},
 
-			"security_policy": {
+			/*"security_policy": {
 				Type:        schema.TypeString,
+				Computed:    true,
 				Optional:    true,
 				ForceNew:    true,
 				Description: `The resource URL for the network edge security service associated with this network edge security service.`,
+			},*/
+			"security_policy": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: compareSelfLinkOrResourceName,
+				Description:      `The security policy associated with this backend service.`,
 			},
 			"region": {
 				Type:             schema.TypeString,
