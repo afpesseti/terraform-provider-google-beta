@@ -622,6 +622,9 @@ func resourceComputeRegionSecurityPoliciesRead(d *schema.ResourceData, meta inte
 	client := config.NewComputeClient(userAgent)
 
 	fmt.Print("--------------------------------------------INSERT READ!!!-----------------------------------------")
+	fmt.Print(project)
+	fmt.Print(region)
+	fmt.Print(sp)
 
 	securityPolicy, err := client.RegionSecurityPolicies.Get(project, region, sp).Do()
 	if err != nil {
@@ -873,29 +876,15 @@ func resourceComputeRegionSecurityPoliciesImporter(d *schema.ResourceData, meta 
 	fmt.Print("--------------------------------------------START import!!!-----------------------------------------")
 
 	config := meta.(*Config)
-	/*if err := parseImportId([]string{"projects/(?P<project>[^/]+)/global/regionSecurityPolicies/(?P<name>[^/]+)", "(?P<project>[^/]+)/(?P<name>[^/]+)", "(?P<name>[^/]+)"}, d, config); err != nil {
-		return nil, err
-	}*/
 
 	if err := parseImportId([]string{
-		"projects/(?P<project>[^/]+)/global/regionSecurityPolicies/(?P<name>[^/]+)",
+		"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/securityPolicies/(?P<name>[^/]+)",
 		"(?P<project>[^/]+)/(?P<name>[^/]+)",
 		"(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
 	}, d, config); err != nil {
 		return nil, err
 	}
-
-	/*if err := parseImportId([]string{
-		"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/securityPolicies/(?P<name>[^/]+)",
-		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
-		"(?P<region>[^/]+)/(?P<name>[^/]+)",
-		"(?P<name>[^/]+)",
-	}, d, config); err != nil {
-		fmt.Print("-------------------------------------------DEU RUIM NO IMPORT MEO!!-----------------------------------------")
-		fmt.Print(err)
-		return nil, err
-	}*/
 
 	fmt.Print("-------------------------------------------IMPORT NO POS!!-----------------------------------------")
 
