@@ -179,6 +179,10 @@ func resourceComputeNetworkEdgeSecurityServicesRead(d *schema.ResourceData, meta
 	if err := d.Set("description", networkEdgeSecurityServices.Description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
 	}
+	if err := d.Set("project", project); err != nil {
+		fmt.Printf("Error setting project: %s", err)
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 	if err := d.Set("region", networkEdgeSecurityServices.Region); err != nil {
 		fmt.Printf("Error setting region: %s", err)
 	}
@@ -309,11 +313,13 @@ func resourceComputeNetworkEdgeSecurityServicesDelete(d *schema.ResourceData, me
 }
 
 func resourceNetworkEdgeSecurityServicesImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	fmt.Print("-------------------------------------------Prepare to Import!!-----------------------------------------\n")
+
 	config := meta.(*Config)
 
 	if err := parseImportId([]string{
 		"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/networkEdgeSecurityServices/(?P<name>[^/]+)",
-		"(?P<project>[^/]+)/(?P<name>[^/]+)",
+		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
 	}, d, config); err != nil {
