@@ -10,7 +10,6 @@ func TestAccComputeRegionSecurityPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	//polLink := "google_compute_region_security_policy.policy"
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
