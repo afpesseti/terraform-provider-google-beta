@@ -2,14 +2,12 @@ package google
 
 import (
 	"fmt"
-	"log"
-
-	"time"
-
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	compute "google.golang.org/api/compute/v0.beta"
+	"log"
+	"time"
 )
 
 func resourceComputeRegionSecurityPolicy() *schema.Resource {
@@ -53,12 +51,10 @@ func resourceComputeRegionSecurityPolicy() *schema.Resource {
 			},
 
 			"type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: `The type indicates the intended use of the security policy. CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services. They filter requests before they hit the origin servers. CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage). They filter requests before the request is served from Google's cache.`,
-				//Change
-				//SetFeature: Cloud Armor for NLB/VMs APIs (item c) -> insert CLOUD_ARMOR_NETWORK on enum
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				Description:  `The type indicates the intended use of the security policy. CLOUD_ARMOR - Cloud Armor backend security policies can be configured to filter incoming HTTP requests targeting backend services. They filter requests before they hit the origin servers. CLOUD_ARMOR_EDGE - Cloud Armor edge security policies can be configured to filter incoming HTTP requests targeting backend services (including Cloud CDN-enabled) as well as backend buckets (Cloud Storage). They filter requests before the request is served from Google's cache.`,
 				ValidateFunc: validation.StringInSlice([]string{"CLOUD_ARMOR", "CLOUD_ARMOR_EDGE", "CLOUD_ARMOR_INTERNAL_SERVICE", "CLOUD_ARMOR_NETWORK"}, false),
 			},
 
@@ -146,7 +142,6 @@ func resourceComputeRegionSecurityPolicy() *schema.Resource {
 							Description: `A match condition that incoming traffic is evaluated against. If it evaluates to true, the corresponding action is enforced.`,
 						},
 
-						//MarkWaf
 						"preconfigured_waf_config": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -342,7 +337,7 @@ func resourceComputeRegionSecurityPolicy() *schema.Resource {
 							},
 							Description: `Parameters defining the redirect action. Cannot be specified for any other actions.`,
 						},
-						//MarkHeader
+
 						"header_action": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -389,8 +384,6 @@ func resourceComputeRegionSecurityPolicy() *schema.Resource {
 				Description: `The URI of the created resource.`,
 			},
 
-			//Change
-			//SetFeature: Cloud Armor for NLB/VMs APIs (item b) -> insert DdosProtectionConfig new object here
 			"ddos_protection_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -549,7 +542,6 @@ func resourceComputeRegionSecurityPoliciesCreate(d *schema.ResourceData, meta in
 		securityPolicy.Rules = expandSecurityPolicyRules(v.(*schema.Set).List())
 	}
 
-	//Change
 	if v, ok := d.GetOk("ddos_protection_config"); ok {
 		securityPolicy.DdosProtectionConfig = expandSecurityPolicyDdosProtectionConfig(v.([]interface{}))
 	}
@@ -570,30 +562,20 @@ func resourceComputeRegionSecurityPoliciesCreate(d *schema.ResourceData, meta in
 
 	client := config.NewComputeClient(userAgent)
 
-	fmt.Print("--------------------------------------------STARTING TO INSERT!!!-----------------------------------------")
 	op, err := client.RegionSecurityPolicies.Insert(project, region, securityPolicy).Do()
-	fmt.Print("--------------------------------------------INSERT RESULT!!!-----------------------------------------")
-	fmt.Println(err != nil)
+
 	if err != nil {
-		fmt.Print("-------------------------------------------DEURUIIIIM!!-----------------------------------------")
-		fmt.Println(err)
 		return errwrap.Wrapf("Error creating RegionSecurityPolicies: {{err}}", err)
 	}
 
-	fmt.Print("-------------------------------------------Keep!!-----------------------------------------")
-	//id, err := replaceVars(d, config, "projects/{{project}}/global/regionSecurityPolicies/{{name}}")
 	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}")
 	if err != nil {
-		fmt.Print("-------------------------------------------DEURUIIIIM PARTE 02!!-----------------------------------------")
-		fmt.Println(err)
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
 	err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Creating RegionSecurityPolicies %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
-		fmt.Print("-------------------------------------------DEURUIIIIM PARTE 03!!-----------------------------------------")
-		fmt.Println(err)
 		return err
 	}
 
@@ -621,15 +603,8 @@ func resourceComputeRegionSecurityPoliciesRead(d *schema.ResourceData, meta inte
 
 	client := config.NewComputeClient(userAgent)
 
-	fmt.Print("--------------------------------------------INSERT READ!!!-----------------------------------------")
-	fmt.Print(project)
-	fmt.Print(region)
-	fmt.Print(sp)
-
 	securityPolicy, err := client.RegionSecurityPolicies.Get(project, region, sp).Do()
 	if err != nil {
-		fmt.Print("-------------------------------------------DEURUIIIIM READ 01!!-----------------------------------------")
-		fmt.Println(err)
 		return handleNotFoundError(err, d, fmt.Sprintf("RegionSecurityPoliciesService %q", d.Id()))
 	}
 
@@ -665,7 +640,6 @@ func resourceComputeRegionSecurityPoliciesRead(d *schema.ResourceData, meta inte
 		fmt.Printf("Error setting self_link: %s", err)
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
-	//Change
 	if err := d.Set("ddos_protection_config", flattenSecurityPolicyDdosProtectionConfig(securityPolicy.DdosProtectionConfig)); err != nil {
 		fmt.Printf("Error setting ddos_protection_config: %s", err)
 		return fmt.Errorf("Error setting ddos_protection_config: %s", err)
@@ -685,14 +659,10 @@ func resourceComputeRegionSecurityPoliciesRead(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error setting recaptcha_options_config: %s", err)
 	}
 
-	fmt.Print("--------------------------------------------TUDO RIGHT COM O READ!!!-----------------------------------------")
-
 	return nil
 }
 
 func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta interface{}) error {
-	fmt.Print("--------------------------------------------INSERT UPDATE!!!-----------------------------------------")
-
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -729,7 +699,7 @@ func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta in
 		securityPolicy.Description = d.Get("description").(string)
 		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "Description")
 	}
-	//Change
+
 	if d.HasChange("ddos_protection_config") {
 		securityPolicy.DdosProtectionConfig = expandSecurityPolicyDdosProtectionConfig(d.Get("ddos_protection_config").([]interface{}))
 		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "DdosProtectionConfig", "ddosProtectionConfig.jsonParsing", "ddosProtectionConfig.jsonCustomConfig", "ddosProtectionConfig.logLevel")
@@ -753,18 +723,14 @@ func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta in
 	if len(securityPolicy.ForceSendFields) > 0 {
 		client := config.NewComputeClient(userAgent)
 
-		fmt.Print("--------------------------------------------CONTINUE UPDATE!!!-----------------------------------------")
-
 		op, err := client.RegionSecurityPolicies.Patch(project, region, sp, securityPolicy).Do()
 
 		if err != nil {
-			fmt.Printf("Error updating RegionSecurityPolicy %q: {{err}}", sp)
 			return errwrap.Wrapf(fmt.Sprintf("Error updating RegionSecurityPolicy %q: {{err}}", sp), err)
 		}
 
 		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating RegionSecurityPolicy %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
-			fmt.Println("Error updating RegionSecurityPolicy222222")
 			return err
 		}
 	}
@@ -838,7 +804,6 @@ func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta in
 }
 
 func resourceComputeRegionSecurityPoliciesDelete(d *schema.ResourceData, meta interface{}) error {
-	fmt.Print("--------------------------------------------START DELETE!!!-----------------------------------------")
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
 	if err != nil {
@@ -873,8 +838,6 @@ func resourceComputeRegionSecurityPoliciesDelete(d *schema.ResourceData, meta in
 }
 
 func resourceComputeRegionSecurityPoliciesImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	fmt.Print("--------------------------------------------START import!!!-----------------------------------------")
-
 	config := meta.(*Config)
 
 	if err := parseImportId([]string{
@@ -886,13 +849,9 @@ func resourceComputeRegionSecurityPoliciesImporter(d *schema.ResourceData, meta 
 		return nil, err
 	}
 
-	fmt.Print("-------------------------------------------IMPORT NO POS!!-----------------------------------------")
-
 	// Replace import id for the resource id
-	//id, err := replaceVars(d, config, "projects/{{project}}/global/regionSecurityPolicies/{{name}}")
 	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/securityPolicies/{{name}}")
 	if err != nil {
-		fmt.Print("-------------------------------------------IMPORT NO ID ERRO!!-----------------------------------------")
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)

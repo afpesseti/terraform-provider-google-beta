@@ -35,7 +35,6 @@ func TestAccComputeRegionSecurityPolicy_basic(t *testing.T) {
 		},
 	})
 }
-
 func TestAccComputeNetworkEdge_basic(t *testing.T) {
 	t.Parallel()
 
@@ -57,7 +56,6 @@ func TestAccComputeNetworkEdge_basic(t *testing.T) {
 		},
 	})
 }
-
 func TestAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy(t *testing.T) {
 	t.Parallel()
 

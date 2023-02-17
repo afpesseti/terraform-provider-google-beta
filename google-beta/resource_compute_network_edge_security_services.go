@@ -76,6 +76,7 @@ func resourceComputeNetworkEdgeSecurityServices() *schema.Resource {
 }
 
 func resourceComputeNetworkEdgeSecurityServicesCreate(d *schema.ResourceData, meta interface{}) error {
+
 	config := meta.(*Config)
 
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -119,30 +120,19 @@ func resourceComputeNetworkEdgeSecurityServicesCreate(d *schema.ResourceData, me
 
 	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices/{{name}}")
 	if err != nil {
-		fmt.Print("-------------------------------------------Problem to INSERT!!-----------------------------------------\n")
-		fmt.Print(err)
-		fmt.Print("\n")
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
 	err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Creating NetworkEdgeSecurityService %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
-		fmt.Print("-------------------------------------------Problem to INSERT 02!!-----------------------------------------\n")
-		fmt.Print(err)
-		fmt.Print("\n")
 		return err
 	}
-
-	fmt.Print("-------------------------------------------Insert sucessfully!!-----------------------------------------\n")
-	fmt.Print("\n")
 
 	return resourceComputeNetworkEdgeSecurityServicesRead(d, meta)
 }
 
 func resourceComputeNetworkEdgeSecurityServicesRead(d *schema.ResourceData, meta interface{}) error {
-	fmt.Print("-------------------------------------------Prepare To READ!!-----------------------------------------\n")
-	fmt.Print("\n")
 
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -166,9 +156,6 @@ func resourceComputeNetworkEdgeSecurityServicesRead(d *schema.ResourceData, meta
 
 	networkEdgeSecurityServices, err := client.NetworkEdgeSecurityServices.Get(project, region, sp).Do()
 	if err != nil {
-		fmt.Print("-------------------------------------------Problem To READ!!-----------------------------------------\n")
-		fmt.Print("\n")
-		fmt.Print(err)
 		return handleNotFoundError(err, d, fmt.Sprintf("NetworkEdgeSecurityServices %q", d.Id()))
 	}
 
@@ -192,15 +179,10 @@ func resourceComputeNetworkEdgeSecurityServicesRead(d *schema.ResourceData, meta
 		return fmt.Errorf("Error setting security policy: %s", err)
 	}
 
-	fmt.Print("-------------------------------------------Read sucessfully!!-----------------------------------------\n")
-	fmt.Print("\n")
-
 	return nil
 }
 
 func resourceComputeNetworkEdgeSecurityServicesUpdate(d *schema.ResourceData, meta interface{}) error {
-	fmt.Print("-------------------------------------------Prepare To Update!!-----------------------------------------\n")
-	fmt.Print("\n")
 
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -245,30 +227,19 @@ func resourceComputeNetworkEdgeSecurityServicesUpdate(d *schema.ResourceData, me
 		op, err := client.NetworkEdgeSecurityServices.Patch(project, region, sp, networkEdgeSecurityServices).Do()
 
 		if err != nil {
-			fmt.Print("-------------------------------------------Problem To Update!!-----------------------------------------\n")
-			fmt.Print(err)
-			fmt.Print("\n")
 			return errwrap.Wrapf(fmt.Sprintf("Error updating NetworkEdgeSecurityServices %q: {{err}}", sp), err)
 		}
 
 		err = computeOperationWaitTime(config, op, project, fmt.Sprintf("Updating NetworkEdgeSecurityServices %q", sp), userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
-			fmt.Print("-------------------------------------------Problem To Update 02!!-----------------------------------------\n")
-			fmt.Print(err)
-			fmt.Print("\n")
 			return err
 		}
 	}
-
-	fmt.Print("-------------------------------------------Update sucessfully!!-----------------------------------------\n")
-	fmt.Print("\n")
 
 	return resourceComputeNetworkEdgeSecurityServicesRead(d, meta)
 }
 
 func resourceComputeNetworkEdgeSecurityServicesDelete(d *schema.ResourceData, meta interface{}) error {
-	fmt.Print("-------------------------------------------Prepare To DELETE!!-----------------------------------------\n")
-	fmt.Print("\n")
 
 	config := meta.(*Config)
 	userAgent, err := generateUserAgentString(d, config.userAgent)
@@ -291,28 +262,19 @@ func resourceComputeNetworkEdgeSecurityServicesDelete(d *schema.ResourceData, me
 	// Delete the SecurityPolicy
 	op, err := client.NetworkEdgeSecurityServices.Delete(project, region, d.Get("name").(string)).Do()
 	if err != nil {
-		fmt.Print("-------------------------------------------Problem To DELETE!!-----------------------------------------\n")
-		fmt.Print(err)
-		fmt.Print("\n")
 		return errwrap.Wrapf("Error deleting NetworkEdgeSecurityServices: {{err}}", err)
 	}
 
 	err = computeOperationWaitTime(config, op, project, "Deleting NetworkEdgeSecurityServices", userAgent, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
-		fmt.Print("-------------------------------------------Problem To DELETE computeOperationWaitTime!!-----------------------------------------\n")
-		fmt.Print(err)
-		fmt.Print("\n")
 		return err
 	}
-
-	fmt.Print("-------------------------------------------Delete sucessfully!!-----------------------------------------\n")
 
 	d.SetId("")
 	return nil
 }
 
 func resourceNetworkEdgeSecurityServicesImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	fmt.Print("-------------------------------------------Prepare to Import!!-----------------------------------------\n")
 
 	config := meta.(*Config)
 
@@ -322,18 +284,12 @@ func resourceNetworkEdgeSecurityServicesImporter(d *schema.ResourceData, meta in
 		"(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
 	}, d, config); err != nil {
-		fmt.Print("-------------------------------------------Problem to Import!!-----------------------------------------\n")
-		fmt.Print(err)
-		fmt.Print("\n")
 		return nil, err
 	}
 
 	// Replace import id for the resource id
 	id, err := replaceVars(d, config, "projects/{{project}}/regions/{{region}}/networkEdgeSecurityServices/{{name}}")
 	if err != nil {
-		fmt.Print("-------------------------------------------Problem on ReplaceVars!!-----------------------------------------\n")
-		fmt.Print(err)
-		fmt.Print("\n")
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
