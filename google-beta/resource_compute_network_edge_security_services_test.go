@@ -82,7 +82,6 @@ resource "google_compute_region_security_policy" "policy" {
 `, spName)
 }
 
-
 func testAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy(serviceName, polName, polLink string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network_edge_security_services" "services" {

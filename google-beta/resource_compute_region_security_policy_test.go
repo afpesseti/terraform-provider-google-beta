@@ -58,7 +58,6 @@ func TestAccComputeRegionSecurityPolicy_update(t *testing.T) {
 	})
 }
 
-
 func testAccComputeRegionSecurityPolicy_basic(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_security_policy" "policy" {
@@ -86,4 +85,3 @@ resource "google_compute_region_security_policy" "policy" {
 }
 `, spName)
 }
-
