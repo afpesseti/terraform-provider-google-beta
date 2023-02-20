@@ -20,7 +20,7 @@ func TestAccComputeNetworkEdgeSecurityServices_basic(t *testing.T) {
 				Config: testAccComputeNetworkEdgeSecurityServices_basic(polName),
 			},
 			{
-				ResourceName:      "google_compute_region_security_policy.policy",
+				ResourceName:      "google_compute_network_edge_security_services.services",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -40,7 +40,7 @@ func TestAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy(t *testi
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionSecurityPolicy_withRegionSecurityPolicybasic(polName),
+				Config: testAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy_basic(polName),
 			},
 			{
 				ResourceName:      "google_compute_region_security_policy.policy",
@@ -59,16 +59,7 @@ func TestAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy(t *testi
 	})
 }
 
-func testAccComputeNetworkEdgeSecurityServices_basic(spName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network_edge_security_services" "services" {
-	name        = "%s"
-	description = "basic network edge security services"
-}
-`, spName)
-}
-
-func testAccComputeRegionSecurityPolicy_withRegionSecurityPolicybasic(spName string) string {
+func testAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy_basic(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_security_policy" "policy" {
   name        = "%s"
@@ -78,6 +69,15 @@ resource "google_compute_region_security_policy" "policy" {
   ddos_protection_config {
     ddos_protection = "STANDARD"
   }
+}
+`, spName)
+}
+
+func testAccComputeNetworkEdgeSecurityServices_basic(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network_edge_security_services" "services" {
+	name        = "%s"
+	description = "basic network edge security services"
 }
 `, spName)
 }

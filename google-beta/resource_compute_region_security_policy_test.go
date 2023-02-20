@@ -20,7 +20,7 @@ func TestAccComputeRegionSecurityPolicy_basic(t *testing.T) {
 				Config: testAccComputeRegionSecurityPolicy_basic(spName),
 			},
 			{
-				ResourceName:      "google_compute_network_edge_security_services.services",
+				ResourceName:      "google_compute_region_security_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
