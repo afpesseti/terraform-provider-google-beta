@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestAccComputeRegionSecurityPolicy_basic(t *testing.T) {
+func TestAccComputeNetworkEdgeSecurityServices_basic(t *testing.T) {
 	t.Parallel()
 
-	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	polName := fmt.Sprintf("tf-test-%s", randString(t, 10))
 
 	vcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -17,15 +17,7 @@ func TestAccComputeRegionSecurityPolicy_basic(t *testing.T) {
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionSecurityPolicy_basic(spName),
-			},
-			{
-				ResourceName:      "google_compute_region_security_policy.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeRegionSecurityPolicy_withDdosProtection(spName),
+				Config: testAccComputeNetworkEdgeSecurityServices_basic(polName),
 			},
 			{
 				ResourceName:      "google_compute_region_security_policy.policy",
@@ -35,27 +27,7 @@ func TestAccComputeRegionSecurityPolicy_basic(t *testing.T) {
 		},
 	})
 }
-func TestAccComputeNetworkEdge_basic(t *testing.T) {
-	t.Parallel()
 
-	spName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeNetworkEdgeSecurityServices_basic(spName),
-			},
-			{
-				ResourceName:      "google_compute_network_edge_security_services.services",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
 func TestAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -68,7 +40,7 @@ func TestAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy(t *testi
 		CheckDestroy: testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeRegionSecurityPolicy_basic(polName),
+				Config: testAccComputeRegionSecurityPolicy_withRegionSecurityPolicybasic(polName),
 			},
 			{
 				ResourceName:      "google_compute_region_security_policy.policy",
@@ -87,7 +59,16 @@ func TestAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy(t *testi
 	})
 }
 
-func testAccComputeRegionSecurityPolicy_basic(spName string) string {
+func testAccComputeNetworkEdgeSecurityServices_basic(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network_edge_security_services" "services" {
+	name        = "%s"
+	description = "basic network edge security services"
+}
+`, spName)
+}
+
+func testAccComputeRegionSecurityPolicy_withRegionSecurityPolicybasic(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_security_policy" "policy" {
   name        = "%s"
@@ -101,28 +82,6 @@ resource "google_compute_region_security_policy" "policy" {
 `, spName)
 }
 
-func testAccComputeRegionSecurityPolicy_withDdosProtection(spName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_region_security_policy" "policy" {
-  name        = "%s"
-  description = "update rule"
-  type = "CLOUD_ARMOR_NETWORK"
-
-  ddos_protection_config {
-    ddos_protection = "ADVANCED"
-  }
-}
-`, spName)
-}
-
-func testAccComputeNetworkEdgeSecurityServices_basic(spName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network_edge_security_services" "services" {
-	name        = "%s"
-	description = "basic network edge security services"
-}
-`, spName)
-}
 
 func testAccComputeNetworkEdgeSecurityServices_withRegionSecurityPolicy(serviceName, polName, polLink string) string {
 	return fmt.Sprintf(`

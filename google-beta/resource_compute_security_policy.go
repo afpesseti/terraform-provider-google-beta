@@ -1108,7 +1108,6 @@ func expandSecurityPolicyDdosProtectionConfig(configured []interface{}) *compute
 	}
 }
 
-// Change
 func flattenSecurityPolicyDdosProtectionConfig(conf *compute.SecurityPolicyDdosProtectionConfig) []map[string]interface{} {
 	if conf == nil {
 		return nil
