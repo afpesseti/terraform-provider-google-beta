@@ -252,13 +252,35 @@ func resourceComputeRegionSecurityPolicy() *schema.Resource {
 										Optional:     true,
 										Default:      "ALL",
 										Description:  `Determines the key to enforce the rateLimitThreshold on`,
-										ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE", "HTTP_PATH", "SNI", "REGION_CODE", ""}, false),
 									},
 
 									"enforce_on_key_name": {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
+									},
+
+									"enforce_on_key_configs": {
+										Type:        schema.TypeList,
+										Description: `Enforce On Key Config of this security policy`,
+										ForceNew:    true,
+										Optional:    true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enforce_on_key_type": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													Description:  `Determines the key to enforce the rate_limit_threshold on`,
+													ValidateFunc: validation.StringInSlice([]string{"ALL", "IP", "HTTP_HEADER", "XFF_IP", "HTTP_COOKIE", "HTTP_PATH", "SNI", "REGION_CODE"}, false),
+												},
+												"enforce_on_key_name": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `Rate limit key name applicable only for the following key types: HTTP_HEADER -- Name of the HTTP header whose value is taken as the key value. HTTP_COOKIE -- Name of the HTTP cookie whose value is taken as the key value.`,
+												},
+											},
+										},
 									},
 
 									"ban_threshold": {
@@ -475,6 +497,36 @@ func resourceComputeRegionSecurityPolicy() *schema.Resource {
 								},
 							},
 						},
+						"auto_deploy_config": {
+							Type:        schema.TypeList,
+							Description: `Auto Deploy Config of this security policy`,
+							Optional:    true,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"load_threshold": {
+										Type:        schema.TypeFloat,
+										Optional:    true,
+										Description: `Identifies new attackers only when the load to the backend service that is under attack exceeds this threshold.`,
+									},
+									"confidence_threshold": {
+										Type:        schema.TypeFloat,
+										Optional:    true,
+										Description: `Rules are only automatically deployed for alerts on potential attacks with confidence scores greater than this threshold.`,
+									},
+									"impacted_baseline_threshold": {
+										Type:        schema.TypeFloat,
+										Optional:    true,
+										Description: `Rules are only automatically deployed when the estimated impact to baseline traffic from the suggested mitigation is below this threshold.`,
+									},
+									"expiration_sec": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: `Google Cloud Armor stops applying the action in the automatically deployed rule to an identified attacker after this duration. The rule continues to operate against new requests.`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -609,53 +661,39 @@ func resourceComputeRegionSecurityPoliciesRead(d *schema.ResourceData, meta inte
 	}
 
 	if err := d.Set("name", securityPolicy.Name); err != nil {
-		fmt.Printf("Error setting name: %s", err)
 		return fmt.Errorf("Error setting name: %s", err)
 	}
 	if err := d.Set("description", securityPolicy.Description); err != nil {
-		fmt.Printf("Error setting description: %s", err)
 		return fmt.Errorf("Error setting description: %s", err)
 	}
 	if err := d.Set("region", securityPolicy.Region); err != nil {
-		fmt.Printf("Error setting region: %s", err)
 		return fmt.Errorf("Error setting region: %s", err)
 	}
 	if err := d.Set("type", securityPolicy.Type); err != nil {
-		fmt.Printf("Error setting type: %s", err)
 		return fmt.Errorf("Error setting type: %s", err)
 	}
 	if err := d.Set("rule", flattenSecurityPolicyRules(securityPolicy.Rules)); err != nil {
-		fmt.Printf("Error setting rule: %s", err)
 		return err
 	}
 	if err := d.Set("fingerprint", securityPolicy.Fingerprint); err != nil {
-		fmt.Printf("Error setting fingerprint: %s", err)
 		return fmt.Errorf("Error setting fingerprint: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
-		fmt.Printf("Error setting project: %s", err)
 		return fmt.Errorf("Error setting project: %s", err)
 	}
 	if err := d.Set("self_link", ConvertSelfLinkToV1(securityPolicy.SelfLink)); err != nil {
-		fmt.Printf("Error setting self_link: %s", err)
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	if err := d.Set("ddos_protection_config", flattenSecurityPolicyDdosProtectionConfig(securityPolicy.DdosProtectionConfig)); err != nil {
-		fmt.Printf("Error setting ddos_protection_config: %s", err)
 		return fmt.Errorf("Error setting ddos_protection_config: %s", err)
 	}
 	if err := d.Set("advanced_options_config", flattenSecurityPolicyAdvancedOptionsConfig(securityPolicy.AdvancedOptionsConfig)); err != nil {
-		fmt.Printf("Error setting advanced_options_config: %s", err)
 		return fmt.Errorf("Error setting advanced_options_config: %s", err)
 	}
-
 	if err := d.Set("adaptive_protection_config", flattenSecurityPolicyAdaptiveProtectionConfig(securityPolicy.AdaptiveProtectionConfig)); err != nil {
-		fmt.Printf("Error setting adaptive_protection_config: %s", err)
 		return fmt.Errorf("Error setting adaptive_protection_config: %s", err)
 	}
-
 	if err := d.Set("recaptcha_options_config", flattenSecurityPolicyRecaptchaOptionConfig(securityPolicy.RecaptchaOptionsConfig)); err != nil {
-		fmt.Printf("Error setting recaptcha_options_config: %s", err)
 		return fmt.Errorf("Error setting recaptcha_options_config: %s", err)
 	}
 
@@ -713,6 +751,7 @@ func resourceComputeRegionSecurityPoliciesUpdate(d *schema.ResourceData, meta in
 	if d.HasChange("adaptive_protection_config") {
 		securityPolicy.AdaptiveProtectionConfig = expandSecurityPolicyAdaptiveProtectionConfig(d.Get("adaptive_protection_config").([]interface{}))
 		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "AdaptiveProtectionConfig", "adaptiveProtectionConfig.layer7DdosDefenseConfig.enable", "adaptiveProtectionConfig.layer7DdosDefenseConfig.ruleVisibility")
+		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "adaptiveProtectionConfig.autoDeployConfig.loadThreshold", "adaptiveProtectionConfig.autoDeployConfig.confidenceThreshold", "adaptiveProtectionConfig.autoDeployConfig.impactedBaselineThreshold", "adaptiveProtectionConfig.autoDeployConfig.expirationSec")
 	}
 
 	if d.HasChange("recaptcha_options_config") {
@@ -842,8 +881,7 @@ func resourceComputeRegionSecurityPoliciesImporter(d *schema.ResourceData, meta 
 
 	if err := parseImportId([]string{
 		"projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/securityPolicies/(?P<name>[^/]+)",
-		"(?P<project>[^/]+)/(?P<name>[^/]+)",
-		"(?P<region>[^/]+)/(?P<name>[^/]+)",
+		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
 		"(?P<name>[^/]+)",
 	}, d, config); err != nil {
 		return nil, err
