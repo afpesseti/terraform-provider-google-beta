@@ -9,8 +9,7 @@ import (
 	"time"
 )
 
-// Change
-func resourceComputeNetworkEdgeSecurityServices() *schema.Resource {
+func ResourceComputeNetworkEdgeSecurityServices() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeNetworkEdgeSecurityServicesCreate,
 		Read:   resourceComputeNetworkEdgeSecurityServicesRead,

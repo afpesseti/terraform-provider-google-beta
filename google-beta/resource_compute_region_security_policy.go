@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func resourceComputeRegionSecurityPolicy() *schema.Resource {
+func ResourceComputeRegionSecurityPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeRegionSecurityPoliciesCreate,
 		Read:   resourceComputeRegionSecurityPoliciesRead,

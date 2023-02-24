@@ -2,8 +2,8 @@ package google
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"testing"
 )
 
 func TestAccComputeRegionSecurityPolicy_basic(t *testing.T) {
