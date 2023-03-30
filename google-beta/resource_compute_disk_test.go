@@ -3,7 +3,6 @@ package google
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -304,7 +303,7 @@ func TestAccComputeDisk_imageDiffSuppressPublicVendorsFamilyNames(t *testing.T) 
 	for _, publicImageProject := range imageMap {
 		token := ""
 		for paginate := true; paginate; {
-			resp, err := config.NewComputeClient(config.userAgent).Images.List(publicImageProject).Filter("deprecated.replacement ne .*images.*").PageToken(token).Do()
+			resp, err := config.NewComputeClient(config.UserAgent).Images.List(publicImageProject).Filter("deprecated.replacement ne .*images.*").PageToken(token).Do()
 			if err != nil {
 				t.Fatalf("Can't list public images for project %q", publicImageProject)
 			}
@@ -320,32 +319,14 @@ func TestAccComputeDisk_imageDiffSuppressPublicVendorsFamilyNames(t *testing.T) 
 	}
 }
 
-func TestAccComputeDisk_timeout(t *testing.T) {
-	// Vcr speeds up test, so it doesn't time out
-	skipIfVcr(t)
-	t.Parallel()
-
-	diskName := fmt.Sprintf("tf-test-disk-%d", randInt(t))
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config:      testAccComputeDisk_timeout(diskName),
-				ExpectError: regexp.MustCompile("timeout"),
-			},
-		},
-	})
-}
-
 func TestAccComputeDisk_update(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_basic(diskName),
@@ -370,15 +351,15 @@ func TestAccComputeDisk_update(t *testing.T) {
 func TestAccComputeDisk_fromSnapshot(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	firstDiskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	snapshotName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	projectName := getTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	firstDiskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	snapshotName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	projectName := GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_fromSnapshot(projectName, firstDiskName, snapshotName, diskName, "self_link"),
@@ -403,19 +384,19 @@ func TestAccComputeDisk_fromSnapshot(t *testing.T) {
 func TestAccComputeDisk_encryption(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	var disk compute.Disk
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_encryption(diskName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeDiskExists(
-						t, "google_compute_disk.foobar", getTestProjectFromEnv(), &disk),
+						t, "google_compute_disk.foobar", GetTestProjectFromEnv(), &disk),
 					testAccCheckEncryptionKey(
 						t, "google_compute_disk.foobar", &disk),
 				),
@@ -428,15 +409,15 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	t.Parallel()
 
 	kms := BootstrapKMSKey(t)
-	pid := getTestProjectFromEnv()
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	pid := GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
 	var disk compute.Disk
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_encryptionKMS(pid, diskName, kms.CryptoKey.Name),
@@ -460,13 +441,13 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_deleteDetach(instanceName, diskName),
@@ -494,17 +475,17 @@ func TestAccComputeDisk_deleteDetach(t *testing.T) {
 
 func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 	// Randomness in instance template
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	diskName2 := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	mgrName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName2 := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	mgrName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_deleteDetachIGM(diskName, mgrName),
@@ -551,11 +532,11 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_pdExtremeImplicitProvisionedIops(diskName),
@@ -572,12 +553,12 @@ func TestAccComputeDisk_pdExtremeImplicitProvisionedIops(t *testing.T) {
 func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	policyName := fmt.Sprintf("tf-test-policy-%s", randString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	policyName := fmt.Sprintf("tf-test-policy-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_resourcePolicies(diskName, policyName),
@@ -593,12 +574,12 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 
 func TestAccComputeDisk_multiWriter(t *testing.T) {
 	t.Parallel()
-	instanceName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	diskName := fmt.Sprintf("tf-testd-%s", randString(t, 10))
+	instanceName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	diskName := fmt.Sprintf("tf-testd-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_multiWriter(instanceName, diskName, true),
@@ -623,9 +604,9 @@ func testAccCheckComputeDiskExists(t *testing.T, n, p string, disk *compute.Disk
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		found, err := config.NewComputeClient(config.userAgent).Disks.Get(
+		found, err := config.NewComputeClient(config.UserAgent).Disks.Get(
 			p, rs.Primary.Attributes["zone"], rs.Primary.Attributes["name"]).Do()
 		if err != nil {
 			return err
@@ -661,15 +642,15 @@ func testAccCheckEncryptionKey(t *testing.T, n string, disk *compute.Disk) resou
 
 func TestAccComputeDisk_cloneDisk(t *testing.T) {
 	t.Parallel()
-	pid := getTestProjectFromEnv()
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	pid := GetTestProjectFromEnv()
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
 	var disk compute.Disk
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_diskClone(diskName, "self_link"),
@@ -702,26 +683,6 @@ resource "google_compute_disk" "foobar" {
   zone  = "us-central1-a"
   labels = {
     my-label = "my-label-value"
-  }
-}
-`, diskName)
-}
-
-func testAccComputeDisk_timeout(diskName string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-11"
-  project = "debian-cloud"
-}
-
-resource "google_compute_disk" "foobar" {
-  name  = "%s"
-  image = data.google_compute_image.my_image.self_link
-  type  = "pd-ssd"
-  zone  = "us-central1-a"
-
-  timeouts {
-    create = ".5s"
   }
 }
 `, diskName)
@@ -1043,19 +1004,19 @@ func testAccComputeDisk_diskClone(diskName, refSelector string) string {
 func TestAccComputeDisk_encryptionWithRSAEncryptedKey(t *testing.T) {
 	t.Parallel()
 
-	diskName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	diskName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 	var disk compute.Disk
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_encryptionWithRSAEncryptedKey(diskName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeDiskExists(
-						t, "google_compute_disk.foobar-1", getTestProjectFromEnv(), &disk),
+						t, "google_compute_disk.foobar-1", GetTestProjectFromEnv(), &disk),
 					testAccCheckEncryptionKey(
 						t, "google_compute_disk.foobar-1", &disk),
 				),

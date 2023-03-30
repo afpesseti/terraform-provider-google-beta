@@ -27,13 +27,13 @@ func TestAccServiceDirectoryNamespace_serviceDirectoryNamespaceBasicExample(t *t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckServiceDirectoryNamespaceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckServiceDirectoryNamespaceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccServiceDirectoryNamespace_serviceDirectoryNamespaceBasicExample(context),
@@ -73,7 +73,7 @@ func testAccCheckServiceDirectoryNamespaceDestroyProducer(t *testing.T) func(s *
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ServiceDirectoryBasePath}}{{name}}")
 			if err != nil {
@@ -86,7 +86,7 @@ func testAccCheckServiceDirectoryNamespaceDestroyProducer(t *testing.T) func(s *
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ServiceDirectoryNamespace still exists at %s", url)
 			}

@@ -30,14 +30,14 @@ func TestAccOrgPolicyPolicy_EnforcePolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrgPolicyPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckOrgPolicyPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrgPolicyPolicy_EnforcePolicy(context),
@@ -55,14 +55,14 @@ func TestAccOrgPolicyPolicy_FolderPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrgPolicyPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckOrgPolicyPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrgPolicyPolicy_FolderPolicy(context),
@@ -89,14 +89,14 @@ func TestAccOrgPolicyPolicy_OrganizationPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrgPolicyPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckOrgPolicyPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrgPolicyPolicy_OrganizationPolicy(context),
@@ -123,14 +123,14 @@ func TestAccOrgPolicyPolicy_ProjectPolicy(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOrgPolicyPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckOrgPolicyPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOrgPolicyPolicy_ProjectPolicy(context),
@@ -356,7 +356,7 @@ func testAccCheckOrgPolicyPolicyDestroyProducer(t *testing.T) func(s *terraform.
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
@@ -368,7 +368,7 @@ func testAccCheckOrgPolicyPolicyDestroyProducer(t *testing.T) func(s *terraform.
 				Parent: dcl.String(rs.Primary.Attributes["parent"]),
 			}
 
-			client := NewDCLOrgPolicyClient(config, config.userAgent, billingProject, 0)
+			client := NewDCLOrgPolicyClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetPolicy(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_org_policy_policy still exists %v", obj)

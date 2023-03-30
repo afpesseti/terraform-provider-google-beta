@@ -55,15 +55,15 @@ func TestAccComputeSubnetwork_basic(t *testing.T) {
 	var subnetwork1 compute.Subnetwork
 	var subnetwork2 compute.Subnetwork
 
-	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	subnetwork1Name := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	subnetwork2Name := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	subnetwork3Name := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cnName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetwork1Name := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetwork2Name := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetwork3Name := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSubnetwork_basic(cnName, subnetwork1Name, subnetwork2Name, subnetwork3Name),
@@ -93,13 +93,13 @@ func TestAccComputeSubnetwork_update(t *testing.T) {
 
 	var subnetwork compute.Subnetwork
 
-	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cnName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetworkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSubnetwork_update1(cnName, "10.2.0.0/24", subnetworkName),
@@ -150,13 +150,13 @@ func TestAccComputeSubnetwork_secondaryIpRanges(t *testing.T) {
 
 	var subnetwork compute.Subnetwork
 
-	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cnName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetworkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSubnetwork_secondaryIpRanges_update1(cnName, subnetworkName),
@@ -206,13 +206,13 @@ func TestAccComputeSubnetwork_flowLogs(t *testing.T) {
 
 	var subnetwork compute.Subnetwork
 
-	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cnName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetworkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSubnetwork_flowLogs(cnName, subnetworkName),
@@ -283,13 +283,13 @@ func TestAccComputeSubnetwork_flowLogsMigrate(t *testing.T) {
 
 	var subnetwork compute.Subnetwork
 
-	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cnName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetworkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSubnetwork_flowLogsMigrate(cnName, subnetworkName),
@@ -334,13 +334,13 @@ func TestAccComputeSubnetwork_flowLogsMigrate(t *testing.T) {
 func TestAccComputeSubnetwork_ipv6(t *testing.T) {
 	t.Parallel()
 
-	cnName := fmt.Sprintf("tf-test-%s", randString(t, 10))
-	subnetworkName := fmt.Sprintf("tf-test-%s", randString(t, 10))
+	cnName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
+	subnetworkName := fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeSubnetworkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeSubnetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeSubnetwork_ipv4(cnName, subnetworkName),
@@ -373,11 +373,11 @@ func testAccCheckComputeSubnetworkExists(t *testing.T, n string, subnetwork *com
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 		region := rs.Primary.Attributes["region"]
 		subnet_name := rs.Primary.Attributes["name"]
 
-		found, err := config.NewComputeClient(config.userAgent).Subnetworks.Get(
+		found, err := config.NewComputeClient(config.UserAgent).Subnetworks.Get(
 			config.Project, region, subnet_name).Do()
 		if err != nil {
 			return err

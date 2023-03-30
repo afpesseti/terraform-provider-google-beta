@@ -27,13 +27,13 @@ func TestAccComputeRoute_routeBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouteDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRoute_routeBasicExample(context),
@@ -68,13 +68,13 @@ func TestAccComputeRoute_routeIlbExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouteDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRoute_routeIlbExample(context),
@@ -144,13 +144,13 @@ func TestAccComputeRoute_routeIlbVipExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckComputeRouteDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeRouteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRoute_routeIlbVipExample(context),
@@ -266,7 +266,7 @@ func testAccCheckComputeRouteDestroyProducer(t *testing.T) func(s *terraform.Sta
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/routes/{{name}}")
 			if err != nil {
@@ -279,7 +279,7 @@ func testAccCheckComputeRouteDestroyProducer(t *testing.T) func(s *terraform.Sta
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil, isPeeringOperationInProgress)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, isPeeringOperationInProgress)
 			if err == nil {
 				return fmt.Errorf("ComputeRoute still exists at %s", url)
 			}

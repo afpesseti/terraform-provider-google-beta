@@ -31,7 +31,7 @@ func certManagerDefaultScopeDiffSuppress(_, old, new string, diff *schema.Resour
 	return false
 }
 
-func resourceCertificateManagerCertificate() *schema.Resource {
+func ResourceCertificateManagerCertificate() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCertificateManagerCertificateCreate,
 		Read:   resourceCertificateManagerCertificateRead,
@@ -79,10 +79,11 @@ automatically, for as long as it's authorized to do so.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"dns_authorizations": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							ForceNew:    true,
-							Description: `Authorizations that will be used for performing domain authorization`,
+							Type:             schema.TypeList,
+							Optional:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: projectNumberDiffSuppress,
+							Description:      `Authorizations that will be used for performing domain authorization`,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -234,7 +235,7 @@ Leaf certificate comes first, followed by intermediate ones if any.`,
 
 func resourceCertificateManagerCertificateCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -290,7 +291,7 @@ func resourceCertificateManagerCertificateCreate(d *schema.ResourceData, meta in
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Certificate: %s", err)
 	}
@@ -302,7 +303,7 @@ func resourceCertificateManagerCertificateCreate(d *schema.ResourceData, meta in
 	}
 	d.SetId(id)
 
-	err = certificateManagerOperationWaitTime(
+	err = CertificateManagerOperationWaitTime(
 		config, res, project, "Creating Certificate", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 
@@ -319,7 +320,7 @@ func resourceCertificateManagerCertificateCreate(d *schema.ResourceData, meta in
 
 func resourceCertificateManagerCertificateRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -342,7 +343,7 @@ func resourceCertificateManagerCertificateRead(d *schema.ResourceData, meta inte
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("CertificateManagerCertificate %q", d.Id()))
 	}
@@ -369,7 +370,7 @@ func resourceCertificateManagerCertificateRead(d *schema.ResourceData, meta inte
 
 func resourceCertificateManagerCertificateUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -423,7 +424,7 @@ func resourceCertificateManagerCertificateUpdate(d *schema.ResourceData, meta in
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating Certificate %q: %s", d.Id(), err)
@@ -431,7 +432,7 @@ func resourceCertificateManagerCertificateUpdate(d *schema.ResourceData, meta in
 		log.Printf("[DEBUG] Finished updating Certificate %q: %#v", d.Id(), res)
 	}
 
-	err = certificateManagerOperationWaitTime(
+	err = CertificateManagerOperationWaitTime(
 		config, res, project, "Updating Certificate", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 
@@ -444,7 +445,7 @@ func resourceCertificateManagerCertificateUpdate(d *schema.ResourceData, meta in
 
 func resourceCertificateManagerCertificateDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -470,12 +471,12 @@ func resourceCertificateManagerCertificateDelete(d *schema.ResourceData, meta in
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "Certificate")
 	}
 
-	err = certificateManagerOperationWaitTime(
+	err = CertificateManagerOperationWaitTime(
 		config, res, project, "Deleting Certificate", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
@@ -545,7 +546,7 @@ func flattenCertificateManagerCertificateManagedDomains(v interface{}, d *schema
 }
 
 func flattenCertificateManagerCertificateManagedDnsAuthorizations(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-	return d.Get("managed.0.dns_authorizations")
+	return v
 }
 
 func flattenCertificateManagerCertificateManagedState(v interface{}, d *schema.ResourceData, config *Config) interface{} {

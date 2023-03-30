@@ -27,7 +27,7 @@ import (
 	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
 )
 
-func resourceComputeRegionNetworkFirewallPolicyAssociation() *schema.Resource {
+func ResourceComputeRegionNetworkFirewallPolicyAssociation() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeRegionNetworkFirewallPolicyAssociationCreate,
 		Read:   resourceComputeRegionNetworkFirewallPolicyAssociationRead,
@@ -117,7 +117,7 @@ func resourceComputeRegionNetworkFirewallPolicyAssociationCreate(d *schema.Resou
 	}
 	d.SetId(id)
 	directive := CreateDirective
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -167,7 +167,7 @@ func resourceComputeRegionNetworkFirewallPolicyAssociationRead(d *schema.Resourc
 		Location:         dcl.String(region),
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -231,7 +231,7 @@ func resourceComputeRegionNetworkFirewallPolicyAssociationDelete(d *schema.Resou
 	}
 
 	log.Printf("[DEBUG] Deleting NetworkFirewallPolicyAssociation %q", d.Id())
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

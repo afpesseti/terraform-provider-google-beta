@@ -15,6 +15,7 @@
 package google
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -25,7 +26,7 @@ func TestAccComputeMachineImageIamBindingGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           randString(t, 10),
+		"random_suffix":           RandString(t, 10),
 		"role":                    "roles/compute.admin",
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
@@ -34,16 +35,28 @@ func TestAccComputeMachineImageIamBindingGenerated(t *testing.T) {
 		"condition_expr_no_desc":  `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImageIamBinding_basicGenerated(context),
 			},
 			{
+				ResourceName:      "google_compute_machine_image_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				// Test Iam Binding update
 				Config: testAccComputeMachineImageIamBinding_updateGenerated(context),
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -53,7 +66,7 @@ func TestAccComputeMachineImageIamMemberGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           randString(t, 10),
+		"random_suffix":           RandString(t, 10),
 		"role":                    "roles/compute.admin",
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
@@ -62,13 +75,19 @@ func TestAccComputeMachineImageIamMemberGenerated(t *testing.T) {
 		"condition_expr_no_desc":  `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccComputeMachineImageIamMember_basicGenerated(context),
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_member.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin user:admin@hashicorptest.com", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -78,7 +97,7 @@ func TestAccComputeMachineImageIamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           randString(t, 10),
+		"random_suffix":           RandString(t, 10),
 		"role":                    "roles/compute.admin",
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
@@ -87,15 +106,27 @@ func TestAccComputeMachineImageIamPolicyGenerated(t *testing.T) {
 		"condition_expr_no_desc":  `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImageIamPolicy_basicGenerated(context),
 			},
 			{
+				ResourceName:      "google_compute_machine_image_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccComputeMachineImageIamPolicy_emptyBinding(context),
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -105,7 +136,7 @@ func TestAccComputeMachineImageIamBindingGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           randString(t, 10),
+		"random_suffix":           RandString(t, 10),
 		"role":                    "roles/compute.admin",
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
@@ -114,12 +145,18 @@ func TestAccComputeMachineImageIamBindingGenerated_withCondition(t *testing.T) {
 		"condition_expr_no_desc":  `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImageIamBinding_withConditionGenerated(context),
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin %s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"]), context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -127,11 +164,11 @@ func TestAccComputeMachineImageIamBindingGenerated_withCondition(t *testing.T) {
 
 func TestAccComputeMachineImageIamBindingGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           randString(t, 10),
+		"random_suffix":           RandString(t, 10),
 		"role":                    "roles/compute.admin",
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
@@ -140,12 +177,30 @@ func TestAccComputeMachineImageIamBindingGenerated_withAndWithoutCondition(t *te
 		"condition_expr_no_desc":  `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImageIamBinding_withAndWithoutConditionGenerated(context),
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_binding.foo2",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin %s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"]), context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_binding.foo3",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin %s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"]), context["condition_title_no_desc"]),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -155,7 +210,7 @@ func TestAccComputeMachineImageIamMemberGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           randString(t, 10),
+		"random_suffix":           RandString(t, 10),
 		"role":                    "roles/compute.admin",
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
@@ -164,12 +219,18 @@ func TestAccComputeMachineImageIamMemberGenerated_withCondition(t *testing.T) {
 		"condition_expr_no_desc":  `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImageIamMember_withConditionGenerated(context),
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_member.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin user:admin@hashicorptest.com %s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"]), context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -177,11 +238,11 @@ func TestAccComputeMachineImageIamMemberGenerated_withCondition(t *testing.T) {
 
 func TestAccComputeMachineImageIamMemberGenerated_withAndWithoutCondition(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           randString(t, 10),
+		"random_suffix":           RandString(t, 10),
 		"role":                    "roles/compute.admin",
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
@@ -190,12 +251,30 @@ func TestAccComputeMachineImageIamMemberGenerated_withAndWithoutCondition(t *tes
 		"condition_expr_no_desc":  `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImageIamMember_withAndWithoutConditionGenerated(context),
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_member.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin user:admin@hashicorptest.com", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_member.foo2",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin user:admin@hashicorptest.com %s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"]), context["condition_title"]),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_member.foo3",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s roles/compute.admin user:admin@hashicorptest.com %s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"]), context["condition_title_no_desc"]),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -205,7 +284,7 @@ func TestAccComputeMachineImageIamPolicyGenerated_withCondition(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":           randString(t, 10),
+		"random_suffix":           RandString(t, 10),
 		"role":                    "roles/compute.admin",
 		"condition_title":         "expires_after_2019_12_31",
 		"condition_expr":          `request.time < timestamp(\"2020-01-01T00:00:00Z\")`,
@@ -218,9 +297,9 @@ func TestAccComputeMachineImageIamPolicyGenerated_withCondition(t *testing.T) {
 	expectedPolicyData := Nprintf(`{"bindings":[{"condition":{"description":"%{condition_desc}","expression":"%{condition_expr}","title":"%{condition_title}"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"},{"condition":{"expression":"%{condition_expr}","title":"%{condition_title}-no-description"},"members":["user:admin@hashicorptest.com"],"role":"%{role}"}]}`, context)
 	expectedPolicyData = strings.Replace(expectedPolicyData, "<", "\\u003c", -1)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImageIamPolicy_withConditionGenerated(context),
@@ -231,6 +310,12 @@ func TestAccComputeMachineImageIamPolicyGenerated_withCondition(t *testing.T) {
 					resource.TestCheckResourceAttrWith("data.google_iam_policy.foo", "policy_data", checkGoogleIamPolicy),
 				),
 			},
+			{
+				ResourceName:      "google_compute_machine_image_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/global/machineImages/%s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -239,7 +324,7 @@ func testAccComputeMachineImageIamMember_basicGenerated(context map[string]inter
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -255,7 +340,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -273,7 +358,7 @@ func testAccComputeMachineImageIamPolicy_basicGenerated(context map[string]inter
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -289,7 +374,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -314,7 +399,7 @@ func testAccComputeMachineImageIamPolicy_emptyBinding(context map[string]interfa
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -330,7 +415,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -351,7 +436,7 @@ func testAccComputeMachineImageIamBinding_basicGenerated(context map[string]inte
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -367,7 +452,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -385,7 +470,7 @@ func testAccComputeMachineImageIamBinding_updateGenerated(context map[string]int
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -401,7 +486,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -419,7 +504,7 @@ func testAccComputeMachineImageIamBinding_withConditionGenerated(context map[str
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -435,7 +520,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -458,7 +543,7 @@ func testAccComputeMachineImageIamBinding_withAndWithoutConditionGenerated(conte
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -474,7 +559,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -519,7 +604,7 @@ func testAccComputeMachineImageIamMember_withConditionGenerated(context map[stri
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -535,7 +620,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -558,7 +643,7 @@ func testAccComputeMachineImageIamMember_withAndWithoutConditionGenerated(contex
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -574,7 +659,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 
@@ -619,7 +704,7 @@ func testAccComputeMachineImageIamPolicy_withConditionGenerated(context map[stri
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -635,7 +720,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 

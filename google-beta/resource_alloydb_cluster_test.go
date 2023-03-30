@@ -10,13 +10,13 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAlloydbClusterDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -51,7 +51,7 @@ resource "google_alloydb_cluster" "default" {
   network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 
   labels = {
-	update = "true" 
+	foo = "bar" 
   }
 
   lifecycle {

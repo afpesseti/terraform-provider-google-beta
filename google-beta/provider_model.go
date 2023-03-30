@@ -59,6 +59,7 @@ type ProviderModel struct {
 	DataformCustomEndpoint             types.String `tfsdk:"dataform_custom_endpoint"`
 	DataFusionCustomEndpoint           types.String `tfsdk:"data_fusion_custom_endpoint"`
 	DataLossPreventionCustomEndpoint   types.String `tfsdk:"data_loss_prevention_custom_endpoint"`
+	DataplexCustomEndpoint             types.String `tfsdk:"dataplex_custom_endpoint"`
 	DataprocCustomEndpoint             types.String `tfsdk:"dataproc_custom_endpoint"`
 	DataprocMetastoreCustomEndpoint    types.String `tfsdk:"dataproc_metastore_custom_endpoint"`
 	DatastoreCustomEndpoint            types.String `tfsdk:"datastore_custom_endpoint"`
@@ -141,7 +142,6 @@ type ProviderModel struct {
 	CloudBuildWorkerPoolCustomEndpoint types.String `tfsdk:"cloud_build_worker_pool_custom_endpoint"`
 	CloudDeployCustomEndpoint          types.String `tfsdk:"clouddeploy_custom_endpoint"`
 	CloudResourceManagerCustomEndpoint types.String `tfsdk:"cloud_resource_manager_custom_endpoint"`
-	DataplexCustomEndpoint             types.String `tfsdk:"dataplex_custom_endpoint"`
 	EventarcCustomEndpoint             types.String `tfsdk:"eventarc_custom_endpoint"`
 	FirebaserulesCustomEndpoint        types.String `tfsdk:"firebaserules_custom_endpoint"`
 	NetworkConnectivityCustomEndpoint  types.String `tfsdk:"network_connectivity_custom_endpoint"`

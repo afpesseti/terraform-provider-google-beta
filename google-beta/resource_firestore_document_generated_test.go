@@ -27,14 +27,14 @@ func TestAccFirestoreDocument_firestoreDocumentBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestFirestoreProjectFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"project_id":    GetTestFirestoreProjectFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFirestoreDocumentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFirestoreDocumentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirestoreDocument_firestoreDocumentBasicExample(context),
@@ -64,14 +64,14 @@ func TestAccFirestoreDocument_firestoreDocumentNestedDocumentExample(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestFirestoreProjectFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"project_id":    GetTestFirestoreProjectFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFirestoreDocumentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFirestoreDocumentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirestoreDocument_firestoreDocumentNestedDocumentExample(context),
@@ -121,7 +121,7 @@ func testAccCheckFirestoreDocumentDestroyProducer(t *testing.T) func(s *terrafor
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FirestoreBasePath}}{{name}}")
 			if err != nil {
@@ -134,7 +134,7 @@ func testAccCheckFirestoreDocumentDestroyProducer(t *testing.T) func(s *terrafor
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("FirestoreDocument still exists at %s", url)
 			}

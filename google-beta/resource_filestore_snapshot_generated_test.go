@@ -27,13 +27,13 @@ func TestAccFilestoreSnapshot_filestoreSnapshotBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFilestoreSnapshotDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFilestoreSnapshot_filestoreSnapshotBasicExample(context),
@@ -78,13 +78,13 @@ func TestAccFilestoreSnapshot_filestoreSnapshotFullExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFilestoreSnapshotDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFilestoreSnapshot_filestoreSnapshotFullExample(context),
@@ -141,7 +141,7 @@ func testAccCheckFilestoreSnapshotDestroyProducer(t *testing.T) func(s *terrafor
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FilestoreBasePath}}projects/{{project}}/locations/{{location}}/instances/{{instance}}/snapshots/{{name}}")
 			if err != nil {
@@ -154,7 +154,7 @@ func testAccCheckFilestoreSnapshotDestroyProducer(t *testing.T) func(s *terrafor
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil, isNotFilestoreQuotaError)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, isNotFilestoreQuotaError)
 			if err == nil {
 				return fmt.Errorf("FilestoreSnapshot still exists at %s", url)
 			}

@@ -8,7 +8,7 @@ import (
 // NewTestConfig create a config using the http test server.
 func NewTestConfig(server *httptest.Server) *Config {
 	cfg := &Config{}
-	cfg.client = server.Client()
+	cfg.Client = server.Client()
 	configureTestBasePaths(cfg, server.URL)
 	return cfg
 }
@@ -56,6 +56,7 @@ func configureTestBasePaths(c *Config, url string) {
 	c.DataformBasePath = url
 	c.DataFusionBasePath = url
 	c.DataLossPreventionBasePath = url
+	c.DataplexBasePath = url
 	c.DataprocBasePath = url
 	c.DataprocMetastoreBasePath = url
 	c.DatastoreBasePath = url

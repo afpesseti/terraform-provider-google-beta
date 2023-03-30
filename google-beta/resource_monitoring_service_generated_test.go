@@ -27,13 +27,13 @@ func TestAccMonitoringGenericService_monitoringServiceExampleExample(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckMonitoringGenericServiceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringGenericServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMonitoringGenericService_monitoringServiceExampleExample(context),
@@ -79,7 +79,7 @@ func testAccCheckMonitoringGenericServiceDestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{MonitoringBasePath}}v3/projects/{{project}}/services/{{service_id}}")
 			if err != nil {
@@ -92,7 +92,7 @@ func testAccCheckMonitoringGenericServiceDestroyProducer(t *testing.T) func(s *t
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil, isMonitoringConcurrentEditError)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, isMonitoringConcurrentEditError)
 			if err == nil {
 				return fmt.Errorf("MonitoringGenericService still exists at %s", url)
 			}

@@ -27,14 +27,15 @@ func TestAccFirebaseWebApp_firebaseWebAppBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+		"display_name":  "tf-test Display Name Basic",
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseWebAppDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseWebAppDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseWebApp_firebaseWebAppBasicExample(context),
@@ -71,7 +72,7 @@ resource "google_firebase_project" "default" {
 resource "google_firebase_web_app" "basic" {
 	provider = google-beta
 	project = google_project.default.project_id
-	display_name = "Display Name Basic%{random_suffix}"
+	display_name = "%{display_name}"
 	deletion_policy = "DELETE"
 
 	depends_on = [google_firebase_project.default]
@@ -116,7 +117,7 @@ func testAccCheckFirebaseWebAppDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FirebaseBasePath}}{{name}}")
 			if err != nil {
@@ -129,7 +130,7 @@ func testAccCheckFirebaseWebAppDestroyProducer(t *testing.T) func(s *terraform.S
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("FirebaseWebApp still exists at %s", url)
 			}

@@ -13,7 +13,7 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func resourceComputeInstanceGroupManager() *schema.Resource {
+func ResourceComputeInstanceGroupManager() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceGroupManagerCreate,
 		Read:   resourceComputeInstanceGroupManagerRead,
@@ -50,7 +50,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 						"instance_template": {
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
+							DiffSuppressFunc: compareSelfLinkRelativePathsIgnoreParams,
 							Description:      `The full URL to an instance template from which all new instances of this version will be created.`,
 						},
 
@@ -476,6 +476,33 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 	}
 }
 
+func parseUniqueId(s string) (string, string) {
+	splits := strings.SplitN(s, "?uniqueId=", 2)
+	if len(splits) == 2 {
+		return splits[0], splits[1]
+	}
+	return s, ""
+}
+
+func compareSelfLinkRelativePathsIgnoreParams(_unused1, old, new string, _unused2 *schema.ResourceData) bool {
+	oldName, oldUniqueId := parseUniqueId(old)
+	newName, newUniqueId := parseUniqueId(new)
+	if oldUniqueId != "" && newUniqueId != "" && oldUniqueId != newUniqueId {
+		return false
+	}
+	return compareSelfLinkRelativePaths(_unused1, oldName, newName, _unused2)
+}
+
+func ConvertToUniqueIdWhenPresent(s string) string {
+	original, uniqueId := parseUniqueId(s)
+	if uniqueId != "" {
+		splits := strings.Split(original, "/")
+		splits[len(splits)-1] = uniqueId
+		return strings.Join(splits, "/")
+	}
+	return s
+}
+
 func getNamedPorts(nps []interface{}) []*compute.NamedPort {
 	namedPorts := make([]*compute.NamedPort, 0, len(nps))
 	for _, v := range nps {
@@ -504,7 +531,7 @@ func getNamedPortsBeta(nps []interface{}) []*compute.NamedPort {
 
 func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -555,7 +582,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 	d.SetId(id)
 
 	// Wait for the operation to complete
-	err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
+	err = ComputeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		// Check if the create operation failed because Terraform was prematurely terminated. If it was we can persist the
 		// operation id to state so that a subsequent refresh of this resource will wait until the operation has terminated
@@ -629,7 +656,7 @@ func getManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGrou
 		return nil, err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}
@@ -655,7 +682,7 @@ func getManager(d *schema.ResourceData, meta interface{}) (*compute.InstanceGrou
 
 func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -676,7 +703,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 		if err := d.Set("operation", op.Name); err != nil {
 			return fmt.Errorf("Error setting operation: %s", err)
 		}
-		err = computeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
+		err = ComputeOperationWaitTime(config, op, project, "Creating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			// remove from state to allow refresh to finish
 			log.Printf("[DEBUG] Resumed operation returned an error, removing from state: %s", err)
@@ -775,7 +802,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -854,7 +881,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error updating managed group instances: %s", err)
 		}
 
-		err = computeOperationWaitTime(config, op, project, "Updating managed group instances", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, op, project, "Updating managed group instances", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -880,7 +907,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 
 		// Wait for the operation to complete:
-		err = computeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -899,7 +926,7 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 		}
 
 		// Wait for the operation to complete
-		err = computeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
+		err = ComputeOperationWaitTime(config, op, project, "Updating InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return err
 		}
@@ -927,7 +954,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 		}
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -955,7 +982,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 	currentSize := int64(d.Get("target_size").(int))
 
 	// Wait for the operation to complete
-	err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
+	err = ComputeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
 
 	for err != nil && currentSize > 0 {
 		if !strings.Contains(err.Error(), "timeout") {
@@ -976,7 +1003,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 
 		log.Printf("[INFO] timeout occurred, but instance group is shrinking (%d < %d)", instanceGroupSize, currentSize)
 		currentSize = instanceGroupSize
-		err = computeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
+		err = ComputeOperationWaitTime(config, op, project, "Deleting InstanceGroupManager", userAgent, d.Timeout(schema.TimeoutDelete))
 	}
 
 	d.SetId("")
@@ -1013,17 +1040,38 @@ func expandAutoHealingPolicies(configured []interface{}) []*compute.InstanceGrou
 }
 
 func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
+
 	preservedState := &compute.StatefulPolicyPreservedState{}
-	stateful_disks := d.Get("stateful_disk").(*schema.Set).List()
-	disks := make(map[string]compute.StatefulPolicyPreservedStateDiskDevice)
-	for _, raw := range stateful_disks {
-		data := raw.(map[string]interface{})
-		disk := compute.StatefulPolicyPreservedStateDiskDevice{
-			AutoDelete: data["delete_rule"].(string),
+
+	isRemovingAStatefulDisk := false
+	if d.HasChange("stateful_disk") {
+		oldDisks, newDisks := d.GetChange("stateful_disk")
+		preservedState.Disks = expandStatefulDisks(newDisks.(*schema.Set).List())
+		// Remove Disks
+		for _, raw := range oldDisks.(*schema.Set).List() {
+			data := raw.(map[string]interface{})
+			deviceName := data["device_name"].(string)
+			if _, exist := preservedState.Disks[deviceName]; !exist {
+				isRemovingAStatefulDisk = true
+				preservedState.NullFields = append(preservedState.NullFields, "Disks."+deviceName)
+			}
 		}
-		disks[data["device_name"].(string)] = disk
+		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "Disks")
 	}
-	preservedState.Disks = disks
+	if !isRemovingAStatefulDisk {
+		preservedState := &compute.StatefulPolicyPreservedState{}
+		stateful_disks := d.Get("stateful_disk").(*schema.Set).List()
+		disks := make(map[string]compute.StatefulPolicyPreservedStateDiskDevice)
+		for _, raw := range stateful_disks {
+			data := raw.(map[string]interface{})
+			disk := compute.StatefulPolicyPreservedStateDiskDevice{
+				AutoDelete: data["delete_rule"].(string),
+			}
+			disks[data["device_name"].(string)] = disk
+		}
+		preservedState.Disks = disks
+	}
+
 	if d.HasChange("stateful_internal_ip") {
 		oldInternalIps, newInternalIps := d.GetChange("stateful_internal_ip")
 		preservedState.InternalIPs = expandStatefulIps(newInternalIps.([]interface{}))
@@ -1036,8 +1084,8 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 			}
 		}
 		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "InternalIPs")
-
 	}
+
 	if d.HasChange("stateful_external_ip") {
 		oldExternalIps, newExternalIps := d.GetChange("stateful_external_ip")
 		preservedState.ExternalIPs = expandStatefulIps(newExternalIps.([]interface{}))
@@ -1050,13 +1098,25 @@ func expandStatefulPolicy(d *schema.ResourceData) *compute.StatefulPolicy {
 			}
 		}
 		preservedState.ForceSendFields = append(preservedState.ForceSendFields, "ExternalIPs")
-
 	}
 
 	statefulPolicy := &compute.StatefulPolicy{PreservedState: preservedState}
 	statefulPolicy.ForceSendFields = append(statefulPolicy.ForceSendFields, "PreservedState")
 
 	return statefulPolicy
+}
+
+func expandStatefulDisks(statefulDisk []interface{}) map[string]compute.StatefulPolicyPreservedStateDiskDevice {
+	statefulDisksMap := make(map[string]compute.StatefulPolicyPreservedStateDiskDevice)
+
+	for _, raw := range statefulDisk {
+		data := raw.(map[string]interface{})
+		deviceName := compute.StatefulPolicyPreservedStateDiskDevice{
+			AutoDelete: data["delete_rule"].(string),
+		}
+		statefulDisksMap[data["device_name"].(string)] = deviceName
+	}
+	return statefulDisksMap
 }
 
 func expandStatefulIps(statefulIP []interface{}) map[string]compute.StatefulPolicyPreservedStateNetworkIp {
@@ -1079,7 +1139,7 @@ func expandVersions(configured []interface{}) []*compute.InstanceGroupManagerVer
 
 		version := compute.InstanceGroupManagerVersion{
 			Name:             data["name"].(string),
-			InstanceTemplate: data["instance_template"].(string),
+			InstanceTemplate: ConvertToUniqueIdWhenPresent(data["instance_template"].(string)),
 			TargetSize:       expandFixedOrPercent(data["target_size"].([]interface{})),
 		}
 

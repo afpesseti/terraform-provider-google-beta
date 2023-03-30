@@ -24,7 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceNetworkServicesEdgeCacheService() *schema.Resource {
+func ResourceNetworkServicesEdgeCacheService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNetworkServicesEdgeCacheServiceCreate,
 		Read:   resourceNetworkServicesEdgeCacheServiceRead,
@@ -62,7 +62,7 @@ and all following characters must be a dash, underscore, letter or digit.`,
 							Required:    true,
 							Description: `The list of hostRules to match against. These rules define which hostnames the EdgeCacheService will match against, and which route configurations apply.`,
 							MinItems:    1,
-							MaxItems:    5,
+							MaxItems:    10,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"hosts": {
@@ -263,7 +263,7 @@ to which you could add rules numbered from 6 to 8, 10 to 11, and 13 to 15 in the
 																Optional:    true,
 																Description: `Describes a header to add.`,
 																MinItems:    1,
-																MaxItems:    5,
+																MaxItems:    25,
 																Elem: &schema.Resource{
 																	Schema: map[string]*schema.Schema{
 																		"header_name": {
@@ -290,7 +290,7 @@ to which you could add rules numbered from 6 to 8, 10 to 11, and 13 to 15 in the
 																Optional:    true,
 																Description: `A list of header names for headers that need to be removed from the request prior to forwarding the request to the origin.`,
 																MinItems:    1,
-																MaxItems:    10,
+																MaxItems:    25,
 																Elem: &schema.Resource{
 																	Schema: map[string]*schema.Schema{
 																		"header_name": {
@@ -308,7 +308,7 @@ to which you could add rules numbered from 6 to 8, 10 to 11, and 13 to 15 in the
 
 Response headers are only sent to the client, and do not have an effect on the cache serving the response.`,
 																MinItems: 1,
-																MaxItems: 5,
+																MaxItems: 25,
 																Elem: &schema.Resource{
 																	Schema: map[string]*schema.Schema{
 																		"header_name": {
@@ -335,7 +335,7 @@ Response headers are only sent to the client, and do not have an effect on the c
 																Optional:    true,
 																Description: `A list of header names for headers that need to be removed from the request prior to forwarding the request to the origin.`,
 																MinItems:    1,
-																MaxItems:    10,
+																MaxItems:    25,
 																Elem: &schema.Resource{
 																	Schema: map[string]*schema.Schema{
 																		"header_name": {
@@ -729,7 +729,7 @@ This translates to the Access-Control-Allow-Credentials response header.`,
 																			Type:        schema.TypeList,
 																			Optional:    true,
 																			Description: `Specifies the content for the Access-Control-Allow-Headers response header.`,
-																			MaxItems:    5,
+																			MaxItems:    25,
 																			Elem: &schema.Schema{
 																				Type: schema.TypeString,
 																			},
@@ -749,7 +749,7 @@ This translates to the Access-Control-Allow-Credentials response header.`,
 																			Description: `Specifies the list of origins that will be allowed to do CORS requests.
 
 This translates to the Access-Control-Allow-Origin response header.`,
-																			MaxItems: 5,
+																			MaxItems: 25,
 																			Elem: &schema.Schema{
 																				Type: schema.TypeString,
 																			},
@@ -763,7 +763,7 @@ This translates to the Access-Control-Allow-Origin response header.`,
 																			Type:        schema.TypeList,
 																			Optional:    true,
 																			Description: `Specifies the content for the Access-Control-Allow-Headers response header.`,
-																			MaxItems:    5,
+																			MaxItems:    25,
 																			Elem: &schema.Schema{
 																				Type: schema.TypeString,
 																			},
@@ -996,7 +996,7 @@ If not set, the EdgeCacheService has no SSL policy configured, and will default 
 
 func resourceNetworkServicesEdgeCacheServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1082,7 +1082,7 @@ func resourceNetworkServicesEdgeCacheServiceCreate(d *schema.ResourceData, meta 
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating EdgeCacheService: %s", err)
 	}
@@ -1094,7 +1094,7 @@ func resourceNetworkServicesEdgeCacheServiceCreate(d *schema.ResourceData, meta 
 	}
 	d.SetId(id)
 
-	err = networkServicesOperationWaitTime(
+	err = NetworkServicesOperationWaitTime(
 		config, res, project, "Creating EdgeCacheService", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 
@@ -1111,7 +1111,7 @@ func resourceNetworkServicesEdgeCacheServiceCreate(d *schema.ResourceData, meta 
 
 func resourceNetworkServicesEdgeCacheServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1134,7 +1134,7 @@ func resourceNetworkServicesEdgeCacheServiceRead(d *schema.ResourceData, meta in
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("NetworkServicesEdgeCacheService %q", d.Id()))
 	}
@@ -1185,7 +1185,7 @@ func resourceNetworkServicesEdgeCacheServiceRead(d *schema.ResourceData, meta in
 
 func resourceNetworkServicesEdgeCacheServiceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1319,7 +1319,7 @@ func resourceNetworkServicesEdgeCacheServiceUpdate(d *schema.ResourceData, meta 
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating EdgeCacheService %q: %s", d.Id(), err)
@@ -1327,7 +1327,7 @@ func resourceNetworkServicesEdgeCacheServiceUpdate(d *schema.ResourceData, meta 
 		log.Printf("[DEBUG] Finished updating EdgeCacheService %q: %#v", d.Id(), res)
 	}
 
-	err = networkServicesOperationWaitTime(
+	err = NetworkServicesOperationWaitTime(
 		config, res, project, "Updating EdgeCacheService", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 
@@ -1340,7 +1340,7 @@ func resourceNetworkServicesEdgeCacheServiceUpdate(d *schema.ResourceData, meta 
 
 func resourceNetworkServicesEdgeCacheServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1366,12 +1366,12 @@ func resourceNetworkServicesEdgeCacheServiceDelete(d *schema.ResourceData, meta 
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "EdgeCacheService")
 	}
 
-	err = networkServicesOperationWaitTime(
+	err = NetworkServicesOperationWaitTime(
 		config, res, project, "Deleting EdgeCacheService", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 

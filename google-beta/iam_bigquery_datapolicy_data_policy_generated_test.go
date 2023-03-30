@@ -15,6 +15,7 @@
 package google
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,20 +25,32 @@ func TestAccBigqueryDatapolicyDataPolicyIamBindingGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 		"role":          "roles/viewer",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDatapolicyDataPolicyIamBinding_basicGenerated(context),
 			},
 			{
+				ResourceName:      "google_bigquery_datapolicy_data_policy_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/dataPolicies/%s roles/viewer", GetTestProjectFromEnv(), GetTestRegionFromEnv(), fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				// Test Iam Binding update
 				Config: testAccBigqueryDatapolicyDataPolicyIamBinding_updateGenerated(context),
+			},
+			{
+				ResourceName:      "google_bigquery_datapolicy_data_policy_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/dataPolicies/%s roles/viewer", GetTestProjectFromEnv(), GetTestRegionFromEnv(), fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -47,17 +60,23 @@ func TestAccBigqueryDatapolicyDataPolicyIamMemberGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 		"role":          "roles/viewer",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccBigqueryDatapolicyDataPolicyIamMember_basicGenerated(context),
+			},
+			{
+				ResourceName:      "google_bigquery_datapolicy_data_policy_iam_member.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/dataPolicies/%s roles/viewer user:admin@hashicorptest.com", GetTestProjectFromEnv(), GetTestRegionFromEnv(), fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -67,19 +86,31 @@ func TestAccBigqueryDatapolicyDataPolicyIamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 		"role":          "roles/viewer",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDatapolicyDataPolicyIamPolicy_basicGenerated(context),
 			},
 			{
+				ResourceName:      "google_bigquery_datapolicy_data_policy_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/dataPolicies/%s", GetTestProjectFromEnv(), GetTestRegionFromEnv(), fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccBigqueryDatapolicyDataPolicyIamPolicy_emptyBinding(context),
+			},
+			{
+				ResourceName:      "google_bigquery_datapolicy_data_policy_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/dataPolicies/%s", GetTestProjectFromEnv(), GetTestRegionFromEnv(), fmt.Sprintf("tf_test_data_policy%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -88,7 +119,6 @@ func TestAccBigqueryDatapolicyDataPolicyIamPolicyGenerated(t *testing.T) {
 func testAccBigqueryDatapolicyDataPolicyIamMember_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_bigquery_datapolicy_data_policy" "data_policy" {
-    provider = google-beta
     location         = "us-central1"
     data_policy_id   = "tf_test_data_policy%{random_suffix}"
     policy_tag       = google_data_catalog_policy_tag.policy_tag.name
@@ -96,14 +126,12 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
   resource "google_data_catalog_policy_tag" "policy_tag" {
-    provider = google-beta
     taxonomy     = google_data_catalog_taxonomy.taxonomy.id
     display_name = "Low security"
     description  = "A policy tag normally associated with low security items"
   }
   
   resource "google_data_catalog_taxonomy" "taxonomy" {
-    provider = google-beta
     region                 = "us-central1"
     display_name           = "taxonomy%{random_suffix}"
     description            = "A collection of policy tags"
@@ -111,7 +139,6 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
 resource "google_bigquery_datapolicy_data_policy_iam_member" "foo" {
-  provider = google-beta
   project = google_bigquery_datapolicy_data_policy.data_policy.project
   location = google_bigquery_datapolicy_data_policy.data_policy.location
   data_policy_id = google_bigquery_datapolicy_data_policy.data_policy.data_policy_id
@@ -124,7 +151,6 @@ resource "google_bigquery_datapolicy_data_policy_iam_member" "foo" {
 func testAccBigqueryDatapolicyDataPolicyIamPolicy_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_bigquery_datapolicy_data_policy" "data_policy" {
-    provider = google-beta
     location         = "us-central1"
     data_policy_id   = "tf_test_data_policy%{random_suffix}"
     policy_tag       = google_data_catalog_policy_tag.policy_tag.name
@@ -132,14 +158,12 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
   resource "google_data_catalog_policy_tag" "policy_tag" {
-    provider = google-beta
     taxonomy     = google_data_catalog_taxonomy.taxonomy.id
     display_name = "Low security"
     description  = "A policy tag normally associated with low security items"
   }
   
   resource "google_data_catalog_taxonomy" "taxonomy" {
-    provider = google-beta
     region                 = "us-central1"
     display_name           = "taxonomy%{random_suffix}"
     description            = "A collection of policy tags"
@@ -147,7 +171,6 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
 data "google_iam_policy" "foo" {
-  provider = google-beta
   binding {
     role = "%{role}"
     members = ["user:admin@hashicorptest.com"]
@@ -155,7 +178,6 @@ data "google_iam_policy" "foo" {
 }
 
 resource "google_bigquery_datapolicy_data_policy_iam_policy" "foo" {
-  provider = google-beta
   project = google_bigquery_datapolicy_data_policy.data_policy.project
   location = google_bigquery_datapolicy_data_policy.data_policy.location
   data_policy_id = google_bigquery_datapolicy_data_policy.data_policy.data_policy_id
@@ -167,7 +189,6 @@ resource "google_bigquery_datapolicy_data_policy_iam_policy" "foo" {
 func testAccBigqueryDatapolicyDataPolicyIamPolicy_emptyBinding(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_bigquery_datapolicy_data_policy" "data_policy" {
-    provider = google-beta
     location         = "us-central1"
     data_policy_id   = "tf_test_data_policy%{random_suffix}"
     policy_tag       = google_data_catalog_policy_tag.policy_tag.name
@@ -175,14 +196,12 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
   resource "google_data_catalog_policy_tag" "policy_tag" {
-    provider = google-beta
     taxonomy     = google_data_catalog_taxonomy.taxonomy.id
     display_name = "Low security"
     description  = "A policy tag normally associated with low security items"
   }
   
   resource "google_data_catalog_taxonomy" "taxonomy" {
-    provider = google-beta
     region                 = "us-central1"
     display_name           = "taxonomy%{random_suffix}"
     description            = "A collection of policy tags"
@@ -190,11 +209,9 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
 data "google_iam_policy" "foo" {
-  provider = google-beta
 }
 
 resource "google_bigquery_datapolicy_data_policy_iam_policy" "foo" {
-  provider = google-beta
   project = google_bigquery_datapolicy_data_policy.data_policy.project
   location = google_bigquery_datapolicy_data_policy.data_policy.location
   data_policy_id = google_bigquery_datapolicy_data_policy.data_policy.data_policy_id
@@ -206,7 +223,6 @@ resource "google_bigquery_datapolicy_data_policy_iam_policy" "foo" {
 func testAccBigqueryDatapolicyDataPolicyIamBinding_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_bigquery_datapolicy_data_policy" "data_policy" {
-    provider = google-beta
     location         = "us-central1"
     data_policy_id   = "tf_test_data_policy%{random_suffix}"
     policy_tag       = google_data_catalog_policy_tag.policy_tag.name
@@ -214,14 +230,12 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
   resource "google_data_catalog_policy_tag" "policy_tag" {
-    provider = google-beta
     taxonomy     = google_data_catalog_taxonomy.taxonomy.id
     display_name = "Low security"
     description  = "A policy tag normally associated with low security items"
   }
   
   resource "google_data_catalog_taxonomy" "taxonomy" {
-    provider = google-beta
     region                 = "us-central1"
     display_name           = "taxonomy%{random_suffix}"
     description            = "A collection of policy tags"
@@ -229,7 +243,6 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
 resource "google_bigquery_datapolicy_data_policy_iam_binding" "foo" {
-  provider = google-beta
   project = google_bigquery_datapolicy_data_policy.data_policy.project
   location = google_bigquery_datapolicy_data_policy.data_policy.location
   data_policy_id = google_bigquery_datapolicy_data_policy.data_policy.data_policy_id
@@ -242,7 +255,6 @@ resource "google_bigquery_datapolicy_data_policy_iam_binding" "foo" {
 func testAccBigqueryDatapolicyDataPolicyIamBinding_updateGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_bigquery_datapolicy_data_policy" "data_policy" {
-    provider = google-beta
     location         = "us-central1"
     data_policy_id   = "tf_test_data_policy%{random_suffix}"
     policy_tag       = google_data_catalog_policy_tag.policy_tag.name
@@ -250,14 +262,12 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
   resource "google_data_catalog_policy_tag" "policy_tag" {
-    provider = google-beta
     taxonomy     = google_data_catalog_taxonomy.taxonomy.id
     display_name = "Low security"
     description  = "A policy tag normally associated with low security items"
   }
   
   resource "google_data_catalog_taxonomy" "taxonomy" {
-    provider = google-beta
     region                 = "us-central1"
     display_name           = "taxonomy%{random_suffix}"
     description            = "A collection of policy tags"
@@ -265,7 +275,6 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
 resource "google_bigquery_datapolicy_data_policy_iam_binding" "foo" {
-  provider = google-beta
   project = google_bigquery_datapolicy_data_policy.data_policy.project
   location = google_bigquery_datapolicy_data_policy.data_policy.location
   data_policy_id = google_bigquery_datapolicy_data_policy.data_policy.data_policy_id

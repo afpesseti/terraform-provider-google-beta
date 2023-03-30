@@ -27,13 +27,13 @@ func TestAccDataprocMetastoreService_dataprocMetastoreServiceBasicExample(t *tes
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataprocMetastoreServiceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocMetastoreService_dataprocMetastoreServiceBasicExample(context),
@@ -72,13 +72,13 @@ func TestAccDataprocMetastoreService_dataprocMetastoreServiceCmekTestExample(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataprocMetastoreServiceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocMetastoreService_dataprocMetastoreServiceCmekTestExample(context),
@@ -139,58 +139,17 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key_binding" {
 `, context)
 }
 
-func TestAccDataprocMetastoreService_dataprocMetastoreServiceEndpointExample(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
-	}
-
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckDataprocMetastoreServiceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataprocMetastoreService_dataprocMetastoreServiceEndpointExample(context),
-			},
-			{
-				ResourceName:            "google_dataproc_metastore_service.endpoint",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"service_id", "location"},
-			},
-		},
-	})
-}
-
-func testAccDataprocMetastoreService_dataprocMetastoreServiceEndpointExample(context map[string]interface{}) string {
-	return Nprintf(`
-resource "google_dataproc_metastore_service" "endpoint" {
-  provider   = google-beta
-  service_id = "tf-test-metastore-endpoint%{random_suffix}"
-  location   = "us-central1"
-  tier       = "DEVELOPER"
-
-  hive_metastore_config {
-    version           = "3.1.2"
-    endpoint_protocol = "GRPC"
-  }
-}
-`, context)
-}
-
 func TestAccDataprocMetastoreService_dataprocMetastoreServiceAuxExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckDataprocMetastoreServiceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocMetastoreService_dataprocMetastoreServiceAuxExample(context),
@@ -228,13 +187,13 @@ func TestAccDataprocMetastoreService_dataprocMetastoreServiceMetadataExample(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckDataprocMetastoreServiceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocMetastoreService_dataprocMetastoreServiceMetadataExample(context),
@@ -274,13 +233,13 @@ func TestAccDataprocMetastoreService_dataprocMetastoreServiceTelemetryExample(t 
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataprocMetastoreServiceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataprocMetastoreService_dataprocMetastoreServiceTelemetryExample(context),
@@ -324,7 +283,7 @@ func testAccCheckDataprocMetastoreServiceDestroyProducer(t *testing.T) func(s *t
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{DataprocMetastoreBasePath}}projects/{{project}}/locations/{{location}}/services/{{service_id}}")
 			if err != nil {
@@ -337,7 +296,7 @@ func testAccCheckDataprocMetastoreServiceDestroyProducer(t *testing.T) func(s *t
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("DataprocMetastoreService still exists at %s", url)
 			}

@@ -24,7 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceMonitoringGenericService() *schema.Resource {
+func ResourceMonitoringGenericService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceMonitoringGenericServiceCreate,
 		Read:   resourceMonitoringGenericServiceRead,
@@ -54,7 +54,7 @@ service ID.`,
 				Optional: true,
 				ForceNew: true,
 				Description: `A well-known service type, defined by its service type and service labels.
-Valid values are described at
+Valid values of service types and services labels are described at
 https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli`,
 				MaxItems: 1,
 				Elem: &schema.Resource{
@@ -127,7 +127,7 @@ https://cloud.google.com/apis/design/resource_names.`,
 
 func resourceMonitoringGenericServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func resourceMonitoringGenericServiceCreate(d *schema.ResourceData, meta interfa
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate), isMonitoringConcurrentEditError)
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate), isMonitoringConcurrentEditError)
 	if err != nil {
 		return fmt.Errorf("Error creating GenericService: %s", err)
 	}
@@ -193,7 +193,7 @@ func resourceMonitoringGenericServiceCreate(d *schema.ResourceData, meta interfa
 
 func resourceMonitoringGenericServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -216,7 +216,7 @@ func resourceMonitoringGenericServiceRead(d *schema.ResourceData, meta interface
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil, isMonitoringConcurrentEditError)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil, isMonitoringConcurrentEditError)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("MonitoringGenericService %q", d.Id()))
 	}
@@ -246,7 +246,7 @@ func resourceMonitoringGenericServiceRead(d *schema.ResourceData, meta interface
 
 func resourceMonitoringGenericServiceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -300,7 +300,7 @@ func resourceMonitoringGenericServiceUpdate(d *schema.ResourceData, meta interfa
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate), isMonitoringConcurrentEditError)
+	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate), isMonitoringConcurrentEditError)
 
 	if err != nil {
 		return fmt.Errorf("Error updating GenericService %q: %s", d.Id(), err)
@@ -313,7 +313,7 @@ func resourceMonitoringGenericServiceUpdate(d *schema.ResourceData, meta interfa
 
 func resourceMonitoringGenericServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -339,7 +339,7 @@ func resourceMonitoringGenericServiceDelete(d *schema.ResourceData, meta interfa
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete), isMonitoringConcurrentEditError)
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete), isMonitoringConcurrentEditError)
 	if err != nil {
 		return handleNotFoundError(err, d, "GenericService")
 	}

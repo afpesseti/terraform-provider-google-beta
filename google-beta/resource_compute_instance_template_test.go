@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -167,24 +168,42 @@ func TestComputeInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T) {
 		Typee       string // misspelled on purpose, type is a special symbol
 		DiskType    string
 		DiskSize    int
+		Interfacee  string
 		ExpectError bool
 	}{
-		"scratch disk correct size": {
+		"scratch disk correct size 1": {
 			Typee:       "SCRATCH",
 			DiskType:    "local-ssd",
 			DiskSize:    375,
+			Interfacee:  "NVME",
+			ExpectError: false,
+		},
+		"scratch disk correct size 2": {
+			Typee:       "SCRATCH",
+			DiskType:    "local-ssd",
+			DiskSize:    3000,
+			Interfacee:  "NVME",
 			ExpectError: false,
 		},
 		"scratch disk incorrect size": {
 			Typee:       "SCRATCH",
 			DiskType:    "local-ssd",
 			DiskSize:    300,
+			Interfacee:  "NVME",
+			ExpectError: true,
+		},
+		"scratch disk incorrect interface": {
+			Typee:       "SCRATCH",
+			DiskType:    "local-ssd",
+			DiskSize:    3000,
+			Interfacee:  "SCSI",
 			ExpectError: true,
 		},
 		"non-scratch disk": {
 			Typee:       "PERSISTENT",
 			DiskType:    "",
 			DiskSize:    300,
+			Interfacee:  "NVME",
 			ExpectError: false,
 		},
 	}
@@ -196,6 +215,7 @@ func TestComputeInstanceTemplate_scratchDiskSizeCustomizeDiff(t *testing.T) {
 				"disk.0.type":         tc.Typee,
 				"disk.0.disk_type":    tc.DiskType,
 				"disk.0.disk_size_gb": tc.DiskSize,
+				"disk.0.interface":    tc.Interfacee,
 			},
 		}
 		err := resourceComputeInstanceTemplateScratchDiskCustomizeDiffFunc(d)
@@ -213,13 +233,13 @@ func TestAccComputeInstanceTemplate_basic(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_basic(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_basic(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -243,13 +263,13 @@ func TestAccComputeInstanceTemplate_imageShorthand(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_imageShorthand(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_imageShorthand(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -269,13 +289,13 @@ func TestAccComputeInstanceTemplate_preemptible(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_preemptible(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_preemptible(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -292,18 +312,53 @@ func TestAccComputeInstanceTemplate_preemptible(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstanceTemplate_maintenance_interval(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_maintenance_interval(RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateMaintenanceInterval(&instanceTemplate, "PERIODIC"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeInstanceTemplate_basic(RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateMaintenanceInterval(&instanceTemplate, ""),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstanceTemplate_IP(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_ip(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_ip(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -324,13 +379,13 @@ func TestAccComputeInstanceTemplate_IPv6(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_ipv6(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_ipv6(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -348,13 +403,13 @@ func TestAccComputeInstanceTemplate_IPv6(t *testing.T) {
 func TestAccComputeInstanceTemplate_networkTier(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_networkTier(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_networkTier(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_instance_template.foobar",
@@ -371,13 +426,13 @@ func TestAccComputeInstanceTemplate_networkIP(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	networkIP := "10.128.0.2"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_networkIP(randString(t, 10), networkIP),
+				Config: testAccComputeInstanceTemplate_networkIP(RandString(t, 10), networkIP),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -401,13 +456,13 @@ func TestAccComputeInstanceTemplate_networkIPAddress(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	ipAddress := "10.128.0.2"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_networkIPAddress(randString(t, 10), ipAddress),
+				Config: testAccComputeInstanceTemplate_networkIPAddress(RandString(t, 10), ipAddress),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -428,13 +483,13 @@ func TestAccComputeInstanceTemplate_networkIPAddress(t *testing.T) {
 func TestAccComputeInstanceTemplate_disks(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_disks(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_disks(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_instance_template.foobar",
@@ -448,13 +503,13 @@ func TestAccComputeInstanceTemplate_disks(t *testing.T) {
 func TestAccComputeInstanceTemplate_disksInvalid(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccComputeInstanceTemplate_disksInvalid(randString(t, 10)),
+				Config:      testAccComputeInstanceTemplate_disksInvalid(RandString(t, 10)),
 				ExpectError: regexp.MustCompile("Cannot use `source`.*"),
 			},
 		},
@@ -464,13 +519,13 @@ func TestAccComputeInstanceTemplate_disksInvalid(t *testing.T) {
 func TestAccComputeInstanceTemplate_regionDisks(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_regionDisks(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_regionDisks(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_instance_template.foobar",
@@ -485,15 +540,15 @@ func TestAccComputeInstanceTemplate_subnet_auto(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	network := "tf-test-network-" + randString(t, 10)
+	network := "tf-test-network-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_subnet_auto(network, randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_subnet_auto(network, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -514,13 +569,13 @@ func TestAccComputeInstanceTemplate_subnet_custom(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_subnet_custom(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_subnet_custom(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -538,21 +593,21 @@ func TestAccComputeInstanceTemplate_subnet_custom(t *testing.T) {
 
 func TestAccComputeInstanceTemplate_subnet_xpn(t *testing.T) {
 	// Randomness
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	org := getTestOrgFromEnv(t)
-	billingId := getTestBillingAccountFromEnv(t)
+	org := GetTestOrgFromEnv(t)
+	billingId := GetTestBillingAccountFromEnv(t)
 	projectName := fmt.Sprintf("tf-testxpn-%d", time.Now().Unix())
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_subnet_xpn(org, billingId, projectName, randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_subnet_xpn(org, billingId, projectName, RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExistsInProject(
 						t, "google_compute_instance_template.foobar", fmt.Sprintf("%s-service", projectName),
@@ -569,13 +624,13 @@ func TestAccComputeInstanceTemplate_metadata_startup_script(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_startup_script(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_startup_script(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -591,13 +646,13 @@ func TestAccComputeInstanceTemplate_primaryAliasIpRange(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_primaryAliasIpRange(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_primaryAliasIpRange(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasAliasIpRange(&instanceTemplate, "", "/24"),
@@ -617,13 +672,13 @@ func TestAccComputeInstanceTemplate_secondaryAliasIpRange(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_secondaryAliasIpRange(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_secondaryAliasIpRange(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasAliasIpRange(&instanceTemplate, "inst-test-secondary", "/24"),
@@ -643,13 +698,13 @@ func TestAccComputeInstanceTemplate_guestAccelerator(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_guestAccelerator(randString(t, 10), 1),
+				Config: testAccComputeInstanceTemplate_guestAccelerator(RandString(t, 10), 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasGuestAccelerator(&instanceTemplate, "nvidia-tesla-k80", 1),
@@ -670,13 +725,13 @@ func TestAccComputeInstanceTemplate_guestAcceleratorSkip(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_guestAccelerator(randString(t, 10), 0),
+				Config: testAccComputeInstanceTemplate_guestAccelerator(RandString(t, 10), 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateLacksGuestAccelerator(&instanceTemplate),
@@ -692,13 +747,13 @@ func TestAccComputeInstanceTemplate_minCpuPlatform(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_minCpuPlatform(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_minCpuPlatform(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasMinCpuPlatform(&instanceTemplate, DEFAULT_MIN_CPU_TEST_VALUE),
@@ -719,13 +774,13 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 	var instanceTemplate compute.InstanceTemplate
 	kms := BootstrapKMSKey(t)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_encryptionKMS(randString(t, 10), kms.CryptoKey.Name),
+				Config: testAccComputeInstanceTemplate_encryptionKMS(RandString(t, 10), kms.CryptoKey.Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 				),
@@ -742,13 +797,13 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 func TestAccComputeInstanceTemplate_soleTenantNodeAffinities(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_soleTenantInstanceTemplate(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_soleTenantInstanceTemplate(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_instance_template.foobar",
@@ -763,15 +818,15 @@ func TestAccComputeInstanceTemplate_instanceResourcePolicies(t *testing.T) {
 	t.Parallel()
 
 	var template compute.InstanceTemplate
-	var policyName = "tf-test-policy-" + randString(t, 10)
+	var policyName = "tf-test-policy-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_instanceResourcePolicyCollocated(randString(t, 10), policyName),
+				Config: testAccComputeInstanceTemplate_instanceResourcePolicyCollocated(RandString(t, 10), policyName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &template),
 					testAccCheckComputeInstanceTemplateHasInstanceResourcePolicies(&template, policyName),
@@ -790,12 +845,12 @@ func TestAccComputeInstanceTemplate_reservationAffinities(t *testing.T) {
 	t.Parallel()
 
 	var template compute.InstanceTemplate
-	var templateName = randString(t, 10)
+	var templateName = RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceTemplate_reservationAffinityInstanceTemplate_nonSpecificReservation(templateName, "NO_RESERVATION"),
@@ -842,13 +897,13 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig1(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_shieldedVmConfig(randString(t, 10), true, true, true),
+				Config: testAccComputeInstanceTemplate_shieldedVmConfig(RandString(t, 10), true, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasShieldedVmConfig(&instanceTemplate, true, true, true),
@@ -868,13 +923,13 @@ func TestAccComputeInstanceTemplate_shieldedVmConfig2(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_shieldedVmConfig(randString(t, 10), true, true, false),
+				Config: testAccComputeInstanceTemplate_shieldedVmConfig(RandString(t, 10), true, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasShieldedVmConfig(&instanceTemplate, true, true, false),
@@ -894,13 +949,13 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplateConfidentialInstanceConfig(randString(t, 10), true),
+				Config: testAccComputeInstanceTemplateConfidentialInstanceConfig(RandString(t, 10), true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, true),
@@ -915,13 +970,13 @@ func TestAccComputeInstanceTemplate_AdvancedMachineFeatures(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplateAdvancedMachineFeatures(randString(t, 10)),
+				Config: testAccComputeInstanceTemplateAdvancedMachineFeatures(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 				),
@@ -933,13 +988,13 @@ func TestAccComputeInstanceTemplate_AdvancedMachineFeatures(t *testing.T) {
 func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_enableDisplay(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_enableDisplay(RandString(t, 10)),
 			},
 			{
 				ResourceName:      "google_compute_instance_template.foobar",
@@ -953,12 +1008,12 @@ func TestAccComputeInstanceTemplate_enableDisplay(t *testing.T) {
 func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccComputeInstanceTemplate_invalidDiskType(randString(t, 10)),
+				Config:      testAccComputeInstanceTemplate_invalidDiskType(RandString(t, 10)),
 				ExpectError: regexp.MustCompile("SCRATCH disks must have a disk_type of local-ssd"),
 			},
 		},
@@ -968,12 +1023,32 @@ func TestAccComputeInstanceTemplate_invalidDiskType(t *testing.T) {
 func TestAccComputeInstanceTemplate_withScratchDisk(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_withScratchDisk(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_with375GbScratchDisk(RandString(t, 10)),
+			},
+			{
+				ResourceName:            "google_compute_instance_template.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name_prefix"},
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceTemplate_with18TbScratchDisk(t *testing.T) {
+	t.Parallel()
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_with18TbScratchDisk(RandString(t, 10)),
 			},
 			{
 				ResourceName:            "google_compute_instance_template.foobar",
@@ -987,17 +1062,17 @@ func TestAccComputeInstanceTemplate_withScratchDisk(t *testing.T) {
 
 func TestAccComputeInstanceTemplate_imageResourceTest(t *testing.T) {
 	// Multiple fine-grained resources
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
-	diskName := "tf-test-disk-" + randString(t, 10)
-	computeImage := "tf-test-image-" + randString(t, 10)
+	diskName := "tf-test-disk-" + RandString(t, 10)
+	computeImage := "tf-test-image-" + RandString(t, 10)
 	imageDesc1 := "Some description"
 	imageDesc2 := "Some other description"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceTemplate_imageResourceTest(diskName, computeImage, imageDesc1),
@@ -1025,15 +1100,15 @@ func TestAccComputeInstanceTemplate_diskResourcePolicies(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	policyName := "tf-test-policy-" + randString(t, 10)
+	policyName := "tf-test-policy-" + RandString(t, 10)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_diskResourcePolicies(randString(t, 10), policyName),
+				Config: testAccComputeInstanceTemplate_diskResourcePolicies(RandString(t, 10), policyName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					testAccCheckComputeInstanceTemplateHasDiskResourcePolicy(&instanceTemplate, policyName),
@@ -1052,12 +1127,12 @@ func TestAccComputeInstanceTemplate_nictype_update(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	var instanceTemplateName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+	var instanceTemplateName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceTemplate_nictype(instanceTemplateName, instanceTemplateName, "GVNIC"),
@@ -1081,12 +1156,12 @@ func TestAccComputeInstanceTemplate_queueCount(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	var instanceTemplateName = fmt.Sprintf("tf-test-%s", randString(t, 10))
+	var instanceTemplateName = fmt.Sprintf("tf-test-%s", RandString(t, 10))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceTemplate_queueCount(instanceTemplateName),
@@ -1104,13 +1179,13 @@ func TestAccComputeInstanceTemplate_managedEnvoy(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_managedEnvoy(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_managedEnvoy(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -1129,13 +1204,13 @@ func TestAccComputeInstanceTemplate_spot(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_spot(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_spot(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -1162,13 +1237,13 @@ func TestAccComputeInstanceTemplate_spot_maxRunDuration(t *testing.T) {
 	expectedMaxRunDuration.Nanos = 123
 	expectedMaxRunDuration.Seconds = 60
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_spot_maxRunDuration(randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_spot_maxRunDuration(RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.foobar", &instanceTemplate),
@@ -1193,16 +1268,20 @@ func TestAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 	kmsKey := BootstrapKMSKeyInLocation(t, "us-central1")
-	kmsKeyName := GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
-	kmsRingName := GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	context := map[string]interface{}{
+		"kms_ring_name": GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
+		"kms_key_name":  GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(kmsRingName, kmsKeyName, randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.template", &instanceTemplate),
@@ -1223,16 +1302,20 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 
 	var instanceTemplate compute.InstanceTemplate
 	kmsKey := BootstrapKMSKeyInLocation(t, "us-central1")
-	kmsKeyName := GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name)
-	kmsRingName := GetResourceNameFromSelfLink(kmsKey.KeyRing.Name)
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeInstanceTemplateDestroyProducer(t),
+	context := map[string]interface{}{
+		"kms_ring_name": GetResourceNameFromSelfLink(kmsKey.KeyRing.Name),
+		"kms_key_name":  GetResourceNameFromSelfLink(kmsKey.CryptoKey.Name),
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_sourceImageEncryptionKey(kmsRingName, kmsKeyName, randString(t, 10)),
+				Config: testAccComputeInstanceTemplate_sourceImageEncryptionKey(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(
 						t, "google_compute_instance_template.template", &instanceTemplate),
@@ -1250,7 +1333,7 @@ func TestAccComputeInstanceTemplate_sourceImageEncryptionKey(t *testing.T) {
 
 func testAccCheckComputeInstanceTemplateDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_instance_template" {
@@ -1258,7 +1341,7 @@ func testAccCheckComputeInstanceTemplateDestroyProducer(t *testing.T) func(s *te
 			}
 
 			splits := strings.Split(rs.Primary.ID, "/")
-			_, err := config.NewComputeClient(config.userAgent).InstanceTemplates.Get(
+			_, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
 				config.Project, splits[len(splits)-1]).Do()
 			if err == nil {
 				return fmt.Errorf("Instance template still exists")
@@ -1274,7 +1357,7 @@ func testAccCheckComputeInstanceTemplateExists(t *testing.T, n string, instanceT
 		panic("Attempted to check existence of Instance template that was nil.")
 	}
 
-	return testAccCheckComputeInstanceTemplateExistsInProject(t, n, getTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
+	return testAccCheckComputeInstanceTemplateExistsInProject(t, n, GetTestProjectFromEnv(), instanceTemplate.(*compute.InstanceTemplate))
 }
 
 func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p string, instanceTemplate *compute.InstanceTemplate) resource.TestCheckFunc {
@@ -1288,11 +1371,11 @@ func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p strin
 			return fmt.Errorf("No ID is set")
 		}
 
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		splits := strings.Split(rs.Primary.ID, "/")
 		templateName := splits[len(splits)-1]
-		found, err := config.NewComputeClient(config.userAgent).InstanceTemplates.Get(
+		found, err := config.NewComputeClient(config.UserAgent).InstanceTemplates.Get(
 			p, templateName).Do()
 		if err != nil {
 			return err
@@ -1300,6 +1383,20 @@ func testAccCheckComputeInstanceTemplateExistsInProject(t *testing.T, n, p strin
 
 		if found.Name != templateName {
 			return fmt.Errorf("Instance template not found")
+		}
+		if strings.Contains(rs.Primary.ID, "uniqueId") {
+			return fmt.Errorf("unique ID is not supposed to be present in the Terraform resource ID")
+		}
+		selfLink := rs.Primary.Attributes["self_link"]
+		if strings.Contains(selfLink, "uniqueId") {
+			return fmt.Errorf("unique ID is not supposed to be present in selfLink")
+		}
+
+		actualSelfLinkUnique := rs.Primary.Attributes["self_link_unique"]
+		foundId := strconv.FormatUint(found.Id, 10)
+		expectedSelfLinkUnique := selfLink + "?uniqueId=" + foundId
+		if actualSelfLinkUnique != expectedSelfLinkUnique {
+			return fmt.Errorf("self_link_unique should be %v but it is: %v", expectedSelfLinkUnique, actualSelfLinkUnique)
 		}
 
 		*instanceTemplate = *found
@@ -1390,6 +1487,15 @@ func testAccCheckComputeInstanceTemplatePreemptible(instanceTemplate *compute.In
 	return func(s *terraform.State) error {
 		if instanceTemplate.Properties.Scheduling.Preemptible != preemptible {
 			return fmt.Errorf("Expected preemptible value %v, got %v", preemptible, instanceTemplate.Properties.Scheduling.Preemptible)
+		}
+		return nil
+	}
+}
+
+func testAccCheckComputeInstanceTemplateMaintenanceInterval(instanceTemplate *compute.InstanceTemplate, maintenance_interval string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if instanceTemplate.Properties.Scheduling.MaintenanceInterval != maintenance_interval {
+			return fmt.Errorf("Expected maintenance interval value %v, got %v", maintenance_interval, instanceTemplate.Properties.Scheduling.MaintenanceInterval)
 		}
 		return nil
 	}
@@ -1776,6 +1882,50 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
+func testAccComputeInstanceTemplate_maintenance_interval(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+    preemptible       = false
+    automatic_restart = true
+    maintenance_interval = "PERIODIC"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+  labels = {
+    my_label = "foobar"
+  }
+}
+`, suffix)
+}
+
 func testAccComputeInstanceTemplate_ip(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_address" "foo" {
@@ -2034,7 +2184,7 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix, suffix)
 }
 
-func testAccComputeInstanceTemplate_withScratchDisk(suffix string) string {
+func testAccComputeInstanceTemplate_with375GbScratchDisk(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
 	family  = "centos-7"
@@ -2060,6 +2210,70 @@ resource "google_compute_instance_template" "foobar" {
   }
 }
 `, suffix)
+}
+
+func testAccComputeInstanceTemplate_with18TbScratchDisk(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+	family  = "centos-7"
+	project = "centos-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name           = "tf-test-instance-template-%s"
+  machine_type   = "n2-standard-16"
+  can_ip_forward = false
+  disk {
+    source_image = data.google_compute_image.my_image.name
+    auto_delete  = true
+    boot         = true
+  }
+  disk {
+    auto_delete  = true
+    disk_size_gb = 3000
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    interface    = "NVME"
+  }
+  disk {
+    auto_delete  = true
+    disk_size_gb = 3000
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    interface    = "NVME"
+  }
+  disk {
+    auto_delete  = true
+    disk_size_gb = 3000
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    interface    = "NVME"
+  }
+  disk {
+    auto_delete  = true
+    disk_size_gb = 3000
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    interface    = "NVME"
+  }
+  disk {
+    auto_delete  = true
+    disk_size_gb = 3000
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    interface    = "NVME"
+  }
+  disk {
+    auto_delete  = true
+    disk_size_gb = 3000
+    type         = "SCRATCH"
+    disk_type    = "local-ssd"
+    interface    = "NVME"
+  }
+  network_interface {
+    network = "default"
+  }
+}`, suffix)
 }
 
 func testAccComputeInstanceTemplate_regionDisks(suffix string) string {
@@ -3106,20 +3320,20 @@ resource "google_compute_instance_template" "foobar" {
 `, suffix)
 }
 
-func testAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(kmsRingName, kmsKeyName, suffix string) string {
-	return fmt.Sprintf(`
+func testAccComputeInstanceTemplate_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
+	return Nprintf(`
 data "google_kms_key_ring" "ring" {
-  name     = "%s"
+  name     = "%{kms_ring_name}"
   location = "us-central1"
 }
 
 data "google_kms_crypto_key" "key" {
-  name     = "%s"
+  name     = "%{kms_key_name}"
   key_ring = data.google_kms_key_ring.ring.id
 }
 
 resource "google_service_account" "test" {
-  account_id   = "test-sa-%s"
+  account_id   = "tf-test-sa-%{random_suffix}"
   display_name = "KMS Ops Account"
 }
 
@@ -3135,7 +3349,7 @@ data "google_compute_image" "debian" {
 }
 
 resource "google_compute_disk" "persistent" {
-  name  = "debian-disk"
+  name  = "tf-test-debian-disk-%{random_suffix}"
   image = data.google_compute_image.debian.self_link
   size  = 10
   type  = "pd-ssd"
@@ -3143,7 +3357,7 @@ resource "google_compute_disk" "persistent" {
 }
 
 resource "google_compute_snapshot" "snapshot" {
-  name        = "my-snapshot"
+  name        = "tf-test-my-snapshot-%{random_suffix}"
   source_disk = google_compute_disk.persistent.id
   zone        = "us-central1-a"
   snapshot_encryption_key {
@@ -3153,7 +3367,7 @@ resource "google_compute_snapshot" "snapshot" {
 }
 
 resource "google_compute_instance_template" "template" {
-  name           = "tf-test-instance-template-%s"
+  name           = "tf-test-instance-template-%{random_suffix}"
   machine_type   = "e2-medium"
 
   disk {
@@ -3170,23 +3384,23 @@ resource "google_compute_instance_template" "template" {
     network = "default"
   }
 }
-`, kmsRingName, kmsKeyName, suffix, suffix)
+`, context)
 }
 
-func testAccComputeInstanceTemplate_sourceImageEncryptionKey(kmsRingName, kmsKeyName, suffix string) string {
-	return fmt.Sprintf(`
+func testAccComputeInstanceTemplate_sourceImageEncryptionKey(context map[string]interface{}) string {
+	return Nprintf(`
 data "google_kms_key_ring" "ring" {
-  name     = "%s"
+  name     = "%{kms_ring_name}"
   location = "us-central1"
 }
 
 data "google_kms_crypto_key" "key" {
-  name     = "%s"
+  name     = "%{kms_key_name}"
   key_ring = data.google_kms_key_ring.ring.id
 }
 
 resource "google_service_account" "test" {
-  account_id   = "tf-test-sa-%s"
+  account_id   = "tf-test-sa-%{random_suffix}"
   display_name = "KMS Ops Account"
 }
 
@@ -3212,7 +3426,7 @@ resource "google_compute_image" "image" {
 
 
 resource "google_compute_instance_template" "template" {
-  name           = "tf-test-instance-template-%s"
+  name           = "tf-test-instance-template-%{random_suffix}"
   machine_type   = "e2-medium"
 
   disk {
@@ -3229,5 +3443,5 @@ resource "google_compute_instance_template" "template" {
     network = "default"
   }
 }
-`, kmsRingName, kmsKeyName, suffix, suffix)
+`, context)
 }

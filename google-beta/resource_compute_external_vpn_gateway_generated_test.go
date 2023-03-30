@@ -24,17 +24,17 @@ import (
 )
 
 func TestAccComputeExternalVpnGateway_externalVpnGatewayExample(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeExternalVpnGatewayDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeExternalVpnGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeExternalVpnGateway_externalVpnGatewayExample(context),
@@ -158,13 +158,13 @@ func TestAccComputeExternalVpnGateway_onlyExternalVpnGatewayFullExample(t *testi
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeExternalVpnGatewayDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeExternalVpnGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeExternalVpnGateway_onlyExternalVpnGatewayFullExample(context),
@@ -206,7 +206,7 @@ func testAccCheckComputeExternalVpnGatewayDestroyProducer(t *testing.T) func(s *
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/externalVpnGateways/{{name}}")
 			if err != nil {
@@ -219,7 +219,7 @@ func testAccCheckComputeExternalVpnGatewayDestroyProducer(t *testing.T) func(s *
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ComputeExternalVpnGateway still exists at %s", url)
 			}

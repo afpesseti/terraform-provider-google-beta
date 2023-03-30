@@ -13,7 +13,7 @@ import (
 
 var jobTypes = []string{"pyspark_config", "spark_config", "hadoop_config", "hive_config", "pig_config", "sparksql_config", "presto_config"}
 
-func resourceDataprocJob() *schema.Resource {
+func ResourceDataprocJob() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDataprocJobCreate,
 		Update: resourceDataprocJobUpdate,
@@ -192,7 +192,7 @@ func resourceDataprocJobUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -284,7 +284,7 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -373,7 +373,7 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

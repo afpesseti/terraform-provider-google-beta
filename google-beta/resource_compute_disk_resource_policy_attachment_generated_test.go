@@ -27,13 +27,13 @@ func TestAccComputeDiskResourcePolicyAttachment_diskResourcePolicyAttachmentBasi
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskResourcePolicyAttachmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskResourcePolicyAttachmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDiskResourcePolicyAttachment_diskResourcePolicyAttachmentBasicExample(context),
@@ -94,7 +94,7 @@ func testAccCheckComputeDiskResourcePolicyAttachmentDestroyProducer(t *testing.T
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/zones/{{zone}}/disks/{{disk}}")
 			if err != nil {
@@ -107,7 +107,7 @@ func testAccCheckComputeDiskResourcePolicyAttachmentDestroyProducer(t *testing.T
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ComputeDiskResourcePolicyAttachment still exists at %s", url)
 			}

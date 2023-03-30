@@ -24,7 +24,7 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
-func resourceComputeNetwork() *schema.Resource {
+func ResourceComputeNetwork() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeNetworkCreate,
 		Read:   resourceComputeNetworkRead,
@@ -103,6 +103,14 @@ Note that packets larger than 1500 bytes (standard Ethernet) can be subject to T
 with an ICMP 'Fragmentation-Needed' message if the packets are routed to the Internet or other VPCs 
 with varying MTUs.`,
 			},
+			"network_firewall_policy_enforcement_order": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateEnum([]string{"BEFORE_CLASSIC_FIREWALL", "AFTER_CLASSIC_FIREWALL", ""}),
+				Description:  `Set the order that Firewall Rules and Firewall Policies are evaluated. Needs to be either 'AFTER_CLASSIC_FIREWALL' or 'BEFORE_CLASSIC_FIREWALL' Default 'AFTER_CLASSIC_FIREWALL' Default value: "AFTER_CLASSIC_FIREWALL" Possible values: ["BEFORE_CLASSIC_FIREWALL", "AFTER_CLASSIC_FIREWALL"]`,
+				Default:      "AFTER_CLASSIC_FIREWALL",
+			},
 			"routing_mode": {
 				Type:         schema.TypeString,
 				Computed:     true,
@@ -145,7 +153,7 @@ immediately after network creation. Defaults to 'false'.`,
 
 func resourceComputeNetworkCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -193,6 +201,12 @@ func resourceComputeNetworkCreate(d *schema.ResourceData, meta interface{}) erro
 	} else if v, ok := d.GetOkExists("internal_ipv6_range"); !isEmptyValue(reflect.ValueOf(internalIpv6RangeProp)) && (ok || !reflect.DeepEqual(v, internalIpv6RangeProp)) {
 		obj["internalIpv6Range"] = internalIpv6RangeProp
 	}
+	networkFirewallPolicyEnforcementOrderProp, err := expandComputeNetworkNetworkFirewallPolicyEnforcementOrder(d.Get("network_firewall_policy_enforcement_order"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("network_firewall_policy_enforcement_order"); !isEmptyValue(reflect.ValueOf(networkFirewallPolicyEnforcementOrderProp)) && (ok || !reflect.DeepEqual(v, networkFirewallPolicyEnforcementOrderProp)) {
+		obj["networkFirewallPolicyEnforcementOrder"] = networkFirewallPolicyEnforcementOrderProp
+	}
 
 	url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/global/networks")
 	if err != nil {
@@ -213,7 +227,7 @@ func resourceComputeNetworkCreate(d *schema.ResourceData, meta interface{}) erro
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Network: %s", err)
 	}
@@ -225,7 +239,7 @@ func resourceComputeNetworkCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 	d.SetId(id)
 
-	err = computeOperationWaitTime(
+	err = ComputeOperationWaitTime(
 		config, res, project, "Creating Network", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 
@@ -256,7 +270,7 @@ func resourceComputeNetworkCreate(d *schema.ResourceData, meta interface{}) erro
 				if err != nil {
 					return fmt.Errorf("Error deleting route: %s", err)
 				}
-				err = computeOperationWaitTime(config, op, project, "Deleting Route", userAgent, d.Timeout(schema.TimeoutCreate))
+				err = ComputeOperationWaitTime(config, op, project, "Deleting Route", userAgent, d.Timeout(schema.TimeoutCreate))
 				if err != nil {
 					return err
 				}
@@ -274,7 +288,7 @@ func resourceComputeNetworkCreate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceComputeNetworkRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -297,7 +311,7 @@ func resourceComputeNetworkRead(d *schema.ResourceData, meta interface{}) error 
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ComputeNetwork %q", d.Id()))
 	}
@@ -348,6 +362,9 @@ func resourceComputeNetworkRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("internal_ipv6_range", flattenComputeNetworkInternalIpv6Range(res["internalIpv6Range"], d, config)); err != nil {
 		return fmt.Errorf("Error reading Network: %s", err)
 	}
+	if err := d.Set("network_firewall_policy_enforcement_order", flattenComputeNetworkNetworkFirewallPolicyEnforcementOrder(res["networkFirewallPolicyEnforcementOrder"], d, config)); err != nil {
+		return fmt.Errorf("Error reading Network: %s", err)
+	}
 	if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
 		return fmt.Errorf("Error reading Network: %s", err)
 	}
@@ -357,7 +374,7 @@ func resourceComputeNetworkRead(d *schema.ResourceData, meta interface{}) error 
 
 func resourceComputeNetworkUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -392,14 +409,14 @@ func resourceComputeNetworkUpdate(d *schema.ResourceData, meta interface{}) erro
 			billingProject = bp
 		}
 
-		res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+		res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return fmt.Errorf("Error updating Network %q: %s", d.Id(), err)
 		} else {
 			log.Printf("[DEBUG] Finished updating Network %q: %#v", d.Id(), res)
 		}
 
-		err = computeOperationWaitTime(
+		err = ComputeOperationWaitTime(
 			config, res, project, "Updating Network", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
@@ -414,7 +431,7 @@ func resourceComputeNetworkUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceComputeNetworkDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -440,12 +457,12 @@ func resourceComputeNetworkDelete(d *schema.ResourceData, meta interface{}) erro
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "Network")
 	}
 
-	err = computeOperationWaitTime(
+	err = ComputeOperationWaitTime(
 		config, res, project, "Deleting Network", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
@@ -518,7 +535,7 @@ func flattenComputeNetworkRoutingConfigRoutingMode(v interface{}, d *schema.Reso
 func flattenComputeNetworkMtu(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -537,6 +554,10 @@ func flattenComputeNetworkEnableUlaInternalIpv6(v interface{}, d *schema.Resourc
 }
 
 func flattenComputeNetworkInternalIpv6Range(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	return v
+}
+
+func flattenComputeNetworkNetworkFirewallPolicyEnforcementOrder(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
@@ -577,5 +598,9 @@ func expandComputeNetworkEnableUlaInternalIpv6(v interface{}, d TerraformResourc
 }
 
 func expandComputeNetworkInternalIpv6Range(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeNetworkNetworkFirewallPolicyEnforcementOrder(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }

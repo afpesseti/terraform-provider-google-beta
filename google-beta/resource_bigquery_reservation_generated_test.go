@@ -27,13 +27,13 @@ func TestAccBigqueryReservationReservation_bigqueryReservationBasicExample(t *te
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBigqueryReservationReservationDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryReservationReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryReservationReservation_bigqueryReservationBasicExample(context),
@@ -52,12 +52,16 @@ func testAccBigqueryReservationReservation_bigqueryReservationBasicExample(conte
 	return Nprintf(`
 resource "google_bigquery_reservation" "reservation" {
 	name           = "tf-test-my-reservation%{random_suffix}"
-	location       = "asia-northeast1"
+	location       = "us-west2"
 	// Set to 0 for testing purposes
 	// In reality this would be larger than zero
 	slot_capacity     = 0
-	ignore_idle_slots = false
+	edition = "STANDARD"
+	ignore_idle_slots = true
 	concurrency       = 0
+	autoscale {
+   	  max_slots = 100
+    }
 }
 `, context)
 }
@@ -72,7 +76,7 @@ func testAccCheckBigqueryReservationReservationDestroyProducer(t *testing.T) fun
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{BigqueryReservationBasePath}}projects/{{project}}/locations/{{location}}/reservations/{{name}}")
 			if err != nil {
@@ -85,7 +89,7 @@ func testAccCheckBigqueryReservationReservationDestroyProducer(t *testing.T) fun
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("BigqueryReservationReservation still exists at %s", url)
 			}

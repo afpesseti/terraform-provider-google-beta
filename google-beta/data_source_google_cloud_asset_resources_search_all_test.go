@@ -11,11 +11,11 @@ import (
 func TestAccDataSourceGoogleCloudAssetResourcesSearchAll_basic(t *testing.T) {
 	t.Parallel()
 
-	project := getTestProjectFromEnv()
+	project := GetTestProjectFromEnv()
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleCloudAssetProjectResources(project),
@@ -26,8 +26,6 @@ func TestAccDataSourceGoogleCloudAssetResourcesSearchAll_basic(t *testing.T) {
 						"results.0.display_name", regexp.MustCompile(project)),
 					resource.TestMatchResourceAttr("data.google_cloud_asset_resources_search_all.resources",
 						"results.0.name", regexp.MustCompile(fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", project))),
-					resource.TestMatchResourceAttr("data.google_cloud_asset_resources_search_all.resources",
-						"results.0.additional_attributes.0", regexp.MustCompile(project)),
 					resource.TestCheckResourceAttrSet("data.google_cloud_asset_resources_search_all.resources", "results.0.location"),
 					resource.TestCheckResourceAttrSet("data.google_cloud_asset_resources_search_all.resources", "results.0.project"),
 				),

@@ -517,6 +517,11 @@ The following arguments are supported:
   TCPSocket specifies an action involving a TCP port. This field is not supported in liveness probe currently.
   Structure is [documented below](#nested_tcp_socket).
 
+* `grpc` -
+  (Optional)
+  GRPC specifies an action involving a GRPC port.
+  Structure is [documented below](#nested_grpc).
+
 
 <a name="nested_http_get"></a>The `http_get` block supports:
 
@@ -545,6 +550,18 @@ The following arguments are supported:
 * `port` -
   (Optional)
   Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+
+<a name="nested_grpc"></a>The `grpc` block supports:
+
+* `port` -
+  (Optional)
+  Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to the same value as container.ports[0].containerPort.
+
+* `service` -
+  (Optional)
+  The name of the service to place in the gRPC HealthCheckRequest
+  (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+  If this is not specified, the default behavior is defined by gRPC.
 
 <a name="nested_startup_probe"></a>The `startup_probe` block supports:
 
@@ -574,6 +591,11 @@ The following arguments are supported:
   TCPSocket specifies an action involving a TCP port. Exactly one of HTTPGet or TCPSocket must be specified.
   Structure is [documented below](#nested_tcp_socket).
 
+* `grpc` -
+  (Optional)
+  GRPC specifies an action involving a GRPC port.
+  Structure is [documented below](#nested_grpc).
+
 
 <a name="nested_http_get"></a>The `http_get` block supports:
 
@@ -602,6 +624,18 @@ The following arguments are supported:
 * `port` -
   (Optional)
   Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to 8080.
+
+<a name="nested_grpc"></a>The `grpc` block supports:
+
+* `port` -
+  (Optional)
+  Port number to access on the container. Number must be in the range 1 to 65535. If not specified, defaults to the same value as container.ports[0].containerPort.
+
+* `service` -
+  (Optional)
+  The name of the service to place in the gRPC HealthCheckRequest
+  (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+  If this is not specified, the default behavior is defined by gRPC.
 
 <a name="nested_volumes"></a>The `volumes` block supports:
 
@@ -785,71 +819,92 @@ In addition to the arguments listed above, the following computed attributes are
 <a name="nested_terminal_condition"></a>The `terminal_condition` block contains:
 
 * `type` -
+  (Output)
   type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
 
 * `state` -
+  (Output)
   State of the condition.
 
 * `message` -
+  (Output)
   Human readable message indicating details about the current status.
 
 * `last_transition_time` -
+  (Output)
   Last time the condition transitioned from one status to another.
 
 * `severity` -
+  (Output)
   How to interpret failures of this condition, one of Error, Warning, Info
 
 * `reason` -
+  (Output)
   A common (service-level) reason for this condition.
 
 * `revision_reason` -
+  (Output)
   A reason for the revision condition.
 
 * `execution_reason` -
+  (Output)
   A reason for the execution condition.
 
 <a name="nested_conditions"></a>The `conditions` block contains:
 
 * `type` -
+  (Output)
   type is used to communicate the status of the reconciliation process. See also: https://github.com/knative/serving/blob/main/docs/spec/errors.md#error-conditions-and-reporting Types common to all resources include: * "Ready": True when the Resource is ready.
 
 * `state` -
+  (Output)
   State of the condition.
 
 * `message` -
+  (Output)
   Human readable message indicating details about the current status.
 
 * `last_transition_time` -
+  (Output)
   Last time the condition transitioned from one status to another.
   A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
 
 * `severity` -
+  (Output)
   How to interpret failures of this condition, one of Error, Warning, Info
 
 * `reason` -
+  (Output)
   A common (service-level) reason for this condition.
 
 * `revision_reason` -
+  (Output)
   A reason for the revision condition.
 
 * `execution_reason` -
+  (Output)
   A reason for the execution condition.
 
 <a name="nested_traffic_statuses"></a>The `traffic_statuses` block contains:
 
 * `type` -
+  (Output)
   The allocation type for this traffic target.
 
 * `revision` -
+  (Output)
   Revision to which this traffic is sent.
 
 * `percent` -
+  (Output)
   Specifies percent of the traffic to this Revision.
 
 * `tag` -
+  (Output)
   Indicates the string used in the URI to exclusively reference this target.
 
 * `uri` -
+  (Output)
   Displays the target URI.
 
 ## Timeouts

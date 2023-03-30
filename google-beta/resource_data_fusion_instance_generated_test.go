@@ -28,13 +28,13 @@ func TestAccDataFusionInstance_dataFusionInstanceBasicExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"prober_test_run": `options = { prober_test_run = "true" }`,
-		"random_suffix":   randString(t, 10),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataFusionInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstance_dataFusionInstanceBasicExample(context),
@@ -65,13 +65,13 @@ func TestAccDataFusionInstance_dataFusionInstanceFullExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"prober_test_run": `options = { prober_test_run = "true" }`,
-		"random_suffix":   randString(t, 10),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataFusionInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstance_dataFusionInstanceFullExample(context),
@@ -97,7 +97,6 @@ resource "google_data_fusion_instance" "extended_instance" {
   enable_stackdriver_logging    = true
   enable_stackdriver_monitoring = true
   private_instance              = true
-  version                       = "6.6.0"
   dataproc_service_account      = data.google_app_engine_default_service_account.default.email
 
   labels = {
@@ -109,6 +108,10 @@ resource "google_data_fusion_instance" "extended_instance" {
     ip_allocation = "${google_compute_global_address.private_ip_alloc.address}/${google_compute_global_address.private_ip_alloc.prefix_length}"
   }
 
+  accelerators {
+    accelerator_type = "CDC"
+    state = "ENABLED"
+  }
   %{prober_test_run}
 }
 
@@ -133,13 +136,13 @@ func TestAccDataFusionInstance_dataFusionInstanceCmekExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataFusionInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstance_dataFusionInstanceCmekExample(context),
@@ -196,13 +199,13 @@ func TestAccDataFusionInstance_dataFusionInstanceEnterpriseExample(t *testing.T)
 
 	context := map[string]interface{}{
 		"prober_test_run": `options = { prober_test_run = "true" }`,
-		"random_suffix":   randString(t, 10),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataFusionInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstance_dataFusionInstanceEnterpriseExample(context),
@@ -233,13 +236,13 @@ func TestAccDataFusionInstance_dataFusionInstanceEventExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataFusionInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstance_dataFusionInstanceEventExample(context),
@@ -260,7 +263,6 @@ resource "google_data_fusion_instance" "event" {
   name    = "tf-test-my-instance%{random_suffix}"
   region  = "us-central1"
   type    = "BASIC"
-  version = "6.7.0"
 
   event_publish_config {
     enabled = true
@@ -278,13 +280,13 @@ func TestAccDataFusionInstance_dataFusionInstanceZoneExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataFusionInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataFusionInstance_dataFusionInstanceZoneExample(context),
@@ -320,7 +322,7 @@ func testAccCheckDataFusionInstanceDestroyProducer(t *testing.T) func(s *terrafo
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{DataFusionBasePath}}projects/{{project}}/locations/{{region}}/instances/{{name}}")
 			if err != nil {
@@ -333,7 +335,7 @@ func testAccCheckDataFusionInstanceDestroyProducer(t *testing.T) func(s *terrafo
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("DataFusionInstance still exists at %s", url)
 			}

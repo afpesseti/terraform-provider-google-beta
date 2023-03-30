@@ -22,18 +22,18 @@ const (
 func TestAccDataflowJob_basic(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	zone := "us-central1-f"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_zone(bucket, job, zone),
@@ -54,18 +54,18 @@ func TestAccDataflowJob_basic(t *testing.T) {
 func TestAccDataflowJobSkipWait_basic(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	zone := "us-central1-f"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJobSkipWait_zone(bucket, job, zone),
@@ -86,17 +86,17 @@ func TestAccDataflowJobSkipWait_basic(t *testing.T) {
 func TestAccDataflowJob_withRegion(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobRegionDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobRegionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_region(bucket, job),
@@ -117,18 +117,18 @@ func TestAccDataflowJob_withRegion(t *testing.T) {
 func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	accountId := "tf-test-dataflow-sa" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_serviceAccount(bucket, job, accountId),
@@ -150,18 +150,18 @@ func TestAccDataflowJob_withServiceAccount(t *testing.T) {
 func TestAccDataflowJob_withNetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_network(bucket, job, network),
@@ -183,19 +183,19 @@ func TestAccDataflowJob_withNetwork(t *testing.T) {
 func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	network := "tf-test-dataflow-net" + randStr
 	subnetwork := "tf-test-dataflow-subnet" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_subnetwork(bucket, job, network, subnetwork),
@@ -217,19 +217,19 @@ func TestAccDataflowJob_withSubnetwork(t *testing.T) {
 func TestAccDataflowJob_withLabels(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	key := "my-label"
 	value := "my-value"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_labels(bucket, job, key, value),
@@ -251,17 +251,17 @@ func TestAccDataflowJob_withLabels(t *testing.T) {
 func TestAccDataflowJob_withIpConfig(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_ipConfig(bucket, job),
@@ -282,20 +282,20 @@ func TestAccDataflowJob_withIpConfig(t *testing.T) {
 func TestAccDataflowJob_withKmsKey(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	key_ring := "tf-test-dataflow-kms-ring-" + randStr
 	crypto_key := "tf-test-dataflow-kms-key-" + randStr
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	zone := "us-central1-f"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_kms(key_ring, crypto_key, bucket, job, zone),
@@ -315,18 +315,18 @@ func TestAccDataflowJob_withKmsKey(t *testing.T) {
 func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	randStr := randString(t, 10)
+	randStr := RandString(t, 10)
 	bucket := "tf-test-dataflow-gcs-" + randStr
 	job := "tf-test-dataflow-job-" + randStr
 	additionalExperiments := []string{"enable_stackdriver_agent_metrics", "shuffle_mode=service"}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_additionalExperiments(bucket, job, additionalExperiments),
@@ -348,14 +348,14 @@ func TestAccDataflowJobWithAdditionalExperiments(t *testing.T) {
 func TestAccDataflowJob_streamUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	suffix := randString(t, 10)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	suffix := RandString(t, 10)
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_updateStream(suffix, "google_storage_bucket.bucket1.url"),
@@ -382,17 +382,17 @@ func TestAccDataflowJob_streamUpdate(t *testing.T) {
 func TestAccDataflowJob_virtualUpdate(t *testing.T) {
 	// Dataflow responses include serialized java classes and bash commands
 	// This makes body comparison infeasible
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
-	suffix := randString(t, 10)
+	suffix := RandString(t, 10)
 
 	// If the update is virtual-only, the ID should remain the same after updating.
 	var id string
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDataflowJobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowJob_virtualUpdate(suffix, "drain"),
@@ -425,8 +425,8 @@ func testAccCheckDataflowJobDestroyProducer(t *testing.T) func(s *terraform.Stat
 				continue
 			}
 
-			config := googleProviderConfig(t)
-			job, err := config.NewDataflowClient(config.userAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).Do()
+			config := GoogleProviderConfig(t)
+			job, err := config.NewDataflowClient(config.UserAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).Do()
 			if job != nil {
 				var ok bool
 				skipWait, err := strconv.ParseBool(rs.Primary.Attributes["skip_wait_on_job_termination"])
@@ -455,8 +455,8 @@ func testAccCheckDataflowJobRegionDestroyProducer(t *testing.T) func(s *terrafor
 			if rs.Type != "google_dataflow_job" {
 				continue
 			}
-			config := googleProviderConfig(t)
-			job, err := config.NewDataflowClient(config.userAgent).Projects.Locations.Jobs.Get(config.Project, "us-central1", rs.Primary.ID).Do()
+			config := GoogleProviderConfig(t)
+			job, err := config.NewDataflowClient(config.UserAgent).Projects.Locations.Jobs.Get(config.Project, "us-central1", rs.Primary.ID).Do()
 			if job != nil {
 				var ok bool
 				skipWait, err := strconv.ParseBool(rs.Primary.Attributes["skip_wait_on_job_termination"])
@@ -489,8 +489,8 @@ func testAccDataflowJobExists(t *testing.T, resource string) resource.TestCheckF
 			return fmt.Errorf("no ID is set")
 		}
 
-		config := googleProviderConfig(t)
-		_, err := config.NewDataflowClient(config.userAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).Do()
+		config := GoogleProviderConfig(t)
+		_, err := config.NewDataflowClient(config.UserAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).Do()
 		if err != nil {
 			return fmt.Errorf("could not confirm Dataflow Job %q exists: %v", rs.Primary.ID, err)
 		}
@@ -587,12 +587,12 @@ func testAccDataflowJobGetGeneratedInstanceTemplate(t *testing.T, s *terraform.S
 	}
 	filter := fmt.Sprintf("properties.labels.dataflow_job_id = %s", rs.Primary.ID)
 
-	config := googleProviderConfig(t)
+	config := GoogleProviderConfig(t)
 
 	var instanceTemplate *compute.InstanceTemplate
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-		instanceTemplates, rerr := config.NewComputeClient(config.userAgent).InstanceTemplates.
+		instanceTemplates, rerr := config.NewComputeClient(config.UserAgent).InstanceTemplates.
 			List(config.Project).
 			Filter(filter).
 			MaxResults(2).
@@ -628,8 +628,8 @@ func testAccRegionalDataflowJobExists(t *testing.T, res, region string) resource
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := googleProviderConfig(t)
-		_, err := config.NewDataflowClient(config.userAgent).Projects.Locations.Jobs.Get(config.Project, region, rs.Primary.ID).Do()
+		config := GoogleProviderConfig(t)
+		_, err := config.NewDataflowClient(config.UserAgent).Projects.Locations.Jobs.Get(config.Project, region, rs.Primary.ID).Do()
 		if err != nil {
 			return fmt.Errorf("Job does not exist")
 		}
@@ -648,9 +648,9 @@ func testAccDataflowJobHasLabels(t *testing.T, res, key string) resource.TestChe
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		job, err := config.NewDataflowClient(config.userAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).Do()
+		job, err := config.NewDataflowClient(config.UserAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).Do()
 		if err != nil {
 			return fmt.Errorf("dataflow job does not exist")
 		}
@@ -673,9 +673,9 @@ func testAccDataflowJobHasExperiments(t *testing.T, res string, experiments []st
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		job, err := config.NewDataflowClient(config.userAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
+		job, err := config.NewDataflowClient(config.UserAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
 		if err != nil {
 			return fmt.Errorf("dataflow job does not exist")
 		}
@@ -706,9 +706,9 @@ func testAccDataflowJobHasTempLocation(t *testing.T, res, targetLocation string)
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("No ID is set")
 		}
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
-		job, err := config.NewDataflowClient(config.userAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
+		job, err := config.NewDataflowClient(config.UserAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
 		if err != nil {
 			return fmt.Errorf("dataflow job does not exist")
 		}

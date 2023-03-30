@@ -27,13 +27,13 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApiGatewayApiConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApiGatewayApiConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApiGatewayApiConfig_apigatewayApiConfigBasicExample(context),
@@ -52,13 +52,13 @@ func testAccApiGatewayApiConfig_apigatewayApiConfigBasicExample(context map[stri
 	return Nprintf(`
 resource "google_api_gateway_api" "api_cfg" {
   provider = google-beta
-  api_id = "tf-test-api-cfg%{random_suffix}"
+  api_id = "tf-test-my-api%{random_suffix}"
 }
 
 resource "google_api_gateway_api_config" "api_cfg" {
   provider = google-beta
   api = google_api_gateway_api.api_cfg.api_id
-  api_config_id = "cfg%{random_suffix}"
+  api_config_id = "tf-test-my-config%{random_suffix}"
 
   openapi_documents {
     document {
@@ -77,13 +77,13 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigFullExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApiGatewayApiConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApiGatewayApiConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApiGatewayApiConfig_apigatewayApiConfigFullExample(context),
@@ -102,13 +102,13 @@ func testAccApiGatewayApiConfig_apigatewayApiConfigFullExample(context map[strin
 	return Nprintf(`
 resource "google_api_gateway_api" "api_cfg" {
   provider = google-beta
-  api_id = "tf-test-api-cfg%{random_suffix}"
+  api_id = "tf-test-my-api%{random_suffix}"
 }
 
 resource "google_api_gateway_api_config" "api_cfg" {
   provider = google-beta
   api = google_api_gateway_api.api_cfg.api_id
-  api_config_id = "tf-test-api-cfg%{random_suffix}"
+  api_config_id = "tf-test-my-config%{random_suffix}"
   display_name = "MM Dev API Config"
   labels = {
     environment = "dev"
@@ -128,13 +128,13 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigGrpcExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApiGatewayApiConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApiGatewayApiConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApiGatewayApiConfig_apigatewayApiConfigGrpcExample(context),
@@ -153,13 +153,13 @@ func testAccApiGatewayApiConfig_apigatewayApiConfigGrpcExample(context map[strin
 	return Nprintf(`
 resource "google_api_gateway_api" "api_cfg" {
   provider = google-beta
-  api_id = "tf-test-api-cfg%{random_suffix}"
+  api_id = "tf-test-my-api%{random_suffix}"
 }
 
 resource "google_api_gateway_api_config" "api_cfg" {
   provider = google-beta
   api = google_api_gateway_api.api_cfg.api_id
-  api_config_id = "cfg%{random_suffix}"
+  api_config_id = "tf-test-my-config%{random_suffix}"
 
   grpc_services {
     file_descriptor_set {
@@ -200,13 +200,13 @@ func TestAccApiGatewayApiConfig_apigatewayApiConfigGrpcFullExample(t *testing.T)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApiGatewayApiConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApiGatewayApiConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApiGatewayApiConfig_apigatewayApiConfigGrpcFullExample(context),
@@ -225,13 +225,13 @@ func testAccApiGatewayApiConfig_apigatewayApiConfigGrpcFullExample(context map[s
 	return Nprintf(`
 resource "google_api_gateway_api" "api_cfg" {
   provider = google-beta
-  api_id = "tf-test-api-cfg%{random_suffix}"
+  api_id = "tf-test-my-api%{random_suffix}"
 }
 
 resource "google_api_gateway_api_config" "api_cfg" {
   provider = google-beta
   api = google_api_gateway_api.api_cfg.api_id
-  api_config_id = "cfg%{random_suffix}"
+  api_config_id = "tf-test-my-config%{random_suffix}"
 
   grpc_services {
     file_descriptor_set {
@@ -282,7 +282,7 @@ func testAccCheckApiGatewayApiConfigDestroyProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ApiGatewayBasePath}}projects/{{project}}/locations/global/apis/{{api}}/configs/{{api_config_id}}")
 			if err != nil {
@@ -295,7 +295,7 @@ func testAccCheckApiGatewayApiConfigDestroyProducer(t *testing.T) func(s *terraf
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ApiGatewayApiConfig still exists at %s", url)
 			}

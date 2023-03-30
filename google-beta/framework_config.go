@@ -26,14 +26,16 @@ import (
 
 // Provider methods
 
-// ConfigureWithData handles the bulk of configuring the provider
+// LoadAndValidateFramework handles the bulk of configuring the provider
 // it is pulled out so that we can manually call this from our testing provider as well
-func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
+func (p *frameworkProvider) LoadAndValidateFramework(ctx context.Context, data ProviderModel, tfVersion string, diags *diag.Diagnostics) {
 	// Set defaults if needed
 	p.HandleDefaults(ctx, &data, diags)
 	if diags.HasError() {
 		return
 	}
+
+	p.context = ctx
 
 	// Handle User Agent string
 	p.userAgent = CompileUserAgentString(ctx, "terraform-provider-google-beta", tfVersion, p.version)
@@ -63,6 +65,8 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	p.AccessApprovalBasePath = data.AccessApprovalCustomEndpoint.ValueString()
 	p.AccessContextManagerBasePath = data.AccessContextManagerCustomEndpoint.ValueString()
 	p.ActiveDirectoryBasePath = data.ActiveDirectoryCustomEndpoint.ValueString()
+	p.AlloydbBasePath = data.AlloydbCustomEndpoint.ValueString()
+	p.ApiGatewayBasePath = data.ApiGatewayCustomEndpoint.ValueString()
 	p.ApigeeBasePath = data.ApigeeCustomEndpoint.ValueString()
 	p.AppEngineBasePath = data.AppEngineCustomEndpoint.ValueString()
 	p.ArtifactRegistryBasePath = data.ArtifactRegistryCustomEndpoint.ValueString()
@@ -70,6 +74,7 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	p.BigQueryBasePath = data.BigQueryCustomEndpoint.ValueString()
 	p.BigqueryAnalyticsHubBasePath = data.BigqueryAnalyticsHubCustomEndpoint.ValueString()
 	p.BigqueryConnectionBasePath = data.BigqueryConnectionCustomEndpoint.ValueString()
+	p.BigqueryDatapolicyBasePath = data.BigqueryDatapolicyCustomEndpoint.ValueString()
 	p.BigqueryDataTransferBasePath = data.BigqueryDataTransferCustomEndpoint.ValueString()
 	p.BigqueryReservationBasePath = data.BigqueryReservationCustomEndpoint.ValueString()
 	p.BigtableBasePath = data.BigtableCustomEndpoint.ValueString()
@@ -78,6 +83,7 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	p.CertificateManagerBasePath = data.CertificateManagerCustomEndpoint.ValueString()
 	p.CloudAssetBasePath = data.CloudAssetCustomEndpoint.ValueString()
 	p.CloudBuildBasePath = data.CloudBuildCustomEndpoint.ValueString()
+	p.Cloudbuildv2BasePath = data.Cloudbuildv2CustomEndpoint.ValueString()
 	p.CloudFunctionsBasePath = data.CloudFunctionsCustomEndpoint.ValueString()
 	p.Cloudfunctions2BasePath = data.Cloudfunctions2CustomEndpoint.ValueString()
 	p.CloudIdentityBasePath = data.CloudIdentityCustomEndpoint.ValueString()
@@ -91,8 +97,10 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	p.ContainerAnalysisBasePath = data.ContainerAnalysisCustomEndpoint.ValueString()
 	p.ContainerAttachedBasePath = data.ContainerAttachedCustomEndpoint.ValueString()
 	p.DataCatalogBasePath = data.DataCatalogCustomEndpoint.ValueString()
+	p.DataformBasePath = data.DataformCustomEndpoint.ValueString()
 	p.DataFusionBasePath = data.DataFusionCustomEndpoint.ValueString()
 	p.DataLossPreventionBasePath = data.DataLossPreventionCustomEndpoint.ValueString()
+	p.DataplexBasePath = data.DataplexCustomEndpoint.ValueString()
 	p.DataprocBasePath = data.DataprocCustomEndpoint.ValueString()
 	p.DataprocMetastoreBasePath = data.DataprocMetastoreCustomEndpoint.ValueString()
 	p.DatastoreBasePath = data.DatastoreCustomEndpoint.ValueString()
@@ -104,6 +112,10 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	p.DocumentAIBasePath = data.DocumentAICustomEndpoint.ValueString()
 	p.EssentialContactsBasePath = data.EssentialContactsCustomEndpoint.ValueString()
 	p.FilestoreBasePath = data.FilestoreCustomEndpoint.ValueString()
+	p.FirebaseBasePath = data.FirebaseCustomEndpoint.ValueString()
+	p.FirebaseDatabaseBasePath = data.FirebaseDatabaseCustomEndpoint.ValueString()
+	p.FirebaseHostingBasePath = data.FirebaseHostingCustomEndpoint.ValueString()
+	p.FirebaseStorageBasePath = data.FirebaseStorageCustomEndpoint.ValueString()
 	p.FirestoreBasePath = data.FirestoreCustomEndpoint.ValueString()
 	p.GameServicesBasePath = data.GameServicesCustomEndpoint.ValueString()
 	p.GKEBackupBasePath = data.GKEBackupCustomEndpoint.ValueString()
@@ -122,6 +134,7 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	p.NetworkManagementBasePath = data.NetworkManagementCustomEndpoint.ValueString()
 	p.NetworkServicesBasePath = data.NetworkServicesCustomEndpoint.ValueString()
 	p.NotebooksBasePath = data.NotebooksCustomEndpoint.ValueString()
+	p.OrgPolicyBasePath = data.OrgPolicyCustomEndpoint.ValueString()
 	p.OSConfigBasePath = data.OSConfigCustomEndpoint.ValueString()
 	p.OSLoginBasePath = data.OSLoginCustomEndpoint.ValueString()
 	p.PrivatecaBasePath = data.PrivatecaCustomEndpoint.ValueString()
@@ -129,8 +142,11 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	p.PubsubLiteBasePath = data.PubsubLiteCustomEndpoint.ValueString()
 	p.RedisBasePath = data.RedisCustomEndpoint.ValueString()
 	p.ResourceManagerBasePath = data.ResourceManagerCustomEndpoint.ValueString()
+	p.RuntimeConfigBasePath = data.RuntimeConfigCustomEndpoint.ValueString()
 	p.SecretManagerBasePath = data.SecretManagerCustomEndpoint.ValueString()
 	p.SecurityCenterBasePath = data.SecurityCenterCustomEndpoint.ValueString()
+	p.SecurityScannerBasePath = data.SecurityScannerCustomEndpoint.ValueString()
+	p.ServiceDirectoryBasePath = data.ServiceDirectoryCustomEndpoint.ValueString()
 	p.ServiceManagementBasePath = data.ServiceManagementCustomEndpoint.ValueString()
 	p.ServiceUsageBasePath = data.ServiceUsageCustomEndpoint.ValueString()
 	p.SourceRepoBasePath = data.SourceRepoCustomEndpoint.ValueString()
@@ -143,9 +159,11 @@ func (p *frameworkProvider) ConfigureWithData(ctx context.Context, data Provider
 	p.VertexAIBasePath = data.VertexAICustomEndpoint.ValueString()
 	p.VPCAccessBasePath = data.VPCAccessCustomEndpoint.ValueString()
 	p.WorkflowsBasePath = data.WorkflowsCustomEndpoint.ValueString()
+	p.WorkstationsBasePath = data.WorkstationsCustomEndpoint.ValueString()
 
 	p.context = ctx
-	p.region = data.Region.String()
+	p.region = data.Region
+	p.zone = data.Zone
 	p.pollInterval = 10 * time.Second
 	p.project = data.Project
 	p.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", ctx, batchingConfig)
@@ -566,6 +584,14 @@ func (p *frameworkProvider) HandleDefaults(ctx context.Context, data *ProviderMo
 		}, DefaultBasePaths[DataLossPreventionBasePathKey])
 		if customEndpoint != nil {
 			data.DataLossPreventionCustomEndpoint = types.StringValue(customEndpoint.(string))
+		}
+	}
+	if data.DataplexCustomEndpoint.IsNull() {
+		customEndpoint := MultiEnvDefault([]string{
+			"GOOGLE_DATAPLEX_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[DataplexBasePathKey])
+		if customEndpoint != nil {
+			data.DataplexCustomEndpoint = types.StringValue(customEndpoint.(string))
 		}
 	}
 	if data.DataprocCustomEndpoint.IsNull() {
@@ -1296,6 +1322,7 @@ func (p *frameworkProvider) SetupClient(ctx context.Context, data ProviderModel,
 	}
 	client.Timeout = timeout
 
+	p.tokenSource = tokenSource
 	p.client = client
 }
 
@@ -1320,6 +1347,10 @@ func (p *frameworkProvider) SetupGrpcLogging() {
 }
 
 func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data ProviderModel, diags *diag.Diagnostics) {
+	// GetCurrentUserEmailFramework doesn't pass an error back from logGoogleIdentities, so we want
+	// a separate diagnostics here
+	var d diag.Diagnostics
+
 	if data.ImpersonateServiceAccount.IsNull() {
 
 		tokenSource := GetTokenSource(ctx, data, true, diags)
@@ -1329,10 +1360,9 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 
 		p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
 
-		email := getCurrUserEmail(p, p.userAgent, diags)
-		if diags.HasError() {
+		email := GetCurrentUserEmailFramework(p, p.userAgent, &d)
+		if d.HasError() {
 			tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
-			return
 		}
 
 		tflog.Info(ctx, fmt.Sprintf("Terraform is using this identity: %s", email))
@@ -1346,10 +1376,9 @@ func (p *frameworkProvider) logGoogleIdentities(ctx context.Context, data Provid
 	}
 
 	p.client = oauth2.NewClient(ctx, tokenSource) // p.client isn't initialised fully when this code is called.
-	email := getCurrUserEmail(p, p.userAgent, diags)
-	if diags.HasError() {
+	email := GetCurrentUserEmailFramework(p, p.userAgent, &d)
+	if d.HasError() {
 		tflog.Info(ctx, "error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope?")
-		return
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Terraform is configured with service account impersonation, original identity: %s, impersonated identity: %s", email, data.ImpersonateServiceAccount.ValueString()))
@@ -1476,8 +1505,8 @@ func GetCredentials(ctx context.Context, data ProviderModel, initialCredentialsO
 // provider configuration set for batching
 func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnostics) *batchingConfig {
 	bc := &batchingConfig{
-		sendAfter:      time.Second * defaultBatchSendIntervalSec,
-		enableBatching: true,
+		SendAfter:      time.Second * DefaultBatchSendIntervalSec,
+		EnableBatching: true,
 	}
 
 	if data.IsNull() {
@@ -1497,10 +1526,10 @@ func GetBatchingConfig(ctx context.Context, data types.List, diags *diag.Diagnos
 		return bc
 	}
 
-	bc.sendAfter = sendAfter
+	bc.SendAfter = sendAfter
 
 	if !pbConfigs[0].EnableBatching.IsNull() {
-		bc.enableBatching = pbConfigs[0].EnableBatching.ValueBool()
+		bc.EnableBatching = pbConfigs[0].EnableBatching.ValueBool()
 	}
 
 	return bc

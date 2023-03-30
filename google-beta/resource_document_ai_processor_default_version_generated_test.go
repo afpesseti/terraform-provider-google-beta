@@ -24,12 +24,12 @@ func TestAccDocumentAIProcessorDefaultVersion_documentaiDefaultVersionExample(t 
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDocumentAIProcessorDefaultVersion_documentaiDefaultVersionExample(context),
@@ -54,7 +54,14 @@ resource "google_document_ai_processor" "processor" {
 
 resource "google_document_ai_processor_default_version" "processor" {
   processor = google_document_ai_processor.processor.id
-  version = "${google_document_ai_processor.processor.id}/processorVersions/pretrained-next"
+  version = "${google_document_ai_processor.processor.id}/processorVersions/stable"
+
+  lifecycle {
+    ignore_changes = [
+      # Using "stable" or "rc" will return a specific version from the API; suppressing the diff.
+      version,
+    ]
+  }
 }
 `, context)
 }

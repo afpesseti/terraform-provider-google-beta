@@ -203,7 +203,7 @@ resource "google_datastream_stream" "default" {
         gcs_destination_config {
             path = "mydata"
             file_rotation_mb = 200
-            file_rotation_interval = "900s"
+            file_rotation_interval = "60s"
             json_file_format {
                 schema_file_format = "NO_SCHEMA_FILE"
                 compression = "GZIP"
@@ -410,6 +410,122 @@ resource "google_datastream_stream" "stream5" {
                 }
             }
         }
+    }
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_working_dir=datastream_stream_postgresql_bigquery_dataset_id&cloudshell_image=gcr.io%2Fgraphite-cloud-shell-images%2Fterraform%3Alatest&open_in_editor=main.tf&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Datastream Stream Postgresql Bigquery Dataset
+
+
+```hcl
+
+resource "google_bigquery_dataset" "postgres" {
+  dataset_id    = "postgres%{random_suffix}"
+  friendly_name = "postgres"
+  description   = "Database of postgres"
+  location      = "us-central1"
+}
+
+resource "google_datastream_stream" "default" {
+  display_name  = "postgres to bigQuery"
+  location      = "us-central1"
+  stream_id     = "postgres-to-big-query%{random_suffix}"
+
+   source_config {
+    source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
+    mysql_source_config {}
+  }
+
+  destination_config {
+    destination_connection_profile = google_datastream_connection_profile.destination_connection_profile2.id
+    bigquery_destination_config {
+      data_freshness = "900s"
+      single_target_dataset {
+        dataset_id = google_bigquery_dataset.postgres.id
+      }
+    }
+  }
+
+  backfill_all {
+  }
+
+}
+
+resource "google_datastream_connection_profile" "destination_connection_profile2" {
+    display_name          = "Connection profile"
+    location              = "us-central1"
+    connection_profile_id = "tf-test-destination-profile%{random_suffix}"
+    bigquery_profile {}
+}
+
+resource "google_sql_database_instance" "instance" {
+    name             = "tf-test-my-instance%{random_suffix}"
+    database_version = "MYSQL_8_0"
+    region           = "us-central1"
+    settings {
+        tier = "db-f1-micro"
+        backup_configuration {
+            enabled            = true
+            binary_log_enabled = true
+        }
+
+        ip_configuration {
+            // Datastream IPs will vary by region.
+            authorized_networks {
+                value = "34.71.242.81"
+            }
+
+            authorized_networks {
+                value = "34.72.28.29"
+            }
+
+            authorized_networks {
+                value = "34.67.6.157"
+            }
+
+            authorized_networks {
+                value = "34.67.234.134"
+            }
+
+            authorized_networks {
+                value = "34.72.239.218"
+            }
+        }
+    }
+
+    deletion_protection  = false
+}
+
+resource "google_sql_database" "db" {
+    instance = google_sql_database_instance.instance.name
+    name     = "db"
+}
+
+resource "random_password" "pwd" {
+    length = 16
+    special = false
+}
+
+resource "google_sql_user" "user" {
+    name     = "user%{random_suffix}"
+    instance = google_sql_database_instance.instance.name
+    host     = "%"
+    password = random_password.pwd.result
+}
+
+resource "google_datastream_connection_profile" "source_connection_profile" {
+    display_name          = "Source connection profile"
+    location              = "us-central1"
+    connection_profile_id = "tf-test-source-profile%{random_suffix}"
+
+    mysql_profile {
+        hostname = google_sql_database_instance.instance.public_ip_address
+        username = google_sql_user.user.name
+        password = google_sql_user.user.password
     }
 }
 ```
@@ -650,6 +766,7 @@ The following arguments are supported:
   https://dev.mysql.com/doc/refman/8.0/en/data-types.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `collation` -
@@ -712,6 +829,7 @@ The following arguments are supported:
   https://dev.mysql.com/doc/refman/8.0/en/data-types.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `collation` -
@@ -805,24 +923,31 @@ The following arguments are supported:
   https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `precision` -
+  (Output)
   Column precision.
 
 * `scale` -
+  (Output)
   Column scale.
 
 * `encoding` -
+  (Output)
   Column encoding.
 
 * `primary_key` -
+  (Output)
   Whether or not the column represents a primary key.
 
 * `nullable` -
+  (Output)
   Whether or not the column can accept a null value.
 
 * `ordinal_position` -
+  (Output)
   The ordinal position of the column in the table.
 
 <a name="nested_exclude_objects"></a>The `exclude_objects` block supports:
@@ -869,24 +994,31 @@ The following arguments are supported:
   https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `precision` -
+  (Output)
   Column precision.
 
 * `scale` -
+  (Output)
   Column scale.
 
 * `encoding` -
+  (Output)
   Column encoding.
 
 * `primary_key` -
+  (Output)
   Whether or not the column represents a primary key.
 
 * `nullable` -
+  (Output)
   Whether or not the column can accept a null value.
 
 * `ordinal_position` -
+  (Output)
   The ordinal position of the column in the table.
 
 <a name="nested_postgresql_source_config"></a>The `postgresql_source_config` block supports:
@@ -961,12 +1093,15 @@ The following arguments are supported:
   https://www.postgresql.org/docs/current/datatype.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `precision` -
+  (Output)
   Column precision.
 
 * `scale` -
+  (Output)
   Column scale.
 
 * `primary_key` -
@@ -1025,12 +1160,15 @@ The following arguments are supported:
   https://www.postgresql.org/docs/current/datatype.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `precision` -
+  (Output)
   Column precision.
 
 * `scale` -
+  (Output)
   Column scale.
 
 * `primary_key` -
@@ -1123,7 +1261,8 @@ The following arguments are supported:
 
 * `dataset_id` -
   (Required)
-  Dataset ID in the format projects/{project}/datasets/{dataset_id}
+  Dataset ID in the format projects/{project}/datasets/{dataset_id} or
+  {project}:{dataset_id}
 
 <a name="nested_source_hierarchy_datasets"></a>The `source_hierarchy_datasets` block supports:
 
@@ -1241,6 +1380,7 @@ The following arguments are supported:
   https://dev.mysql.com/doc/refman/8.0/en/data-types.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `collation` -
@@ -1303,12 +1443,15 @@ The following arguments are supported:
   https://www.postgresql.org/docs/current/datatype.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `precision` -
+  (Output)
   Column precision.
 
 * `scale` -
+  (Output)
   Column scale.
 
 * `primary_key` -
@@ -1367,24 +1510,31 @@ The following arguments are supported:
   https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html
 
 * `length` -
+  (Output)
   Column length.
 
 * `precision` -
+  (Output)
   Column precision.
 
 * `scale` -
+  (Output)
   Column scale.
 
 * `encoding` -
+  (Output)
   Column encoding.
 
 * `primary_key` -
+  (Output)
   Whether or not the column represents a primary key.
 
 * `nullable` -
+  (Output)
   Whether or not the column can accept a null value.
 
 * `ordinal_position` -
+  (Output)
   The ordinal position of the column in the table.
 
 ## Attributes Reference

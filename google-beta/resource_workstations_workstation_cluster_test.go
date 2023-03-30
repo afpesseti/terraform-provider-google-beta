@@ -10,13 +10,13 @@ func TestAccWorkstationsWorkstationCluster_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckWorkstationsWorkstationClusterDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckWorkstationsWorkstationClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWorkstationsWorkstationCluster_workstationClusterBasicExample(context),
@@ -50,7 +50,7 @@ resource "google_workstations_workstation_cluster" "default" {
   location   		        = "us-central1"
 
   labels = {
-	  foo = "bar"
+	foo = "bar"
   }
 }
 
@@ -58,10 +58,6 @@ resource "google_compute_network" "default" {
   provider                = google-beta
   name                    = "tf-test-workstation-cluster%{random_suffix}"
   auto_create_subnetworks = false
-}
-
-data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_compute_subnetwork" "default" {

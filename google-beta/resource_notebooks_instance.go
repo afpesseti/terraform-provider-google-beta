@@ -41,7 +41,7 @@ func NotebooksInstanceLabelDiffSuppress(k, old, new string, d *schema.ResourceDa
 	return false
 }
 
-func resourceNotebooksInstance() *schema.Resource {
+func ResourceNotebooksInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNotebooksInstanceCreate,
 		Read:   resourceNotebooksInstanceRead,
@@ -415,9 +415,12 @@ Format: projects/{project_id}`,
 				Description: `Instance creation time`,
 			},
 			"proxy_uri": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: `The proxy endpoint that is used to access the Jupyter notebook.`,
+				Type:     schema.TypeString,
+				Computed: true,
+				Description: `The proxy endpoint that is used to access the Jupyter notebook.
+Only returned when the resource is in a 'PROVISIONED' state. If
+needed you can utilize 'terraform apply -refresh-only' to await
+the population of this value.`,
 			},
 			"state": {
 				Type:        schema.TypeString,
@@ -443,7 +446,7 @@ Format: projects/{project_id}`,
 
 func resourceNotebooksInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -631,7 +634,7 @@ func resourceNotebooksInstanceCreate(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Instance: %s", err)
 	}
@@ -646,7 +649,7 @@ func resourceNotebooksInstanceCreate(d *schema.ResourceData, meta interface{}) e
 	// Use the resource in the operation response to populate
 	// identity fields and d.Id() before read
 	var opRes map[string]interface{}
-	err = notebooksOperationWaitTimeWithResponse(
+	err = NotebooksOperationWaitTimeWithResponse(
 		config, res, &opRes, project, "Creating Instance", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 	if err != nil {
@@ -670,7 +673,7 @@ func resourceNotebooksInstanceCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceNotebooksInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -693,7 +696,7 @@ func resourceNotebooksInstanceRead(d *schema.ResourceData, meta interface{}) err
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("NotebooksInstance %q", d.Id()))
 	}
@@ -774,7 +777,7 @@ func resourceNotebooksInstanceRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceNotebooksInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -809,14 +812,14 @@ func resourceNotebooksInstanceUpdate(d *schema.ResourceData, meta interface{}) e
 			billingProject = bp
 		}
 
-		res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+		res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
 			return fmt.Errorf("Error updating Instance %q: %s", d.Id(), err)
 		} else {
 			log.Printf("[DEBUG] Finished updating Instance %q: %#v", d.Id(), res)
 		}
 
-		err = notebooksOperationWaitTime(
+		err = NotebooksOperationWaitTime(
 			config, res, project, "Updating Instance", userAgent,
 			d.Timeout(schema.TimeoutUpdate))
 		if err != nil {
@@ -831,7 +834,7 @@ func resourceNotebooksInstanceUpdate(d *schema.ResourceData, meta interface{}) e
 
 func resourceNotebooksInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -857,12 +860,12 @@ func resourceNotebooksInstanceDelete(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "Instance")
 	}
 
-	err = notebooksOperationWaitTime(
+	err = NotebooksOperationWaitTime(
 		config, res, project, "Deleting Instance", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
@@ -939,7 +942,7 @@ func flattenNotebooksInstanceAcceleratorConfigType(v interface{}, d *schema.Reso
 func flattenNotebooksInstanceAcceleratorConfigCoreCount(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}

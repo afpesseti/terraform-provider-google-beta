@@ -27,14 +27,14 @@ func TestAccFirebaseStorageBucket_firebasestorageBucketBasicExample(t *testing.T
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_id":    GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseStorageBucketDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseStorageBucket_firebasestorageBucketBasicExample(context),
@@ -76,7 +76,7 @@ func testAccCheckFirebaseStorageBucketDestroyProducer(t *testing.T) func(s *terr
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FirebaseStorageBasePath}}projects/{{project}}/buckets/{{bucket_id}}")
 			if err != nil {
@@ -89,7 +89,7 @@ func testAccCheckFirebaseStorageBucketDestroyProducer(t *testing.T) func(s *terr
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("FirebaseStorageBucket still exists at %s", url)
 			}

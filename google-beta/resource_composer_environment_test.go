@@ -26,6 +26,16 @@ func init() {
 	})
 }
 
+func allComposerServiceAgents() []string {
+	return []string{
+		"cloudcomposer-accounts",
+		"compute-system",
+		"container-engine-robot",
+		"gcp-sa-artifactregistry",
+		"gcp-sa-pubsub",
+	}
+}
+
 func TestComposerImageVersionDiffSuppress(t *testing.T) {
 	t.Parallel()
 
@@ -60,13 +70,13 @@ func TestComposerImageVersionDiffSuppress(t *testing.T) {
 func TestAccComposerEnvironment_basic(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_basic(envName, network, subnetwork),
@@ -85,7 +95,7 @@ func TestAccComposerEnvironment_basic(t *testing.T) {
 			{
 				ResourceName:      "google_composer_environment.test",
 				ImportState:       true,
-				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", getTestProjectFromEnv(), "us-central1", envName),
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", GetTestProjectFromEnv(), "us-central1", envName),
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
@@ -106,14 +116,14 @@ func TestAccComposerEnvironment_basic(t *testing.T) {
 func TestAccComposerEnvironment_update(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_basic(envName, network, subnetwork),
@@ -143,14 +153,14 @@ func TestAccComposerEnvironment_update(t *testing.T) {
 func TestAccComposerEnvironmentComposer1_private(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironmentComposer1_private(envName, network, subnetwork),
@@ -163,7 +173,7 @@ func TestAccComposerEnvironmentComposer1_private(t *testing.T) {
 			{
 				ResourceName:      "google_composer_environment.test",
 				ImportState:       true,
-				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", getTestProjectFromEnv(), "us-central1", envName),
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", GetTestProjectFromEnv(), "us-central1", envName),
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
@@ -182,14 +192,14 @@ func TestAccComposerEnvironmentComposer1_private(t *testing.T) {
 func TestAccComposerEnvironmentComposer2_private(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironmentComposer2_private(envName, network, subnetwork),
@@ -202,7 +212,7 @@ func TestAccComposerEnvironmentComposer2_private(t *testing.T) {
 			{
 				ResourceName:      "google_composer_environment.test",
 				ImportState:       true,
-				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", getTestProjectFromEnv(), "us-central1", envName),
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", GetTestProjectFromEnv(), "us-central1", envName),
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
@@ -222,14 +232,14 @@ func TestAccComposerEnvironmentComposer2_private(t *testing.T) {
 func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_privateWithWebServerControl(envName, network, subnetwork),
@@ -250,7 +260,7 @@ func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 			{
 				ResourceName:      "google_composer_environment.test",
 				ImportState:       true,
-				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", getTestProjectFromEnv(), "us-central1", envName),
+				ImportStateId:     fmt.Sprintf("projects/%s/locations/%s/environments/%s", GetTestProjectFromEnv(), "us-central1", envName),
 				ImportStateVerify: true,
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
@@ -268,14 +278,14 @@ func TestAccComposerEnvironment_privateWithWebServerControl(t *testing.T) {
 
 func TestAccComposerEnvironment_withDatabaseConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_databaseCfg(envName, network, subnetwork),
@@ -303,14 +313,16 @@ func TestAccComposerEnvironment_withDatabaseConfig(t *testing.T) {
 
 func TestAccComposerEnvironment_withWebServerConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	grantServiceAgentsRole(t, "service-", []string{"gcp-sa-cloudbuild"}, "roles/cloudbuild.builds.builder")
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_webServerCfg(envName, network, subnetwork),
@@ -340,15 +352,16 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer1(t *testing.T) {
 	t.Parallel()
 
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
-	pid := getTestProjectFromEnv()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	pid := GetTestProjectFromEnv()
+	grantServiceAgentsRole(t, "service-", allComposerServiceAgents(), "roles/cloudkms.cryptoKeyEncrypterDecrypter")
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_encryptionCfg(pid, "1", "1", envName, kms.CryptoKey.Name, network, subnetwork),
@@ -375,15 +388,16 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 	t.Parallel()
 
 	kms := BootstrapKMSKeyInLocation(t, "us-central1")
-	pid := getTestProjectFromEnv()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	pid := GetTestProjectFromEnv()
+	grantServiceAgentsRole(t, "service-", allComposerServiceAgents(), "roles/cloudkms.cryptoKeyEncrypterDecrypter")
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_encryptionCfg(pid, "2", "2", envName, kms.CryptoKey.Name, network, subnetwork),
@@ -409,14 +423,14 @@ func TestAccComposerEnvironment_withEncryptionConfigComposer2(t *testing.T) {
 func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_maintenanceWindow(envName, network, subnetwork),
@@ -442,14 +456,14 @@ func TestAccComposerEnvironment_withMaintenanceWindow(t *testing.T) {
 func TestAccComposerEnvironment_maintenanceWindowUpdate(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_maintenanceWindow(envName, network, subnetwork),
@@ -478,14 +492,14 @@ func TestAccComposerEnvironment_maintenanceWindowUpdate(t *testing.T) {
 func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_composerV2(envName, network, subnetwork),
@@ -511,14 +525,14 @@ func TestAccComposerEnvironment_ComposerV2(t *testing.T) {
 func TestAccComposerEnvironment_UpdateComposerV2WithTriggerer(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_composerV2(envName, network, subnetwork),
@@ -547,14 +561,14 @@ func TestAccComposerEnvironment_UpdateComposerV2WithTriggerer(t *testing.T) {
 func TestAccComposerEnvironment_UpdateComposerV2(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_composerV2(envName, network, subnetwork),
@@ -583,13 +597,13 @@ func TestAccComposerEnvironment_UpdateComposerV2(t *testing.T) {
 func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_composerV2PrivateServiceConnect(envName, network, subnetwork),
@@ -615,13 +629,13 @@ func TestAccComposerEnvironment_composerV2PrivateServiceConnect(t *testing.T) {
 func TestAccComposerEnvironment_composerV1MasterAuthNetworks(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_MasterAuthNetworks("1", "1", envName, network, subnetwork),
@@ -647,13 +661,13 @@ func TestAccComposerEnvironment_composerV1MasterAuthNetworks(t *testing.T) {
 func TestAccComposerEnvironment_composerV2MasterAuthNetworks(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_MasterAuthNetworks("2", "2", envName, network, subnetwork),
@@ -679,13 +693,13 @@ func TestAccComposerEnvironment_composerV2MasterAuthNetworks(t *testing.T) {
 func TestAccComposerEnvironment_composerV1MasterAuthNetworksUpdate(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_MasterAuthNetworks("1", "1", envName, network, subnetwork),
@@ -714,13 +728,13 @@ func TestAccComposerEnvironment_composerV1MasterAuthNetworksUpdate(t *testing.T)
 func TestAccComposerEnvironment_composerV2MasterAuthNetworksUpdate(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_MasterAuthNetworks("2", "2", envName, network, subnetwork),
@@ -750,15 +764,15 @@ func TestAccComposerEnvironment_composerV2MasterAuthNetworksUpdate(t *testing.T)
 func TestAccComposerEnvironment_withNodeConfig(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
-	serviceAccount := fmt.Sprintf("tf-test-%d", randInt(t))
+	serviceAccount := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_nodeCfg(envName, network, subnetwork, serviceAccount),
@@ -783,14 +797,14 @@ func TestAccComposerEnvironment_withNodeConfig(t *testing.T) {
 
 func TestAccComposerEnvironmentAirflow2_withRecoveryConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_airflow2RecoveryCfg(envName, network, subnetwork),
@@ -823,14 +837,14 @@ func TestAccComposerEnvironmentAirflow2_withRecoveryConfig(t *testing.T) {
 
 func TestAccComposerEnvironment_withSoftwareConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_softwareCfg(envName, network, subnetwork),
@@ -855,14 +869,14 @@ func TestAccComposerEnvironment_withSoftwareConfig(t *testing.T) {
 
 func TestAccComposerEnvironmentAirflow2_withSoftwareConfig(t *testing.T) {
 	t.Parallel()
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_airflow2SoftwareCfg(envName, network, subnetwork),
@@ -898,14 +912,14 @@ func TestAccComposerEnvironmentAirflow2_withSoftwareConfig(t *testing.T) {
 func TestAccComposerEnvironment_withUpdateOnCreate(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_updateOnlyFields(envName, network, subnetwork),
@@ -931,15 +945,15 @@ func TestAccComposerEnvironment_withUpdateOnCreate(t *testing.T) {
 func TestAccComposerEnvironment_fixPyPiPackages(t *testing.T) {
 	t.Parallel()
 
-	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, randInt(t))
-	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, randInt(t))
+	envName := fmt.Sprintf("%s-%d", testComposerEnvironmentPrefix, RandInt(t))
+	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, RandInt(t))
 	subnetwork := network + "-1"
-	serviceAccount := fmt.Sprintf("tf-test-%d", randInt(t))
+	serviceAccount := fmt.Sprintf("tf-test-%d", RandInt(t))
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccComposerEnvironmentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccComposerEnvironment_fixPyPiPackages(envName, network, subnetwork, serviceAccount),
@@ -957,9 +971,17 @@ func TestAccComposerEnvironment_fixPyPiPackages(t *testing.T) {
 	})
 }
 
+// This bootstraps the IAM roles needed for the service agents.
+func grantServiceAgentsRole(t *testing.T, prefix string, agentNames []string, role string) {
+	if BootstrapAllPSARole(t, prefix, agentNames, role) {
+		// Fail this test run because the policy needs time to reconcile.
+		t.Fatal("Stopping test because permissions were added.")
+	}
+}
+
 func testAccComposerEnvironmentDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
+		config := GoogleProviderConfig(t)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_composer_environment" {
@@ -976,7 +998,7 @@ func testAccComposerEnvironmentDestroyProducer(t *testing.T) func(s *terraform.S
 				Environment: idTokens[5],
 			}
 
-			_, err := config.NewComposerClient(config.userAgent).Projects.Locations.Environments.Get(envName.resourceName()).Do()
+			_, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.Get(envName.resourceName()).Do()
 			if err == nil {
 				return fmt.Errorf("environment %s still exists", envName.resourceName())
 			}
@@ -1001,6 +1023,9 @@ resource "google_composer_environment" "test" {
         use_ip_aliases          = true
         cluster_ipv4_cidr_block = "10.0.0.0/16"
       }
+    }
+    software_config {
+      image_version = "composer-1-airflow-2.3"
     }
   }
 }
@@ -1037,6 +1062,9 @@ resource "google_composer_environment" "test" {
         use_ip_aliases          = true
         cluster_ipv4_cidr_block = "10.0.0.0/16"
       }
+    }
+    software_config {
+      image_version = "composer-1-airflow-2"
     }
     private_environment_config {
       enable_private_endpoint = true
@@ -1127,6 +1155,9 @@ resource "google_composer_environment" "test" {
       cloud_sql_ipv4_cidr_block = "10.32.0.0/12"
       master_ipv4_cidr_block =  "172.17.50.0/28"
     }
+    software_config {
+      image_version = "composer-1-airflow-2"
+    }
     web_server_network_access_control {
       allowed_ip_range {
         value = "192.168.0.1"
@@ -1179,6 +1210,9 @@ resource "google_composer_environment" "test" {
       cloud_sql_ipv4_cidr_block = "10.32.0.0/12"
       master_ipv4_cidr_block =  "172.17.50.0/28"
     }
+    software_config {
+      image_version = "composer-1-airflow-2"
+    }
     web_server_network_access_control {
       allowed_ip_range {
         value = "192.168.0.1"
@@ -1222,6 +1256,9 @@ resource "google_composer_environment" "test" {
     database_config {
       machine_type  = "db-n1-standard-4"
     }
+    software_config {
+      image_version = "composer-1-airflow-2"
+    }
   }
 }
 
@@ -1255,6 +1292,9 @@ resource "google_composer_environment" "test" {
     database_config {
       machine_type  = "db-n1-standard-8"
     }
+    software_config {
+      image_version = "composer-1-airflow-2"
+    }
   }
 }
 
@@ -1284,6 +1324,9 @@ resource "google_composer_environment" "test" {
       network    = google_compute_network.test.self_link
       subnetwork = google_compute_subnetwork.test.self_link
       zone       = "us-central1-a"
+    }
+    software_config {
+      image_version = "composer-1-airflow-2"
     }
     web_server_config {
       machine_type  = "composer-n1-webserver-4"
@@ -1318,6 +1361,9 @@ resource "google_composer_environment" "test" {
       subnetwork = google_compute_subnetwork.test.self_link
       zone       = "us-central1-a"
     }
+    software_config {
+      image_version = "composer-1-airflow-2"
+    }
     web_server_config {
       machine_type  = "composer-n1-webserver-8"
     }
@@ -1346,41 +1392,13 @@ data "google_project" "project" {
   project_id = "%s"
 }
 
-
-resource "google_project_iam_member" "kms-project-binding1" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@cloudcomposer-accounts.iam.gserviceaccount.com"
-}
-resource "google_project_iam_member" "kms-project-binding2" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
-}
-resource "google_project_iam_member" "kms-project-binding3" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com"
-}
-resource "google_project_iam_member" "kms-project-binding4" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-artifactregistry.iam.gserviceaccount.com"
-}
-resource "google_project_iam_member" "kms-project-binding5" {
-  project = data.google_project.project.project_id
-  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
 resource "google_kms_crypto_key_iam_member" "iam" {
   crypto_key_id = "%s"
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member  = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
 }
 resource "google_composer_environment" "test" {
-  depends_on = [google_project_iam_member.kms-project-binding1, google_project_iam_member.kms-project-binding2,
-  google_project_iam_member.kms-project-binding3, google_project_iam_member.kms-project-binding4,
-  google_project_iam_member.kms-project-binding5, google_kms_crypto_key_iam_member.iam]
+  depends_on = [google_kms_crypto_key_iam_member.iam]
   name   = "%s"
   region = "us-central1"
   config {
@@ -1755,7 +1773,7 @@ resource "google_composer_environment" "test" {
     }
 
     software_config {
-      image_version = "composer-1-airflow-1"
+      image_version = "composer-1-airflow-2"
 
       airflow_config_overrides = {
         core-load_example = "True"
@@ -1892,6 +1910,9 @@ resource "google_composer_environment" "test" {
         use_ip_aliases          = true
         cluster_ipv4_cidr_block = "10.0.0.0/16"
       }
+    }
+    software_config {
+      image_version = "composer-1-airflow-2"
     }
   }
   depends_on = [google_project_iam_member.composer-worker]
@@ -2060,6 +2081,7 @@ resource "google_composer_environment" "test" {
       zone       = "us-central1-a"
     }
     software_config {
+      image_version = "composer-1-airflow-2"
       pypi_packages = {
         numpy = ""
       }
@@ -2312,7 +2334,7 @@ resource "google_project_iam_member" "composer-worker" {
  * rate-limited, for now just warn instead of returning actual errors.
  */
 func testSweepComposerResources(region string) error {
-	config, err := sharedConfigForRegion(region)
+	config, err := SharedConfigForRegion(region)
 	if err != nil {
 		return fmt.Errorf("error getting shared config for region: %s", err)
 	}
@@ -2341,7 +2363,7 @@ func testSweepComposerResources(region string) error {
 }
 
 func testSweepComposerEnvironments(config *Config, region string) error {
-	found, err := config.NewComposerClient(config.userAgent).Projects.Locations.Environments.List(
+	found, err := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.List(
 		fmt.Sprintf("projects/%s/locations/%s", config.Project, region)).Do()
 	if err != nil {
 		return fmt.Errorf("error listing storage buckets for composer environment: %s", err)
@@ -2379,12 +2401,12 @@ func testSweepComposerEnvironments(config *Config, region string) error {
 		case "ERROR":
 			fallthrough
 		default:
-			op, deleteErr := config.NewComposerClient(config.userAgent).Projects.Locations.Environments.Delete(e.Name).Do()
+			op, deleteErr := config.NewComposerClient(config.UserAgent).Projects.Locations.Environments.Delete(e.Name).Do()
 			if deleteErr != nil {
 				allErrors = multierror.Append(allErrors, fmt.Errorf("composer: unable to delete environment %q: %s", e.Name, deleteErr))
 				continue
 			}
-			waitErr := composerOperationWaitTime(config, op, config.Project, "Sweeping old test environments", config.userAgent, 10*time.Minute)
+			waitErr := ComposerOperationWaitTime(config, op, config.Project, "Sweeping old test environments", config.UserAgent, 10*time.Minute)
 			if waitErr != nil {
 				allErrors = multierror.Append(allErrors, fmt.Errorf("composer: unable to delete environment %q: %s", e.Name, waitErr))
 			}
@@ -2395,9 +2417,9 @@ func testSweepComposerEnvironments(config *Config, region string) error {
 
 func testSweepComposerEnvironmentBuckets(config *Config, region string) error {
 	artifactsBName := fmt.Sprintf("artifacts.%s.appspot.com", config.Project)
-	artifactBucket, err := config.NewStorageClient(config.userAgent).Buckets.Get(artifactsBName).Do()
+	artifactBucket, err := config.NewStorageClient(config.UserAgent).Buckets.Get(artifactsBName).Do()
 	if err != nil {
-		if isGoogleApiErrorWithCode(err, 404) {
+		if IsGoogleApiErrorWithCode(err, 404) {
 			log.Printf("composer environment bucket %q not found, doesn't need to be cleaned up", artifactsBName)
 		} else {
 			return err
@@ -2406,7 +2428,7 @@ func testSweepComposerEnvironmentBuckets(config *Config, region string) error {
 		return err
 	}
 
-	found, err := config.NewStorageClient(config.userAgent).Buckets.List(config.Project).Prefix(region).Do()
+	found, err := config.NewStorageClient(config.UserAgent).Buckets.List(config.Project).Prefix(region).Do()
 	if err != nil {
 		return fmt.Errorf("error listing storage buckets created when testing composer environment: %s", err)
 	}
@@ -2428,20 +2450,20 @@ func testSweepComposerEnvironmentBuckets(config *Config, region string) error {
 
 func testSweepComposerEnvironmentCleanUpBucket(config *Config, bucket *storage.Bucket) error {
 	var allErrors error
-	objList, err := config.NewStorageClient(config.userAgent).Objects.List(bucket.Name).Do()
+	objList, err := config.NewStorageClient(config.UserAgent).Objects.List(bucket.Name).Do()
 	if err != nil {
 		allErrors = multierror.Append(allErrors,
 			fmt.Errorf("Unable to list objects to delete for bucket %q: %s", bucket.Name, err))
 	}
 
 	for _, o := range objList.Items {
-		if err := config.NewStorageClient(config.userAgent).Objects.Delete(bucket.Name, o.Name).Do(); err != nil {
+		if err := config.NewStorageClient(config.UserAgent).Objects.Delete(bucket.Name, o.Name).Do(); err != nil {
 			allErrors = multierror.Append(allErrors,
 				fmt.Errorf("Unable to delete object %q from bucket %q: %s", o.Name, bucket.Name, err))
 		}
 	}
 
-	if err := config.NewStorageClient(config.userAgent).Buckets.Delete(bucket.Name).Do(); err != nil {
+	if err := config.NewStorageClient(config.UserAgent).Buckets.Delete(bucket.Name).Do(); err != nil {
 		allErrors = multierror.Append(allErrors, fmt.Errorf("Unable to delete bucket %q: %s", bucket.Name, err))
 	}
 
@@ -2460,14 +2482,14 @@ func testSweepComposerEnvironmentCleanUpBucket(config *Config, bucket *storage.B
 // Destroy test step for config with a network will fail unless we clean up the firewalls before.
 func testAccCheckClearComposerEnvironmentFirewalls(t *testing.T, networkName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := googleProviderConfig(t)
-		config.Project = getTestProjectFromEnv()
-		network, err := config.NewComputeClient(config.userAgent).Networks.Get(getTestProjectFromEnv(), networkName).Do()
+		config := GoogleProviderConfig(t)
+		config.Project = GetTestProjectFromEnv()
+		network, err := config.NewComputeClient(config.UserAgent).Networks.Get(GetTestProjectFromEnv(), networkName).Do()
 		if err != nil {
 			return err
 		}
 
-		foundFirewalls, err := config.NewComputeClient(config.userAgent).Firewalls.List(config.Project).Do()
+		foundFirewalls, err := config.NewComputeClient(config.UserAgent).Firewalls.List(config.Project).Do()
 		if err != nil {
 			return fmt.Errorf("Unable to list firewalls for network %q: %s", network.Name, err)
 		}
@@ -2478,15 +2500,15 @@ func testAccCheckClearComposerEnvironmentFirewalls(t *testing.T, networkName str
 				continue
 			}
 			log.Printf("[DEBUG] Deleting firewall %q for test-resource network %q", firewall.Name, network.Name)
-			op, err := config.NewComputeClient(config.userAgent).Firewalls.Delete(config.Project, firewall.Name).Do()
+			op, err := config.NewComputeClient(config.UserAgent).Firewalls.Delete(config.Project, firewall.Name).Do()
 			if err != nil {
 				allErrors = multierror.Append(allErrors,
 					fmt.Errorf("Unable to delete firewalls for network %q: %s", network.Name, err))
 				continue
 			}
 
-			waitErr := computeOperationWaitTime(config, op, config.Project,
-				"Sweeping test composer environment firewalls", config.userAgent, 10)
+			waitErr := ComputeOperationWaitTime(config, op, config.Project,
+				"Sweeping test composer environment firewalls", config.UserAgent, 10)
 			if waitErr != nil {
 				allErrors = multierror.Append(allErrors,
 					fmt.Errorf("Error while waiting to delete firewall %q: %s", firewall.Name, waitErr))

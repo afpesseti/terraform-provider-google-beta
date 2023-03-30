@@ -27,13 +27,13 @@ func TestAccComputeGlobalForwardingRule_externalTcpProxyLbMigBackendExample(t *t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_externalTcpProxyLbMigBackendExample(context),
@@ -200,13 +200,13 @@ func TestAccComputeGlobalForwardingRule_externalHttpLbMigBackendCustomHeaderExam
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_externalHttpLbMigBackendCustomHeaderExample(context),
@@ -385,13 +385,13 @@ func TestAccComputeGlobalForwardingRule_globalForwardingRuleHttpExample(t *testi
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_globalForwardingRuleHttpExample(context),
@@ -463,13 +463,13 @@ func TestAccComputeGlobalForwardingRule_globalForwardingRuleInternalExample(t *t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_globalForwardingRuleInternalExample(context),
@@ -600,13 +600,13 @@ func TestAccComputeGlobalForwardingRule_globalForwardingRuleExternalManagedExamp
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_globalForwardingRuleExternalManagedExample(context),
@@ -671,13 +671,13 @@ func TestAccComputeGlobalForwardingRule_globalForwardingRuleHybridExample(t *tes
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_globalForwardingRuleHybridExample(context),
@@ -831,14 +831,14 @@ func TestAccComputeGlobalForwardingRule_privateServiceConnectGoogleApisExample(t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project":       GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeGlobalForwardingRule_privateServiceConnectGoogleApisExample(context),
@@ -904,7 +904,7 @@ func testAccCheckComputeGlobalForwardingRuleDestroyProducer(t *testing.T) func(s
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/forwardingRules/{{name}}")
 			if err != nil {
@@ -917,7 +917,7 @@ func testAccCheckComputeGlobalForwardingRuleDestroyProducer(t *testing.T) func(s
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ComputeGlobalForwardingRule still exists at %s", url)
 			}

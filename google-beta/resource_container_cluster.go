@@ -163,7 +163,7 @@ func isBeenEnabled(_ context.Context, old, new, _ interface{}) bool {
 	return false
 }
 
-func resourceContainerCluster() *schema.Resource {
+func ResourceContainerCluster() *schema.Resource {
 	return &schema.Resource{
 		UseJSONNumber: true,
 		Create:        resourceContainerClusterCreate,
@@ -1005,6 +1005,48 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
+			"protect_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `The notification config for sending cluster upgrade notifications`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"workload_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: `WorkloadConfig defines the flags to enable or disable the workload configurations for the cluster.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"audit_mode": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: `Mode defines how to audit the workload configs. Accepted values are MODE_UNSPECIFIED, DISABLED, BASIC.`,
+									},
+								},
+							},
+							AtLeastOneOf: []string{
+								"protect_config.0.workload_config",
+								"protect_config.0.workload_vulnerability_mode",
+							},
+						},
+						"workload_vulnerability_mode": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: `WorkloadVulnerabilityMode defines mode to perform vulnerability scanning. Accepted values are WORKLOAD_VULNERABILITY_MODE_UNSPECIFIED, DISABLED, BASIC.`,
+							AtLeastOneOf: []string{
+								"protect_config.0.workload_config",
+								"protect_config.0.workload_vulnerability_mode",
+							},
+						},
+					},
+				},
+			},
+
 			"monitoring_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1377,6 +1419,15 @@ func resourceContainerCluster() *schema.Resource {
 							ForceNew:      true,
 							ConflictsWith: ipAllocationCidrBlockFields,
 							Description:   `The name of the existing secondary range in the cluster's subnetwork to use for service ClusterIPs. Alternatively, services_ipv4_cidr_block can be used to automatically create a GKE-managed one.`,
+						},
+
+						"stack_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							Default:      "IPV4",
+							ValidateFunc: validation.StringInSlice([]string{"IPV4", "IPV4_IPV6"}, false),
+							Description:  `The IP Stack type of the cluster. Choose between IPV4 and IPV4_IPV6. Default type is IPV4 Only if not set`,
 						},
 					},
 				},
@@ -1869,7 +1920,7 @@ func resourceNodeConfigEmptyGuestAccelerator(_ context.Context, diff *schema.Res
 
 func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1933,6 +1984,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		ConfidentialNodes:    expandConfidentialNodes(d.Get("confidential_nodes")),
 		ResourceLabels:       expandStringMap(d, "resource_labels"),
 		NodePoolAutoConfig:   expandNodePoolAutoConfig(d.Get("node_pool_auto_config")),
+		ProtectConfig:        expandProtectConfig(d.Get("protect_config")),
 		CostManagementConfig: expandCostManagementConfig(d.Get("cost_management_config")),
 	}
 
@@ -2171,7 +2223,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -2460,12 +2512,16 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
+	if err := d.Set("protect_config", flattenProtectConfig(cluster.ProtectConfig)); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -3410,7 +3466,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		op, err := clusterNodePoolDeleteCall.Do()
 		if err != nil {
-			if !isGoogleApiErrorWithCode(err, 404) {
+			if !IsGoogleApiErrorWithCode(err, 404) {
 				return errwrap.Wrapf("Error deleting default node pool: {{err}}", err)
 			}
 			log.Printf("[WARN] Container cluster %q default node pool already removed, no change", d.Id())
@@ -3570,12 +3626,26 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	if d.HasChange("protect_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredProtectConfig: expandProtectConfig(d.Get("protect_config")),
+			},
+		}
+		updateF := updateFunc(req, "updating GKE cluster master protect_config")
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s Protect Config has been updated to %#v", d.Id(), req.Update.DesiredProtectConfig)
+	}
+
 	return resourceContainerClusterRead(d, meta)
 }
 
 func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -3593,7 +3663,7 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 	clusterName := d.Get("name").(string)
 
 	if _, err := containerClusterAwaitRestingState(config, project, location, clusterName, userAgent, d.Timeout(schema.TimeoutDelete)); err != nil {
-		if isGoogleApiErrorWithCode(err, 404) {
+		if IsGoogleApiErrorWithCode(err, 404) {
 			log.Printf("[INFO] GKE cluster %s doesn't exist to delete", d.Id())
 			return nil
 		}
@@ -3661,7 +3731,7 @@ func cleanFailedContainerCluster(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -3829,6 +3899,7 @@ func expandClusterAddonsConfig(configured interface{}) *container.AddonsConfig {
 }
 
 func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*container.IPAllocationPolicy, error) {
+
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		if networkingMode == "VPC_NATIVE" {
@@ -3837,20 +3908,23 @@ func expandIPAllocationPolicy(configured interface{}, networkingMode string) (*c
 		return &container.IPAllocationPolicy{
 			UseIpAliases:    false,
 			UseRoutes:       true,
+			StackType:       "IPV4",
 			ForceSendFields: []string{"UseIpAliases"},
 		}, nil
 	}
 
 	config := l[0].(map[string]interface{})
-	return &container.IPAllocationPolicy{
-		UseIpAliases:          networkingMode == "VPC_NATIVE" || networkingMode == "",
-		ClusterIpv4CidrBlock:  config["cluster_ipv4_cidr_block"].(string),
-		ServicesIpv4CidrBlock: config["services_ipv4_cidr_block"].(string),
+	stackType := config["stack_type"].(string)
 
+	return &container.IPAllocationPolicy{
+		UseIpAliases:               networkingMode == "VPC_NATIVE" || networkingMode == "",
+		ClusterIpv4CidrBlock:       config["cluster_ipv4_cidr_block"].(string),
+		ServicesIpv4CidrBlock:      config["services_ipv4_cidr_block"].(string),
 		ClusterSecondaryRangeName:  config["cluster_secondary_range_name"].(string),
 		ServicesSecondaryRangeName: config["services_secondary_range_name"].(string),
 		ForceSendFields:            []string{"UseIpAliases"},
 		UseRoutes:                  networkingMode == "ROUTES",
+		StackType:                  stackType,
 	}, nil
 }
 
@@ -3863,7 +3937,7 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 	location, _ := getLocation(d, config)
 	clusterName := d.Get("name").(string)
 	name := containerClusterFullName(project, location, clusterName)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil
 	}
@@ -4129,6 +4203,56 @@ func expandAuthenticatorGroupsConfig(configured interface{}) *container.Authenti
 		result.SecurityGroup = securityGroup.(string)
 	}
 	return result
+}
+
+func expandProtectConfig(configured interface{}) *container.ProtectConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	pc := &container.ProtectConfig{}
+	protectConfig := l[0].(map[string]interface{})
+	pc.WorkloadConfig = expandProtectConfigWorkloadConfig(protectConfig["workload_config"])
+	if v, ok := protectConfig["workload_vulnerability_mode"]; ok {
+		pc.WorkloadVulnerabilityMode = v.(string)
+	}
+	return pc
+}
+
+func expandProtectConfigWorkloadConfig(configured interface{}) *container.WorkloadConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	workloadConfig := l[0].(map[string]interface{})
+	return &container.WorkloadConfig{
+		AuditMode: workloadConfig["audit_mode"].(string),
+	}
+}
+
+func flattenProtectConfig(pc *container.ProtectConfig) []map[string]interface{} {
+	if pc == nil {
+		return nil
+	}
+
+	result := make(map[string]interface{})
+
+	result["workload_config"] = flattenProtectConfigWorkloadConfig(pc.WorkloadConfig)
+	result["workload_vulnerability_mode"] = pc.WorkloadVulnerabilityMode
+
+	return []map[string]interface{}{result}
+}
+
+func flattenProtectConfigWorkloadConfig(wc *container.WorkloadConfig) []map[string]interface{} {
+	if wc == nil {
+		return nil
+	}
+
+	result := make(map[string]interface{})
+	result["audit_mode"] = wc.AuditMode
+
+	return []map[string]interface{}{result}
 }
 
 func expandNotificationConfig(configured interface{}) *container.NotificationConfig {
@@ -4931,12 +5055,14 @@ func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, con
 	}
 
 	p := c.IpAllocationPolicy
+
 	return []map[string]interface{}{
 		{
 			"cluster_ipv4_cidr_block":       p.ClusterIpv4CidrBlock,
 			"services_ipv4_cidr_block":      p.ServicesIpv4CidrBlock,
 			"cluster_secondary_range_name":  p.ClusterSecondaryRangeName,
 			"services_secondary_range_name": p.ServicesSecondaryRangeName,
+			"stack_type":                    p.StackType,
 		},
 	}, nil
 }
@@ -5318,7 +5444,7 @@ func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string
 func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return nil, err
 	}

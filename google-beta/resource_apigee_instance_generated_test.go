@@ -24,19 +24,19 @@ import (
 )
 
 func TestAccApigeeInstance_apigeeInstanceBasicTestExample(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckApigeeInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeInstance_apigeeInstanceBasicTestExample(context),
@@ -116,19 +116,19 @@ resource "google_apigee_instance" "apigee_instance" {
 }
 
 func TestAccApigeeInstance_apigeeInstanceCidrRangeTestExample(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckApigeeInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeInstance_apigeeInstanceCidrRangeTestExample(context),
@@ -209,19 +209,19 @@ resource "google_apigee_instance" "apigee_instance" {
 }
 
 func TestAccApigeeInstance_apigeeInstanceIpRangeTestExample(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckApigeeInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeInstance_apigeeInstanceIpRangeTestExample(context),
@@ -270,7 +270,7 @@ resource "google_compute_global_address" "apigee_range" {
   name          = "apigee-range"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  prefix_length = 22
+  prefix_length = 21
   network       = google_compute_network.apigee_network.id
   project       = google_project.project.project_id
 }
@@ -296,25 +296,25 @@ resource "google_apigee_instance" "apigee_instance" {
   name     = "tf-test%{random_suffix}"
   location = "us-central1"
   org_id   = google_apigee_organization.apigee_org.id
-  ip_range = "10.87.8.0/22"
+  ip_range = "${google_compute_global_address.apigee_range.address}/22"
 }
 `, context)
 }
 
 func TestAccApigeeInstance_apigeeInstanceFullTestExample(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApigeeInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApigeeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeInstance_apigeeInstanceFullTestExample(context),
@@ -460,19 +460,19 @@ resource "google_apigee_instance" "apigee_instance" {
 }
 
 func TestAccApigeeInstance_apigeeInstanceServiceAttachmentBasicTestExample(t *testing.T) {
-	skipIfVcr(t)
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckApigeeInstanceDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeInstance_apigeeInstanceServiceAttachmentBasicTestExample(context),
@@ -662,7 +662,7 @@ func testAccCheckApigeeInstanceDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}{{org_id}}/instances/{{name}}")
 			if err != nil {
@@ -675,7 +675,7 @@ func testAccCheckApigeeInstanceDestroyProducer(t *testing.T) func(s *terraform.S
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil, isApigeeRetryableError)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, isApigeeRetryableError)
 			if err == nil {
 				return fmt.Errorf("ApigeeInstance still exists at %s", url)
 			}

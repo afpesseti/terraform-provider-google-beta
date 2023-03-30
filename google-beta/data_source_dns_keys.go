@@ -13,7 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ datasource.DataSource = &GoogleDnsKeysDataSource{}
+// Ensure the implementation satisfies the expected interfaces
+var (
+	_ datasource.DataSource              = &GoogleDnsKeysDataSource{}
+	_ datasource.DataSourceWithConfigure = &GoogleDnsKeysDataSource{}
+)
 
 func NewGoogleDnsKeysDataSource() datasource.DataSource {
 	return &GoogleDnsKeysDataSource{}
@@ -164,10 +168,11 @@ func (d *GoogleDnsKeysDataSource) Read(ctx context.Context, req datasource.ReadR
 	tflog.Debug(ctx, fmt.Sprintf("fetching DNS keys from managed zone %s", data.ManagedZone.ValueString()))
 
 	clientResp, err := d.client.DnsKeys.List(data.Project.ValueString(), data.ManagedZone.ValueString()).Do()
-	if err != nil && !isGoogleApiErrorWithCode(err, 404) {
-		diags.AddError("error retrieving DNS keys", err.Error())
-		return
-	} else if isGoogleApiErrorWithCode(err, 404) {
+	if err != nil {
+		if !IsGoogleApiErrorWithCode(err, 404) {
+			resp.Diagnostics.AddError(fmt.Sprintf("Error when reading or editing dataSourceDnsKeys"), err.Error())
+		}
+		// Save data into Terraform state
 		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		return
 	}

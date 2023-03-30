@@ -27,14 +27,14 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelBasicExample(t *testing
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_id":    GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseHostingChannelDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseHostingChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelBasicExample(context),
@@ -69,14 +69,14 @@ func TestAccFirebaseHostingChannel_firebasehostingChannelFullExample(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_id":    GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseHostingChannelDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseHostingChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseHostingChannel_firebasehostingChannelFullExample(context),
@@ -122,7 +122,7 @@ func testAccCheckFirebaseHostingChannelDestroyProducer(t *testing.T) func(s *ter
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FirebaseHostingBasePath}}sites/{{site_id}}/channels/{{channel_id}}")
 			if err != nil {
@@ -135,7 +135,7 @@ func testAccCheckFirebaseHostingChannelDestroyProducer(t *testing.T) func(s *ter
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("FirebaseHostingChannel still exists at %s", url)
 			}

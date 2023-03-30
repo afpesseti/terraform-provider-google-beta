@@ -27,13 +27,13 @@ func TestAccCloudRunV2Job_cloudrunv2JobBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudRunV2JobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobBasicExample(context),
@@ -62,6 +62,12 @@ resource "google_cloud_run_v2_job" "default" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
+  }
 }
 `, context)
 }
@@ -71,13 +77,13 @@ func TestAccCloudRunV2Job_cloudrunv2JobSqlExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"deletion_protection": false,
-		"random_suffix":       randString(t, 10),
+		"random_suffix":       RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudRunV2JobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobSqlExample(context),
@@ -131,6 +137,12 @@ resource "google_cloud_run_v2_job" "default" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
+  }
 }
 
 data "google_project" "project" {
@@ -172,13 +184,13 @@ func TestAccCloudRunV2Job_cloudrunv2JobVpcaccessExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudRunV2JobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobVpcaccessExample(context),
@@ -211,6 +223,12 @@ resource "google_cloud_run_v2_job" "default" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
+  }
 }
 
 resource "google_vpc_access_connector" "connector" {
@@ -240,13 +258,13 @@ func TestAccCloudRunV2Job_cloudrunv2JobSecretExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCloudRunV2JobDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudRunV2Job_cloudrunv2JobSecretExample(context),
@@ -291,6 +309,12 @@ resource "google_cloud_run_v2_job" "default" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      launch_stage,
+    ]
+  }
 }
 
 data "google_project" "project" {
@@ -327,7 +351,7 @@ func testAccCheckCloudRunV2JobDestroyProducer(t *testing.T) func(s *terraform.St
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{CloudRunV2BasePath}}projects/{{project}}/locations/{{location}}/jobs/{{name}}")
 			if err != nil {
@@ -340,7 +364,7 @@ func testAccCheckCloudRunV2JobDestroyProducer(t *testing.T) func(s *terraform.St
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("CloudRunV2Job still exists at %s", url)
 			}

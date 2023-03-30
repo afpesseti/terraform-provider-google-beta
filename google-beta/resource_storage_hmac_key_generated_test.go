@@ -27,13 +27,13 @@ func TestAccStorageHmacKey_storageHmacKeyExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckStorageHmacKeyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckStorageHmacKeyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccStorageHmacKey_storageHmacKeyExample(context),
@@ -72,14 +72,14 @@ func testAccCheckStorageHmacKeyDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{StorageBasePath}}projects/{{project}}/hmacKeys/{{access_id}}")
 			if err != nil {
 				return err
 			}
 
-			res, err := sendRequest(config, "GET", "", url, config.userAgent, nil)
+			res, err := SendRequest(config, "GET", "", url, config.UserAgent, nil)
 			if err != nil {
 				return nil
 			}

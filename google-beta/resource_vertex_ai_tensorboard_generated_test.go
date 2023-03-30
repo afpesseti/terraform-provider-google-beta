@@ -27,13 +27,13 @@ func TestAccVertexAITensorboard_vertexAiTensorboardExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckVertexAITensorboardDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAITensorboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAITensorboard_vertexAiTensorboardExample(context),
@@ -67,13 +67,13 @@ func TestAccVertexAITensorboard_vertexAiTensorboardFullExample(t *testing.T) {
 
 	context := map[string]interface{}{
 		"kms_key_name":  BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckVertexAITensorboardDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAITensorboardDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAITensorboard_vertexAiTensorboardFullExample(context),
@@ -124,7 +124,7 @@ func testAccCheckVertexAITensorboardDestroyProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{VertexAIBasePath}}{{name}}")
 			if err != nil {
@@ -137,7 +137,7 @@ func testAccCheckVertexAITensorboardDestroyProducer(t *testing.T) func(s *terraf
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("VertexAITensorboard still exists at %s", url)
 			}

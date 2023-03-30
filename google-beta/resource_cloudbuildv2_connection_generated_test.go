@@ -30,16 +30,16 @@ func TestAccCloudbuildv2Connection_GheCompleteConnection(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"region":        GetTestRegionFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudbuildv2Connection_GheCompleteConnection(context),
@@ -56,16 +56,16 @@ func TestAccCloudbuildv2Connection_GheConnection(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"region":        GetTestRegionFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudbuildv2Connection_GheConnection(context),
@@ -90,16 +90,16 @@ func TestAccCloudbuildv2Connection_GhePrivConnection(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"region":        GetTestRegionFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudbuildv2Connection_GhePrivConnection(context),
@@ -116,16 +116,16 @@ func TestAccCloudbuildv2Connection_GhePrivUpdateConnection(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"region":        GetTestRegionFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudbuildv2Connection_GhePrivUpdateConnection(context),
@@ -150,16 +150,16 @@ func TestAccCloudbuildv2Connection_GithubConnection(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"region":        getTestRegionFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"region":        GetTestRegionFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckCloudbuildv2ConnectionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudbuildv2Connection_GithubConnection(context),
@@ -377,7 +377,7 @@ func testAccCheckCloudbuildv2ConnectionDestroyProducer(t *testing.T) func(s *ter
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
@@ -395,7 +395,7 @@ func testAccCheckCloudbuildv2ConnectionDestroyProducer(t *testing.T) func(s *ter
 				UpdateTime:  dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
 			}
 
-			client := NewDCLCloudbuildv2Client(config, config.userAgent, billingProject, 0)
+			client := NewDCLCloudbuildv2Client(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetConnection(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_cloudbuildv2_connection still exists %v", obj)

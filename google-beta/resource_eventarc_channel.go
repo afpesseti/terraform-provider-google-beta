@@ -27,7 +27,7 @@ import (
 	eventarc "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/eventarc/beta"
 )
 
-func resourceEventarcChannel() *schema.Resource {
+func ResourceEventarcChannel() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceEventarcChannelCreate,
 		Read:   resourceEventarcChannelRead,
@@ -142,7 +142,7 @@ func resourceEventarcChannelCreate(d *schema.ResourceData, meta interface{}) err
 	}
 	d.SetId(id)
 	directive := CreateDirective
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -188,7 +188,7 @@ func resourceEventarcChannelRead(d *schema.ResourceData, meta interface{}) error
 		ThirdPartyProvider: dcl.String(d.Get("third_party_provider").(string)),
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func resourceEventarcChannelUpdate(d *schema.ResourceData, meta interface{}) err
 		ThirdPartyProvider: dcl.String(d.Get("third_party_provider").(string)),
 	}
 	directive := UpdateDirective
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -309,7 +309,7 @@ func resourceEventarcChannelDelete(d *schema.ResourceData, meta interface{}) err
 	}
 
 	log.Printf("[DEBUG] Deleting Channel %q", d.Id())
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

@@ -23,17 +23,75 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func TestAccCertificateManagerCertificate_certificateManagerGoogleManagedCertificateExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCertificateManagerCertificateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCertificateManagerCertificate_certificateManagerGoogleManagedCertificateExample(context),
+			},
+			{
+				ResourceName:            "google_certificate_manager_certificate.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"self_managed", "name"},
+			},
+		},
+	})
+}
+
+func testAccCertificateManagerCertificate_certificateManagerGoogleManagedCertificateExample(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_certificate_manager_certificate" "default" {
+  name        = "tf-test-dns-cert%{random_suffix}"
+  description = "The default cert"
+  scope       = "EDGE_CACHE"
+  managed {
+    domains = [
+      google_certificate_manager_dns_authorization.instance.domain,
+      google_certificate_manager_dns_authorization.instance2.domain,
+      ]
+    dns_authorizations = [
+      google_certificate_manager_dns_authorization.instance.id,
+      google_certificate_manager_dns_authorization.instance2.id,
+      ]
+  }
+}
+
+
+resource "google_certificate_manager_dns_authorization" "instance" {
+  name        = "tf-test-dns-auth%{random_suffix}"
+  description = "The default dnss"
+  domain      = "subdomain%{random_suffix}.hashicorptest.com"
+}
+
+resource "google_certificate_manager_dns_authorization" "instance2" {
+  name        = "tf-test-dns-auth2%{random_suffix}"
+  description = "The default dnss"
+  domain      = "subdomain2%{random_suffix}.hashicorptest.com"
+}
+`, context)
+}
+
 func TestAccCertificateManagerCertificate_certificateManagerSelfManagedCertificateExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCertificateManagerCertificateDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCertificateManagerCertificateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCertificateManagerCertificate_certificateManagerSelfManagedCertificateExample(context),
@@ -72,7 +130,7 @@ func testAccCheckCertificateManagerCertificateDestroyProducer(t *testing.T) func
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{CertificateManagerBasePath}}projects/{{project}}/locations/global/certificates/{{name}}")
 			if err != nil {
@@ -85,7 +143,7 @@ func testAccCheckCertificateManagerCertificateDestroyProducer(t *testing.T) func
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("CertificateManagerCertificate still exists at %s", url)
 			}

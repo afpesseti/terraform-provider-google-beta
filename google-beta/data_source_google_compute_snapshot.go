@@ -8,10 +8,10 @@ import (
 	"google.golang.org/api/compute/v0.beta"
 )
 
-func dataSourceGoogleComputeSnapshot() *schema.Resource {
+func DataSourceGoogleComputeSnapshot() *schema.Resource {
 
 	// Generate datasource schema from resource
-	dsSchema := datasourceSchemaFromResourceSchema(resourceComputeSnapshot().Schema)
+	dsSchema := datasourceSchemaFromResourceSchema(ResourceComputeSnapshot().Schema)
 
 	dsSchema["filter"] = &schema.Schema{
 		Type:     schema.TypeString,
@@ -47,7 +47,7 @@ func dataSourceGoogleComputeSnapshotRead(d *schema.ResourceData, meta interface{
 	}
 
 	if v, ok := d.GetOk("filter"); ok {
-		userAgent, err := generateUserAgentString(d, config.userAgent)
+		userAgent, err := generateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}

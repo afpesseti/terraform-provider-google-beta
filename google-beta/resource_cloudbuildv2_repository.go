@@ -27,7 +27,7 @@ import (
 	cloudbuildv2 "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/cloudbuildv2/beta"
 )
 
-func resourceCloudbuildv2Repository() *schema.Resource {
+func ResourceCloudbuildv2Repository() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCloudbuildv2RepositoryCreate,
 		Read:   resourceCloudbuildv2RepositoryRead,
@@ -133,7 +133,7 @@ func resourceCloudbuildv2RepositoryCreate(d *schema.ResourceData, meta interface
 	}
 	d.SetId(id)
 	directive := CreateDirective
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func resourceCloudbuildv2RepositoryRead(d *schema.ResourceData, meta interface{}
 		Project:     dcl.String(project),
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -250,7 +250,7 @@ func resourceCloudbuildv2RepositoryDelete(d *schema.ResourceData, meta interface
 	}
 
 	log.Printf("[DEBUG] Deleting Repository %q", d.Id())
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

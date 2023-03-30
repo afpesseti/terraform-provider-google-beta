@@ -54,12 +54,6 @@ var CloudResourceManagerEndpointEntry = &schema.Schema{
 	Optional: true,
 }
 
-var DataplexEndpointEntryKey = "dataplex_custom_endpoint"
-var DataplexEndpointEntry = &schema.Schema{
-	Type:     schema.TypeString,
-	Optional: true,
-}
-
 var EventarcEndpointEntryKey = "eventarc_custom_endpoint"
 var EventarcEndpointEntry = &schema.Schema{
 	Type:     schema.TypeString,
@@ -96,7 +90,6 @@ type DCLConfig struct {
 	CloudBuildWorkerPoolBasePath string
 	ClouddeployBasePath          string
 	CloudResourceManagerBasePath string
-	DataplexBasePath             string
 	EventarcBasePath             string
 	FirebaserulesBasePath        string
 	GKEHubFeatureBasePath        string
@@ -104,13 +97,12 @@ type DCLConfig struct {
 	RecaptchaEnterpriseBasePath  string
 }
 
-func configureDCLProvider(provider *schema.Provider) {
+func ConfigureDCLProvider(provider *schema.Provider) {
 	provider.Schema[ApikeysEndpointEntryKey] = ApikeysEndpointEntry
 	provider.Schema[AssuredWorkloadsEndpointEntryKey] = AssuredWorkloadsEndpointEntry
 	provider.Schema[CloudBuildWorkerPoolEndpointEntryKey] = CloudBuildWorkerPoolEndpointEntry
 	provider.Schema[ClouddeployEndpointEntryKey] = ClouddeployEndpointEntry
 	provider.Schema[CloudResourceManagerEndpointEntryKey] = CloudResourceManagerEndpointEntry
-	provider.Schema[DataplexEndpointEntryKey] = DataplexEndpointEntry
 	provider.Schema[EventarcEndpointEntryKey] = EventarcEndpointEntry
 	provider.Schema[FirebaserulesEndpointEntryKey] = FirebaserulesEndpointEntry
 	provider.Schema[GKEHubFeatureEndpointEntryKey] = GKEHubFeatureEndpointEntry
@@ -118,66 +110,61 @@ func configureDCLProvider(provider *schema.Provider) {
 	provider.Schema[RecaptchaEnterpriseEndpointEntryKey] = RecaptchaEnterpriseEndpointEntry
 }
 
-func HandleDCLProviderDefaults(d *schema.ResourceData) {
+func HandleDCLCustomEndpointDefaults(d *schema.ResourceData) {
 	if d.Get(ApikeysEndpointEntryKey) == "" {
-		d.Set(ApikeysEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(ApikeysEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_APIKEYS_CUSTOM_ENDPOINT",
 		}))
 	}
 	if d.Get(AssuredWorkloadsEndpointEntryKey) == "" {
-		d.Set(AssuredWorkloadsEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(AssuredWorkloadsEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_ASSURED_WORKLOADS_CUSTOM_ENDPOINT",
 		}))
 	}
 	if d.Get(CloudBuildWorkerPoolEndpointEntryKey) == "" {
-		d.Set(CloudBuildWorkerPoolEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(CloudBuildWorkerPoolEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_CLOUD_BUILD_WORKER_POOL_CUSTOM_ENDPOINT",
 		}))
 	}
 	if d.Get(ClouddeployEndpointEntryKey) == "" {
-		d.Set(ClouddeployEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(ClouddeployEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_CLOUDDEPLOY_CUSTOM_ENDPOINT",
 		}))
 	}
 	if d.Get(CloudResourceManagerEndpointEntryKey) == "" {
-		d.Set(CloudResourceManagerEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(CloudResourceManagerEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_CLOUD_RESOURCE_MANAGER_CUSTOM_ENDPOINT",
 		}))
 	}
-	if d.Get(DataplexEndpointEntryKey) == "" {
-		d.Set(DataplexEndpointEntryKey, multiEnvSearch([]string{
-			"GOOGLE_DATAPLEX_CUSTOM_ENDPOINT",
-		}))
-	}
 	if d.Get(EventarcEndpointEntryKey) == "" {
-		d.Set(EventarcEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(EventarcEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_EVENTARC_CUSTOM_ENDPOINT",
 		}))
 	}
 	if d.Get(FirebaserulesEndpointEntryKey) == "" {
-		d.Set(FirebaserulesEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(FirebaserulesEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_FIREBASERULES_CUSTOM_ENDPOINT",
 		}))
 	}
 	if d.Get(GKEHubFeatureEndpointEntryKey) == "" {
-		d.Set(GKEHubFeatureEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(GKEHubFeatureEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_GKEHUB_FEATURE_CUSTOM_ENDPOINT",
 		}))
 	}
 	if d.Get(NetworkConnectivityEndpointEntryKey) == "" {
-		d.Set(NetworkConnectivityEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(NetworkConnectivityEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_NETWORK_CONNECTIVITY_CUSTOM_ENDPOINT",
 		}))
 	}
 	if d.Get(RecaptchaEnterpriseEndpointEntryKey) == "" {
-		d.Set(RecaptchaEnterpriseEndpointEntryKey, multiEnvSearch([]string{
+		d.Set(RecaptchaEnterpriseEndpointEntryKey, MultiEnvSearch([]string{
 			"GOOGLE_RECAPTCHA_ENTERPRISE_CUSTOM_ENDPOINT",
 		}))
 	}
 }
 
 // plugin-framework provider set-up
-func configureDCLFrameworkProvider(frameworkSchema *framework_schema.Schema) {
+func configureDCLCustomEndpointAttributesFramework(frameworkSchema *framework_schema.Schema) {
 	frameworkSchema.Attributes["apikeys_custom_endpoint"] = framework_schema.StringAttribute{
 		Optional: true,
 		Validators: []validator.String{
@@ -203,12 +190,6 @@ func configureDCLFrameworkProvider(frameworkSchema *framework_schema.Schema) {
 		},
 	}
 	frameworkSchema.Attributes["cloud_resource_manager_custom_endpoint"] = framework_schema.StringAttribute{
-		Optional: true,
-		Validators: []validator.String{
-			CustomEndpointValidator(),
-		},
-	}
-	frameworkSchema.Attributes["dataplex_custom_endpoint"] = framework_schema.StringAttribute{
 		Optional: true,
 		Validators: []validator.String{
 			CustomEndpointValidator(),
@@ -246,13 +227,12 @@ func configureDCLFrameworkProvider(frameworkSchema *framework_schema.Schema) {
 	}
 }
 
-func providerDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
+func ProviderDCLConfigure(d *schema.ResourceData, config *Config) interface{} {
 	config.ApikeysBasePath = d.Get(ApikeysEndpointEntryKey).(string)
 	config.AssuredWorkloadsBasePath = d.Get(AssuredWorkloadsEndpointEntryKey).(string)
 	config.CloudBuildWorkerPoolBasePath = d.Get(CloudBuildWorkerPoolEndpointEntryKey).(string)
 	config.ClouddeployBasePath = d.Get(ClouddeployEndpointEntryKey).(string)
 	config.CloudResourceManagerBasePath = d.Get(CloudResourceManagerEndpointEntryKey).(string)
-	config.DataplexBasePath = d.Get(DataplexEndpointEntryKey).(string)
 	config.EventarcBasePath = d.Get(EventarcEndpointEntryKey).(string)
 	config.FirebaserulesBasePath = d.Get(FirebaserulesEndpointEntryKey).(string)
 	config.GKEHubFeatureBasePath = d.Get(GKEHubFeatureEndpointEntryKey).(string)

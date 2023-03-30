@@ -62,7 +62,7 @@ func stepTimeoutCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v in
 	return nil
 }
 
-func resourceCloudBuildTrigger() *schema.Resource {
+func ResourceCloudBuildTrigger() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCloudBuildTriggerCreate,
 		Read:   resourceCloudBuildTriggerRead,
@@ -856,6 +856,12 @@ One of 'trigger_template', 'github', 'pubsub_config' or 'webhook_config' must be
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"enterprise_config_resource_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: `The resource name of the github enterprise config that should be applied to this installation.
+For example: "projects/{$projectId}/locations/{$locationId}/githubEnterpriseConfigs/{$configId}"`,
+						},
 						"name": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -1275,7 +1281,7 @@ Only populated on get requests.`,
 
 func resourceCloudBuildTriggerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1427,7 +1433,7 @@ func resourceCloudBuildTriggerCreate(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Trigger: %s", err)
 	}
@@ -1465,7 +1471,7 @@ func resourceCloudBuildTriggerCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceCloudBuildTriggerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1490,7 +1496,7 @@ func resourceCloudBuildTriggerRead(d *schema.ResourceData, meta interface{}) err
 
 	// To support import with the legacy id format.
 	url = strings.ReplaceAll(url, "/locations//", "/locations/global/")
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("CloudBuildTrigger %q", d.Id()))
 	}
@@ -1574,7 +1580,7 @@ func resourceCloudBuildTriggerRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceCloudBuildTriggerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1728,7 +1734,7 @@ func resourceCloudBuildTriggerUpdate(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating Trigger %q: %s", d.Id(), err)
@@ -1741,7 +1747,7 @@ func resourceCloudBuildTriggerUpdate(d *schema.ResourceData, meta interface{}) e
 
 func resourceCloudBuildTriggerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -1767,7 +1773,7 @@ func resourceCloudBuildTriggerDelete(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "Trigger")
 	}
@@ -2083,6 +2089,8 @@ func flattenCloudBuildTriggerGithub(v interface{}, d *schema.ResourceData, confi
 		flattenCloudBuildTriggerGithubPullRequest(original["pullRequest"], d, config)
 	transformed["push"] =
 		flattenCloudBuildTriggerGithubPush(original["push"], d, config)
+	transformed["enterprise_config_resource_name"] =
+		flattenCloudBuildTriggerGithubEnterpriseConfigResourceName(original["enterpriseConfigResourceName"], d, config)
 	return []interface{}{transformed}
 }
 func flattenCloudBuildTriggerGithubOwner(v interface{}, d *schema.ResourceData, config *Config) interface{} {
@@ -2148,6 +2156,10 @@ func flattenCloudBuildTriggerGithubPushBranch(v interface{}, d *schema.ResourceD
 }
 
 func flattenCloudBuildTriggerGithubPushTag(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	return v
+}
+
+func flattenCloudBuildTriggerGithubEnterpriseConfigResourceName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
@@ -2759,7 +2771,7 @@ func flattenCloudBuildTriggerBuildOptionsMachineType(v interface{}, d *schema.Re
 func flattenCloudBuildTriggerBuildOptionsDiskSizeGb(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -3255,6 +3267,13 @@ func expandCloudBuildTriggerGithub(v interface{}, d TerraformResourceData, confi
 		transformed["push"] = transformedPush
 	}
 
+	transformedEnterpriseConfigResourceName, err := expandCloudBuildTriggerGithubEnterpriseConfigResourceName(original["enterprise_config_resource_name"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedEnterpriseConfigResourceName); val.IsValid() && !isEmptyValue(val) {
+		transformed["enterpriseConfigResourceName"] = transformedEnterpriseConfigResourceName
+	}
+
 	return transformed, nil
 }
 
@@ -3353,6 +3372,10 @@ func expandCloudBuildTriggerGithubPushBranch(v interface{}, d TerraformResourceD
 }
 
 func expandCloudBuildTriggerGithubPushTag(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandCloudBuildTriggerGithubEnterpriseConfigResourceName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
 

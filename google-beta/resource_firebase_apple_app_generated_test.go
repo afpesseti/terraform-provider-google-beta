@@ -27,15 +27,16 @@ func TestAccFirebaseAppleApp_firebaseAppleAppBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"project_id":    getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+		"project_id":    GetTestProjectFromEnv(),
+		"display_name":  "tf-test Display Name Basic",
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseAppleAppDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseAppleAppDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseAppleApp_firebaseAppleAppBasicExample(context),
@@ -54,7 +55,7 @@ func testAccFirebaseAppleApp_firebaseAppleAppBasicExample(context map[string]int
 resource "google_firebase_apple_app" "default" {
   provider = google-beta
   project = "%{project_id}"
-  display_name = "Display Name Basic%{random_suffix}"
+  display_name = "%{display_name}"
   bundle_id = "apple.app.12345%{random_suffix}"
 }
 `, context)
@@ -64,17 +65,18 @@ func TestAccFirebaseAppleApp_firebaseAppleAppFullExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"project_id":    getTestProjectFromEnv(),
+		"org_id":        GetTestOrgFromEnv(t),
+		"project_id":    GetTestProjectFromEnv(),
 		"app_store_id":  12345,
 		"team_id":       9987654321,
-		"random_suffix": randString(t, 10),
+		"display_name":  "tf-test Display Name Full",
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseAppleAppDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseAppleAppDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseAppleApp_firebaseAppleAppFullExample(context),
@@ -94,7 +96,7 @@ func testAccFirebaseAppleApp_firebaseAppleAppFullExample(context map[string]inte
 resource "google_firebase_apple_app" "full" {
   provider = google-beta
   project = "%{project_id}"
-  display_name = "Display Name Full%{random_suffix}"
+  display_name = "%{display_name}"
   bundle_id = "apple.app.12345%{random_suffix}"
   app_store_id = "%{app_store_id}"
   team_id = "%{team_id}"
@@ -112,7 +114,7 @@ func testAccCheckFirebaseAppleAppDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FirebaseBasePath}}{{name}}")
 			if err != nil {
@@ -125,7 +127,7 @@ func testAccCheckFirebaseAppleAppDestroyProducer(t *testing.T) func(s *terraform
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("FirebaseAppleApp still exists at %s", url)
 			}

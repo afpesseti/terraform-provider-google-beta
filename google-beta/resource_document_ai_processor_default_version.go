@@ -24,7 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceDocumentAIProcessorDefaultVersion() *schema.Resource {
+func ResourceDocumentAIProcessorDefaultVersion() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceDocumentAIProcessorDefaultVersionCreate,
 		Read:   resourceDocumentAIProcessorDefaultVersionRead,
@@ -51,7 +51,8 @@ func resourceDocumentAIProcessorDefaultVersion() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: projectNumberDiffSuppress,
-				Description:      `The version to set`,
+				Description: `The version to set. Using 'stable' or 'rc' will cause the API to return the latest version in that release channel.
+Apply 'lifecycle.ignore_changes' to the 'version' field to suppress this diff.`,
 			},
 		},
 		UseJSONNumber: true,
@@ -60,7 +61,7 @@ func resourceDocumentAIProcessorDefaultVersion() *schema.Resource {
 
 func resourceDocumentAIProcessorDefaultVersionCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -97,7 +98,7 @@ func resourceDocumentAIProcessorDefaultVersionCreate(d *schema.ResourceData, met
 		url = strings.TrimPrefix(url, "https://")
 		url = "https://" + location + url
 	}
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating ProcessorDefaultVersion: %s", err)
 	}
@@ -116,7 +117,7 @@ func resourceDocumentAIProcessorDefaultVersionCreate(d *schema.ResourceData, met
 
 func resourceDocumentAIProcessorDefaultVersionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func resourceDocumentAIProcessorDefaultVersionRead(d *schema.ResourceData, meta 
 		url = strings.TrimPrefix(url, "https://")
 		url = "https://" + location + url
 	}
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("DocumentAIProcessorDefaultVersion %q", d.Id()))
 	}

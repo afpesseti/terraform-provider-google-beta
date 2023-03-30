@@ -27,13 +27,13 @@ func TestAccComputeHaVpnGateway_haVpnGatewayBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHaVpnGatewayDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeHaVpnGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeHaVpnGateway_haVpnGatewayBasicExample(context),
@@ -63,23 +63,23 @@ resource "google_compute_network" "network1" {
 `, context)
 }
 
-func TestAccComputeHaVpnGateway_computeHaVpnGatewayEncryptedInterconnectExample(t *testing.T) {
+func TestAccComputeHaVpnGateway_haVpnGatewayIpv6Example(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHaVpnGatewayDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeHaVpnGatewayDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHaVpnGateway_computeHaVpnGatewayEncryptedInterconnectExample(context),
+				Config: testAccComputeHaVpnGateway_haVpnGatewayIpv6Example(context),
 			},
 			{
-				ResourceName:            "google_compute_ha_vpn_gateway.vpn-gateway",
+				ResourceName:            "google_compute_ha_vpn_gateway.ha_gateway1",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"network", "region"},
@@ -88,72 +88,17 @@ func TestAccComputeHaVpnGateway_computeHaVpnGatewayEncryptedInterconnectExample(
 	})
 }
 
-func testAccComputeHaVpnGateway_computeHaVpnGatewayEncryptedInterconnectExample(context map[string]interface{}) string {
+func testAccComputeHaVpnGateway_haVpnGatewayIpv6Example(context map[string]interface{}) string {
 	return Nprintf(`
-resource "google_compute_ha_vpn_gateway" "vpn-gateway" {
-  name           = "tf-test-test-ha-vpngw%{random_suffix}"
-  network        = google_compute_network.network.id
-  vpn_interfaces {
-      id                      = 0
-      interconnect_attachment = google_compute_interconnect_attachment.attachment1.self_link
-  }
-  vpn_interfaces {
-      id                      = 1
-      interconnect_attachment = google_compute_interconnect_attachment.attachment2.self_link
-  }
+resource "google_compute_ha_vpn_gateway" "ha_gateway1" {
+  region   = "us-central1"
+  name     = "tf-test-ha-vpn-1%{random_suffix}"
+  network  = google_compute_network.network1.id
+  stack_type = "IPV4_IPV6"
 }
 
-resource "google_compute_interconnect_attachment" "attachment1" {
-  name                     = "tf-test-test-interconnect-attachment1%{random_suffix}"
-  edge_availability_domain = "AVAILABILITY_DOMAIN_1"
-  type                     = "PARTNER"
-  router                   = google_compute_router.router.id
-  encryption               = "IPSEC"
-  ipsec_internal_addresses = [
-    google_compute_address.address1.self_link,
-  ]
-}
-
-resource "google_compute_interconnect_attachment" "attachment2" {
-  name                     = "tf-test-test-interconnect-attachment2%{random_suffix}"
-  edge_availability_domain = "AVAILABILITY_DOMAIN_2"
-  type                     = "PARTNER"
-  router                   = google_compute_router.router.id
-  encryption               = "IPSEC"
-  ipsec_internal_addresses = [
-    google_compute_address.address2.self_link,
-  ]
-}
-
-resource "google_compute_address" "address1" {
-  name          = "tf-test-test-address1%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "IPSEC_INTERCONNECT"
-  address       = "192.168.1.0"
-  prefix_length = 29
-  network       = google_compute_network.network.self_link
-}
-
-resource "google_compute_address" "address2" {
-  name          = "tf-test-test-address2%{random_suffix}"
-  address_type  = "INTERNAL"
-  purpose       = "IPSEC_INTERCONNECT"
-  address       = "192.168.2.0"
-  prefix_length = 29
-  network       = google_compute_network.network.self_link
-}
-
-resource "google_compute_router" "router" {
-  name                          = "tf-test-test-router%{random_suffix}"
-  network                       = google_compute_network.network.name
-  encrypted_interconnect_router = true
-  bgp {
-    asn = 16550
-  }
-}
-
-resource "google_compute_network" "network" {
-  name                    = "tf-test-test-network%{random_suffix}"
+resource "google_compute_network" "network1" {
+  name                    = "network1%{random_suffix}"
   auto_create_subnetworks = false
 }
 `, context)
@@ -169,7 +114,7 @@ func testAccCheckComputeHaVpnGatewayDestroyProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/vpnGateways/{{name}}")
 			if err != nil {
@@ -182,7 +127,7 @@ func testAccCheckComputeHaVpnGatewayDestroyProducer(t *testing.T) func(s *terraf
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ComputeHaVpnGateway still exists at %s", url)
 			}

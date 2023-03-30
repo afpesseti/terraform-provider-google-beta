@@ -27,7 +27,7 @@ import (
 	compute "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/compute/beta"
 )
 
-func resourceComputeForwardingRule() *schema.Resource {
+func ResourceComputeForwardingRule() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeForwardingRuleCreate,
 		Read:   resourceComputeForwardingRuleRead,
@@ -306,7 +306,7 @@ func resourceComputeForwardingRuleCreate(d *schema.ResourceData, meta interface{
 	}
 	d.SetId(id)
 	directive := CreateDirective
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -371,7 +371,7 @@ func resourceComputeForwardingRuleRead(d *schema.ResourceData, meta interface{})
 		Target:                        dcl.String(d.Get("target").(string)),
 	}
 
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -508,7 +508,7 @@ func resourceComputeForwardingRuleUpdate(d *schema.ResourceData, meta interface{
 		Target:                        dcl.String(d.Get("target").(string)),
 	}
 	directive := UpdateDirective
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -575,7 +575,7 @@ func resourceComputeForwardingRuleDelete(d *schema.ResourceData, meta interface{
 	}
 
 	log.Printf("[DEBUG] Deleting ForwardingRule %q", d.Id())
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

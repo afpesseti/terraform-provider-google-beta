@@ -27,13 +27,13 @@ func TestAccGameServicesGameServerDeployment_gameServiceDeploymentBasicExample(t
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckGameServicesGameServerDeploymentDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGameServicesGameServerDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGameServicesGameServerDeployment_gameServiceDeploymentBasicExample(context),
@@ -67,7 +67,7 @@ func testAccCheckGameServicesGameServerDeploymentDestroyProducer(t *testing.T) f
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{GameServicesBasePath}}projects/{{project}}/locations/{{location}}/gameServerDeployments/{{deployment_id}}")
 			if err != nil {
@@ -80,7 +80,7 @@ func testAccCheckGameServicesGameServerDeploymentDestroyProducer(t *testing.T) f
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("GameServicesGameServerDeployment still exists at %s", url)
 			}

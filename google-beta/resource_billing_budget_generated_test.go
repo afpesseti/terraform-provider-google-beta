@@ -27,14 +27,14 @@ func TestAccBillingBudget_billingBudgetBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestMasterBillingAccountFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"billing_acct":  GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetBasicExample(context),
@@ -75,14 +75,14 @@ func TestAccBillingBudget_billingBudgetLastperiodExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestMasterBillingAccountFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"billing_acct":  GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetLastperiodExample(context),
@@ -132,14 +132,14 @@ func TestAccBillingBudget_billingBudgetFilterExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestMasterBillingAccountFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"billing_acct":  GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetFilterExample(context),
@@ -196,14 +196,14 @@ func TestAccBillingBudget_billingBudgetNotifyExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestMasterBillingAccountFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"billing_acct":  GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetNotifyExample(context),
@@ -273,14 +273,14 @@ func TestAccBillingBudget_billingBudgetCustomperiodExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestMasterBillingAccountFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"billing_acct":  GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetCustomperiodExample(context),
@@ -348,14 +348,14 @@ func TestAccBillingBudget_billingBudgetOptionalExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"billing_acct":  getTestMasterBillingAccountFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"billing_acct":  GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBillingBudgetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBillingBudget_billingBudgetOptionalExample(context),
@@ -409,7 +409,7 @@ func testAccCheckBillingBudgetDestroyProducer(t *testing.T) func(s *terraform.St
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{BillingBasePath}}billingAccounts/{{billing_account}}/budgets/{{name}}")
 			if err != nil {
@@ -422,7 +422,7 @@ func testAccCheckBillingBudgetDestroyProducer(t *testing.T) func(s *terraform.St
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("BillingBudget still exists at %s", url)
 			}

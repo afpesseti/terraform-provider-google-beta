@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"golang.org/x/oauth2"
 
 	"google.golang.org/api/option"
 )
@@ -43,10 +44,12 @@ type frameworkProvider struct {
 	gRPCLoggingOptions         []option.ClientOption
 	pollInterval               time.Duration
 	project                    types.String
-	region                     string
+	region                     types.String
+	zone                       types.String
 	requestBatcherIam          *RequestBatcher
 	requestBatcherServiceUsage *RequestBatcher
 	scopes                     []string
+	tokenSource                oauth2.TokenSource
 	userAgent                  string
 	userProjectOverride        bool
 	version                    string
@@ -90,6 +93,7 @@ type frameworkProvider struct {
 	DataformBasePath             string
 	DataFusionBasePath           string
 	DataLossPreventionBasePath   string
+	DataplexBasePath             string
 	DataprocBasePath             string
 	DataprocMetastoreBasePath    string
 	DatastoreBasePath            string
@@ -446,6 +450,12 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
 				},
 			},
 			"data_loss_prevention_custom_endpoint": &schema.StringAttribute{
+				Optional: true,
+				Validators: []validator.String{
+					CustomEndpointValidator(),
+				},
+			},
+			"dataplex_custom_endpoint": &schema.StringAttribute{
 				Optional: true,
 				Validators: []validator.String{
 					CustomEndpointValidator(),
@@ -901,7 +911,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
 		},
 	}
 
-	configureDCLFrameworkProvider(&resp.Schema)
+	configureDCLCustomEndpointAttributesFramework(&resp.Schema)
 }
 
 // Configure prepares an API client for data sources and resources.
@@ -915,7 +925,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
 	}
 
 	// Configuration values are now available.
-	p.ConfigureWithData(ctx, data, req.TerraformVersion, &resp.Diagnostics)
+	p.LoadAndValidateFramework(ctx, data, req.TerraformVersion, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -928,9 +938,13 @@ func (p *frameworkProvider) Configure(ctx context.Context, req provider.Configur
 // DataSources defines the data sources implemented in the provider.
 func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		NewGoogleClientConfigDataSource,
+		NewGoogleClientOpenIDUserinfoDataSource,
 		NewGoogleDnsManagedZoneDataSource,
 		NewGoogleDnsRecordSetDataSource,
 		NewGoogleDnsKeysDataSource,
+		NewGoogleFirebaseAppleAppConfigDataSource,
+		NewGoogleFirebaseWebAppConfigDataSource,
 	}
 }
 

@@ -51,7 +51,7 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 	return
 }
 
-func resourceBigQueryDataset() *schema.Resource {
+func ResourceBigQueryDataset() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceBigQueryDatasetCreate,
 		Read:   resourceBigQueryDatasetRead,
@@ -86,6 +86,21 @@ underscores (_). The maximum length is 1,024 characters.`,
 				Description: `An array of objects that define dataset access for one or more entities.`,
 				Elem:        bigqueryDatasetAccessSchema(),
 				// Default schema.HashSchema is used.
+			},
+			"default_collation": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
+				Description: `Defines the default collation specification of future tables created
+in the dataset. If a table is created in this dataset without table-level
+default collation, then the table inherits the dataset default collation,
+which is applied to the string fields that do not have explicit collation
+specified. A change to this field affects only tables created afterwards,
+and does not alter the existing tables.
+
+The following values are supported:
+- 'und:ci': undetermined locale, case insensitive.
+- '': empty string. Default to case-sensitive behavior.`,
 			},
 			"default_encryption_configuration": {
 				Type:     schema.TypeList,
@@ -152,6 +167,14 @@ expiration time indicated by this property.`,
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: `A descriptive name for the dataset`,
+			},
+			"is_case_insensitive": {
+				Type:     schema.TypeBool,
+				Computed: true,
+				Optional: true,
+				Description: `TRUE if the dataset and its table names are case-insensitive, otherwise FALSE.
+By default, this is FALSE, which means the dataset and its table names are
+case-sensitive. This field does not affect routine references.`,
 			},
 			"labels": {
 				Type:     schema.TypeMap,
@@ -379,7 +402,7 @@ is 1,024 characters.`,
 
 func resourceBigQueryDatasetCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -424,7 +447,7 @@ func resourceBigQueryDatasetCreate(d *schema.ResourceData, meta interface{}) err
 	friendlyNameProp, err := expandBigQueryDatasetFriendlyName(d.Get("friendly_name"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("friendly_name"); !isEmptyValue(reflect.ValueOf(friendlyNameProp)) && (ok || !reflect.DeepEqual(v, friendlyNameProp)) {
+	} else if v, ok := d.GetOkExists("friendly_name"); ok || !reflect.DeepEqual(v, friendlyNameProp) {
 		obj["friendlyName"] = friendlyNameProp
 	}
 	labelsProp, err := expandBigQueryDatasetLabels(d.Get("labels"), d, config)
@@ -444,6 +467,18 @@ func resourceBigQueryDatasetCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	} else if v, ok := d.GetOkExists("default_encryption_configuration"); !isEmptyValue(reflect.ValueOf(defaultEncryptionConfigurationProp)) && (ok || !reflect.DeepEqual(v, defaultEncryptionConfigurationProp)) {
 		obj["defaultEncryptionConfiguration"] = defaultEncryptionConfigurationProp
+	}
+	isCaseInsensitiveProp, err := expandBigQueryDatasetIsCaseInsensitive(d.Get("is_case_insensitive"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("is_case_insensitive"); !isEmptyValue(reflect.ValueOf(isCaseInsensitiveProp)) && (ok || !reflect.DeepEqual(v, isCaseInsensitiveProp)) {
+		obj["isCaseInsensitive"] = isCaseInsensitiveProp
+	}
+	defaultCollationProp, err := expandBigQueryDatasetDefaultCollation(d.Get("default_collation"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("default_collation"); !isEmptyValue(reflect.ValueOf(defaultCollationProp)) && (ok || !reflect.DeepEqual(v, defaultCollationProp)) {
+		obj["defaultCollation"] = defaultCollationProp
 	}
 
 	url, err := replaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets")
@@ -465,7 +500,7 @@ func resourceBigQueryDatasetCreate(d *schema.ResourceData, meta interface{}) err
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Dataset: %s", err)
 	}
@@ -484,7 +519,7 @@ func resourceBigQueryDatasetCreate(d *schema.ResourceData, meta interface{}) err
 
 func resourceBigQueryDatasetRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -507,7 +542,7 @@ func resourceBigQueryDatasetRead(d *schema.ResourceData, meta interface{}) error
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("BigQueryDataset %q", d.Id()))
 	}
@@ -573,6 +608,12 @@ func resourceBigQueryDatasetRead(d *schema.ResourceData, meta interface{}) error
 	if err := d.Set("default_encryption_configuration", flattenBigQueryDatasetDefaultEncryptionConfiguration(res["defaultEncryptionConfiguration"], d, config)); err != nil {
 		return fmt.Errorf("Error reading Dataset: %s", err)
 	}
+	if err := d.Set("is_case_insensitive", flattenBigQueryDatasetIsCaseInsensitive(res["isCaseInsensitive"], d, config)); err != nil {
+		return fmt.Errorf("Error reading Dataset: %s", err)
+	}
+	if err := d.Set("default_collation", flattenBigQueryDatasetDefaultCollation(res["defaultCollation"], d, config)); err != nil {
+		return fmt.Errorf("Error reading Dataset: %s", err)
+	}
 	if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
 		return fmt.Errorf("Error reading Dataset: %s", err)
 	}
@@ -582,7 +623,7 @@ func resourceBigQueryDatasetRead(d *schema.ResourceData, meta interface{}) error
 
 func resourceBigQueryDatasetUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -635,7 +676,7 @@ func resourceBigQueryDatasetUpdate(d *schema.ResourceData, meta interface{}) err
 	friendlyNameProp, err := expandBigQueryDatasetFriendlyName(d.Get("friendly_name"), d, config)
 	if err != nil {
 		return err
-	} else if v, ok := d.GetOkExists("friendly_name"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, friendlyNameProp)) {
+	} else if v, ok := d.GetOkExists("friendly_name"); ok || !reflect.DeepEqual(v, friendlyNameProp) {
 		obj["friendlyName"] = friendlyNameProp
 	}
 	labelsProp, err := expandBigQueryDatasetLabels(d.Get("labels"), d, config)
@@ -656,6 +697,18 @@ func resourceBigQueryDatasetUpdate(d *schema.ResourceData, meta interface{}) err
 	} else if v, ok := d.GetOkExists("default_encryption_configuration"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, defaultEncryptionConfigurationProp)) {
 		obj["defaultEncryptionConfiguration"] = defaultEncryptionConfigurationProp
 	}
+	isCaseInsensitiveProp, err := expandBigQueryDatasetIsCaseInsensitive(d.Get("is_case_insensitive"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("is_case_insensitive"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, isCaseInsensitiveProp)) {
+		obj["isCaseInsensitive"] = isCaseInsensitiveProp
+	}
+	defaultCollationProp, err := expandBigQueryDatasetDefaultCollation(d.Get("default_collation"), d, config)
+	if err != nil {
+		return err
+	} else if v, ok := d.GetOkExists("default_collation"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, defaultCollationProp)) {
+		obj["defaultCollation"] = defaultCollationProp
+	}
 
 	url, err := replaceVars(d, config, "{{BigQueryBasePath}}projects/{{project}}/datasets/{{dataset_id}}")
 	if err != nil {
@@ -669,7 +722,7 @@ func resourceBigQueryDatasetUpdate(d *schema.ResourceData, meta interface{}) err
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PUT", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := SendRequestWithTimeout(config, "PUT", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating Dataset %q: %s", d.Id(), err)
@@ -682,7 +735,7 @@ func resourceBigQueryDatasetUpdate(d *schema.ResourceData, meta interface{}) err
 
 func resourceBigQueryDatasetDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -708,7 +761,7 @@ func resourceBigQueryDatasetDelete(d *schema.ResourceData, meta interface{}) err
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "Dataset")
 	}
@@ -894,7 +947,7 @@ func flattenBigQueryDatasetAccessRoutineRoutineId(v interface{}, d *schema.Resou
 func flattenBigQueryDatasetCreationTime(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -928,7 +981,7 @@ func flattenBigQueryDatasetDatasetReferenceDatasetId(v interface{}, d *schema.Re
 func flattenBigQueryDatasetDefaultTableExpirationMs(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -945,7 +998,7 @@ func flattenBigQueryDatasetDefaultTableExpirationMs(v interface{}, d *schema.Res
 func flattenBigQueryDatasetDefaultPartitionExpirationMs(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -978,7 +1031,7 @@ func flattenBigQueryDatasetLabels(v interface{}, d *schema.ResourceData, config 
 func flattenBigQueryDatasetLastModifiedTime(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -1016,6 +1069,14 @@ func flattenBigQueryDatasetDefaultEncryptionConfiguration(v interface{}, d *sche
 	return []interface{}{transformed}
 }
 func flattenBigQueryDatasetDefaultEncryptionConfigurationKmsKeyName(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	return v
+}
+
+func flattenBigQueryDatasetIsCaseInsensitive(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	return v
+}
+
+func flattenBigQueryDatasetDefaultCollation(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
 }
 
@@ -1336,5 +1397,13 @@ func expandBigQueryDatasetDefaultEncryptionConfiguration(v interface{}, d Terraf
 }
 
 func expandBigQueryDatasetDefaultEncryptionConfigurationKmsKeyName(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandBigQueryDatasetIsCaseInsensitive(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandBigQueryDatasetDefaultCollation(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }

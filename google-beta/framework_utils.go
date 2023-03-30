@@ -29,7 +29,7 @@ func CompileUserAgentString(ctx context.Context, name, tfVersion, provVersion st
 	return ua
 }
 
-func getCurrUserEmail(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
+func GetCurrentUserEmailFramework(p *frameworkProvider, userAgent string, diags *diag.Diagnostics) string {
 	// When environment variables UserProjectOverride and BillingProject are set for the provider,
 	// the header X-Goog-User-Project is set for the API requests.
 	// But it causes an error when calling GetCurrUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
@@ -63,10 +63,10 @@ func generateFrameworkUserAgentString(metaData *ProviderMetaModel, currUserAgent
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
 func getProjectFramework(rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	return getProjectFromSchemaFramework("project", rVal, pVal, diags)
+	return getProjectFromFrameworkSchema("project", rVal, pVal, diags)
 }
 
-func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
+func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
 	if !rVal.IsNull() && rVal.ValueString() != "" {
 		return rVal
 	}
@@ -80,7 +80,7 @@ func getProjectFromSchemaFramework(projectSchemaField string, rVal, pVal types.S
 }
 
 func handleDatasourceNotFoundError(ctx context.Context, err error, state *tfsdk.State, resource string, diags *diag.Diagnostics) {
-	if isGoogleApiErrorWithCode(err, 404) {
+	if IsGoogleApiErrorWithCode(err, 404) {
 		tflog.Warn(ctx, fmt.Sprintf("Removing %s because it's gone", resource))
 		// The resource doesn't exist anymore
 		state.RemoveResource(ctx)
@@ -123,17 +123,4 @@ func parseProjectFieldValueFramework(resourceType, fieldValue, projectSchemaFiel
 
 		resourceType: resourceType,
 	}
-}
-
-func getProjectFromFrameworkSchema(projectSchemaField string, rVal, pVal types.String, diags *diag.Diagnostics) types.String {
-	if !rVal.IsNull() && projectSchemaField != "" {
-		return rVal
-	}
-
-	if !pVal.IsNull() {
-		return pVal
-	}
-
-	diags.AddError("required field is not set", fmt.Sprintf("%s must be set", projectSchemaField))
-	return types.String{}
 }

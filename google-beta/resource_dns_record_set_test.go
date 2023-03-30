@@ -73,11 +73,11 @@ func TestIpv6AddressDiffSuppress(t *testing.T) {
 func TestAccDNSRecordSet_basic(t *testing.T) {
 	t.Parallel()
 
-	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
@@ -91,7 +91,7 @@ func TestAccDNSRecordSet_basic(t *testing.T) {
 			// Check both import formats
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -102,18 +102,18 @@ func TestAccDNSRecordSet_basic(t *testing.T) {
 func TestAccDNSRecordSet_Update(t *testing.T) {
 	t.Parallel()
 
-	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -122,7 +122,7 @@ func TestAccDNSRecordSet_Update(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -131,7 +131,7 @@ func TestAccDNSRecordSet_Update(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -142,18 +142,18 @@ func TestAccDNSRecordSet_Update(t *testing.T) {
 func TestAccDNSRecordSet_changeType(t *testing.T) {
 	t.Parallel()
 
-	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -162,7 +162,7 @@ func TestAccDNSRecordSet_changeType(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./CNAME", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./CNAME", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -173,12 +173,12 @@ func TestAccDNSRecordSet_changeType(t *testing.T) {
 func TestAccDNSRecordSet_nestedNS(t *testing.T) {
 	t.Parallel()
 
-	zoneName := fmt.Sprintf("dnszone-test-ns-%s", randString(t, 10))
+	zoneName := fmt.Sprintf("dnszone-test-ns-%s", RandString(t, 10))
 	recordSetName := fmt.Sprintf("\"nested.%s.hashicorptest.com.\"", zoneName)
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_NS(zoneName, recordSetName, 300),
@@ -196,19 +196,19 @@ func TestAccDNSRecordSet_nestedNS(t *testing.T) {
 func TestAccDNSRecordSet_secondaryNS(t *testing.T) {
 	t.Parallel()
 
-	zoneName := fmt.Sprintf("dnszone-test-ns-%s", randString(t, 10))
+	zoneName := fmt.Sprintf("dnszone-test-ns-%s", RandString(t, 10))
 	recordSetName := "google_dns_managed_zone.parent-zone.dns_name"
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_NS(zoneName, recordSetName, 300),
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s.hashicorptest.com./NS", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s.hashicorptest.com./NS", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -219,11 +219,11 @@ func TestAccDNSRecordSet_secondaryNS(t *testing.T) {
 func TestAccDNSRecordSet_quotedTXT(t *testing.T) {
 	t.Parallel()
 
-	zoneName := fmt.Sprintf("dnszone-test-txt-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	zoneName := fmt.Sprintf("dnszone-test-txt-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_quotedTXT(zoneName, 300),
@@ -241,18 +241,18 @@ func TestAccDNSRecordSet_quotedTXT(t *testing.T) {
 func TestAccDNSRecordSet_uppercaseMX(t *testing.T) {
 	t.Parallel()
 
-	zoneName := fmt.Sprintf("dnszone-test-txt-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	zoneName := fmt.Sprintf("dnszone-test-txt-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_uppercaseMX(zoneName, 300),
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./MX", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./MX", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -263,21 +263,21 @@ func TestAccDNSRecordSet_uppercaseMX(t *testing.T) {
 func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 	t.Parallel()
 
-	networkName := fmt.Sprintf("tf-test-network-%s", randString(t, 10))
-	backendName := fmt.Sprintf("tf-test-backend-%s", randString(t, 10))
-	forwardingRuleName := fmt.Sprintf("tf-test-forwarding-rule-%s", randString(t, 10))
-	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	networkName := fmt.Sprintf("tf-test-network-%s", RandString(t, 10))
+	backendName := fmt.Sprintf("tf-test-backend-%s", RandString(t, 10))
+	forwardingRuleName := fmt.Sprintf("tf-test-forwarding-rule-%s", RandString(t, 10))
+	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_routingPolicyWRR(networkName, backendName, forwardingRuleName, zoneName, 300),
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -286,7 +286,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -295,7 +295,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -306,30 +306,27 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 func TestAccDNSRecordSet_changeRouting(t *testing.T) {
 	t.Parallel()
 
-	networkName := fmt.Sprintf("tf-test-network-%s", randString(t, 10))
-	backendName := fmt.Sprintf("tf-test-backend-%s", randString(t, 10))
-	forwardingRuleName := fmt.Sprintf("tf-test-forwarding-rule-%s", randString(t, 10))
-	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_basic(zoneName, "127.0.0.10", 300),
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDnsRecordSet_routingPolicyGEO(networkName, backendName, forwardingRuleName, zoneName, 300),
+				Config: testAccDnsRecordSet_routingPolicy(zoneName, 300),
 			},
 			{
 				ResourceName:      "google_dns_record_set.foobar",
-				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", getTestProjectFromEnv(), zoneName, zoneName),
+				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -341,11 +338,11 @@ func TestAccDNSRecordSet_changeRouting(t *testing.T) {
 func TestAccDNSRecordSet_interpolated(t *testing.T) {
 	t.Parallel()
 
-	zoneName := fmt.Sprintf("dnszone-test-%s", randString(t, 10))
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDnsRecordSetDestroyProducer(t),
+	zoneName := fmt.Sprintf("dnszone-test-%s", RandString(t, 10))
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDnsRecordSetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDnsRecordSet_interpolated(zoneName),
@@ -371,7 +368,7 @@ func testAccCheckDnsRecordSetDestroyProducer(t *testing.T) func(s *terraform.Sta
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{managed_zone}}/rrsets/{{name}}/{{type}}")
 			if err != nil {
@@ -384,7 +381,7 @@ func testAccCheckDnsRecordSetDestroyProducer(t *testing.T) func(s *terraform.Sta
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("DNSResourceDnsRecordSet still exists at %s", url)
 			}
@@ -410,6 +407,34 @@ resource "google_dns_record_set" "foobar" {
   ttl          = %d
 }
 `, zoneName, zoneName, zoneName, addr2, ttl)
+}
+
+func testAccDnsRecordSet_routingPolicy(zoneName string, ttl int) string {
+	return fmt.Sprintf(`
+resource "google_dns_managed_zone" "parent-zone" {
+  name        = "%s"
+  dns_name    = "%s.hashicorptest.com."
+  description = "Test Description"
+}
+
+resource "google_dns_record_set" "foobar" {
+  managed_zone = google_dns_managed_zone.parent-zone.name
+  name         = "test-record.%s.hashicorptest.com."
+  type         = "A"
+  ttl          = %d
+  routing_policy {
+    wrr {
+      weight  = 0
+      rrdatas = ["1.2.3.4", "4.3.2.1"]
+    }
+
+    wrr {
+      weight  = 0
+      rrdatas = ["2.3.4.5", "5.4.3.2"]
+    }
+  }
+}
+`, zoneName, zoneName, zoneName, ttl)
 }
 
 func testAccDnsRecordSet_NS(name string, recordSetName string, ttl int) string {
@@ -508,6 +533,7 @@ resource "google_compute_forwarding_rule" "default" {
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.backend.id
   all_ports             = true
+  allow_global_access   = true
   network               = google_compute_network.default.name
 }
 
@@ -515,6 +541,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   name        = "%s"
   dns_name    = "%s.hashicorptest.com."
   description = "Test Description"
+  visibility = "private"
 }
 
 resource "google_dns_record_set" "foobar" {
@@ -572,6 +599,7 @@ resource "google_compute_forwarding_rule" "default" {
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.backend.id
   all_ports             = true
+  allow_global_access   = true
   network               = google_compute_network.default.name
 }
 
@@ -579,6 +607,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   name        = "%s"
   dns_name    = "%s.hashicorptest.com."
   description = "Test Description"
+  visibility = "private"
 }
 
 resource "google_dns_record_set" "foobar" {
@@ -638,6 +667,7 @@ resource "google_compute_forwarding_rule" "default" {
   load_balancing_scheme = "INTERNAL"
   backend_service       = google_compute_region_backend_service.backend.id
   all_ports             = true
+  allow_global_access   = true
   network               = google_compute_network.default.name
 }
 
@@ -645,6 +675,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   name        = "%s"
   dns_name    = "%s.hashicorptest.com."
   description = "Test Description"
+  visibility = "private"
 }
 
 resource "google_dns_record_set" "foobar" {

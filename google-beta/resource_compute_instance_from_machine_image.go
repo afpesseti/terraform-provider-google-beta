@@ -10,7 +10,7 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func resourceComputeInstanceFromMachineImage() *schema.Resource {
+func ResourceComputeInstanceFromMachineImage() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceFromMachineImageCreate,
 		Read:   resourceComputeInstanceRead,
@@ -20,16 +20,16 @@ func resourceComputeInstanceFromMachineImage() *schema.Resource {
 		// Import doesn't really make sense, because you could just import
 		// as a google_compute_instance.
 
-		Timeouts: resourceComputeInstance().Timeouts,
+		Timeouts: ResourceComputeInstance().Timeouts,
 
 		Schema:        computeInstanceFromMachineImageSchema(),
-		CustomizeDiff: resourceComputeInstance().CustomizeDiff,
+		CustomizeDiff: ResourceComputeInstance().CustomizeDiff,
 		UseJSONNumber: true,
 	}
 }
 
 func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
-	s := resourceComputeInstance().Schema
+	s := ResourceComputeInstance().Schema
 
 	for _, field := range []string{"boot_disk", "machine_type", "network_interface"} {
 		// The user can set these fields as an override, but doesn't need to -
@@ -92,7 +92,7 @@ func computeInstanceFromMachineImageSchema() map[string]*schema.Schema {
 
 func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, instance.Name))
 
 	// Wait for the operation to complete
-	waitErr := computeOperationWaitTime(config, op, project,
+	waitErr := ComputeOperationWaitTime(config, op, project,
 		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
 	if waitErr != nil {
 		// The resource didn't actually create

@@ -15,6 +15,7 @@
 package google
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,20 +25,32 @@ func TestAccRuntimeConfigConfigIamBindingGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 		"role":          "roles/viewer",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRuntimeConfigConfigIamBinding_basicGenerated(context),
 			},
 			{
+				ResourceName:      "google_runtimeconfig_config_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/configs/%s roles/viewer", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				// Test Iam Binding update
 				Config: testAccRuntimeConfigConfigIamBinding_updateGenerated(context),
+			},
+			{
+				ResourceName:      "google_runtimeconfig_config_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/configs/%s roles/viewer", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -47,17 +60,23 @@ func TestAccRuntimeConfigConfigIamMemberGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 		"role":          "roles/viewer",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccRuntimeConfigConfigIamMember_basicGenerated(context),
+			},
+			{
+				ResourceName:      "google_runtimeconfig_config_iam_member.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/configs/%s roles/viewer user:admin@hashicorptest.com", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -67,19 +86,31 @@ func TestAccRuntimeConfigConfigIamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 		"role":          "roles/viewer",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRuntimeConfigConfigIamPolicy_basicGenerated(context),
 			},
 			{
+				ResourceName:      "google_runtimeconfig_config_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/configs/%s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccRuntimeConfigConfigIamPolicy_emptyBinding(context),
+			},
+			{
+				ResourceName:      "google_runtimeconfig_config_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("projects/%s/configs/%s", GetTestProjectFromEnv(), fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])),
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

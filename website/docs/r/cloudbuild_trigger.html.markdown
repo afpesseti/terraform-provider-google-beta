@@ -464,6 +464,26 @@ resource "google_cloudbuild_trigger" "bbs-pull-request-trigger" {
   filename = "cloudbuild.yaml"
 }
 ```
+## Example Usage - Cloudbuild Trigger Github Enterprise
+
+
+```hcl
+resource "google_cloudbuild_trigger" "ghe-trigger" {
+  name        = "terraform-ghe-trigger"
+  location    = "us-central1"
+
+  github {
+    owner = "hashicorp"
+    name  = "terraform-provider-google"
+    push {
+      branch = "^main$"
+    }
+    enterprise_config_resource_name = "projects/123456789/locations/us-central1/githubEnterpriseConfigs/configID"
+  }
+
+  filename = "cloudbuild.yaml"
+}
+```
 
 ## Argument Reference
 
@@ -774,6 +794,11 @@ The following arguments are supported:
   filter to match changes in refs, like branches or tags. Specify only one of `pull_request` or `push`.
   Structure is [documented below](#nested_push).
 
+* `enterprise_config_resource_name` -
+  (Optional)
+  The resource name of the github enterprise config that should be applied to this installation.
+  For example: "projects/{$projectId}/locations/{$locationId}/githubEnterpriseConfigs/{$configId}"
+
 
 <a name="nested_pull_request"></a>The `pull_request` block supports:
 
@@ -863,6 +888,7 @@ The following arguments are supported:
 <a name="nested_pubsub_config"></a>The `pubsub_config` block supports:
 
 * `subscription` -
+  (Output)
   Output only. Name of the subscription.
 
 * `topic` -
@@ -874,6 +900,7 @@ The following arguments are supported:
   Service account that will make the push request.
 
 * `state` -
+  (Output)
   Potential issues with the underlying Pub/Sub subscription configuration.
   Only populated on get requests.
 
@@ -884,6 +911,7 @@ The following arguments are supported:
   Resource name for the secret required as a URL parameter.
 
 * `state` -
+  (Output)
   Potential issues with the underlying Pub/Sub subscription configuration.
   Only populated on get requests.
 
@@ -1211,6 +1239,7 @@ The following arguments are supported:
   Path globs used to match files in the build's workspace.
 
 * `timing` -
+  (Output)
   Output only. Stores timing information for pushing all artifact objects.
   Structure is [documented below](#nested_timing).
 

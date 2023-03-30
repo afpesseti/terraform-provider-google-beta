@@ -23,7 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceComputeNetworkEndpoint() *schema.Resource {
+func ResourceComputeNetworkEndpoint() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeNetworkEndpointCreate,
 		Read:   resourceComputeNetworkEndpointRead,
@@ -64,10 +64,12 @@ This is required for network endpoints of type GCE_VM_IP_PORT.
 The instance must be in the same zone of network endpoint group.`,
 			},
 			"port": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				ForceNew:    true,
-				Description: `Port number of network endpoint.`,
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+				Description: `Port number of network endpoint.
+**Note** 'port' is required unless the Network Endpoint Group is created
+with the type of 'GCE_VM_IP'`,
 			},
 			"zone": {
 				Type:             schema.TypeString,
@@ -90,7 +92,7 @@ The instance must be in the same zone of network endpoint group.`,
 
 func resourceComputeNetworkEndpointCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -146,7 +148,7 @@ func resourceComputeNetworkEndpointCreate(d *schema.ResourceData, meta interface
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating NetworkEndpoint: %s", err)
 	}
@@ -158,7 +160,7 @@ func resourceComputeNetworkEndpointCreate(d *schema.ResourceData, meta interface
 	}
 	d.SetId(id)
 
-	err = computeOperationWaitTime(
+	err = ComputeOperationWaitTime(
 		config, res, project, "Creating NetworkEndpoint", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 
@@ -175,7 +177,7 @@ func resourceComputeNetworkEndpointCreate(d *schema.ResourceData, meta interface
 
 func resourceComputeNetworkEndpointRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -198,7 +200,7 @@ func resourceComputeNetworkEndpointRead(d *schema.ResourceData, meta interface{}
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "POST", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "POST", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ComputeNetworkEndpoint %q", d.Id()))
 	}
@@ -246,7 +248,7 @@ func resourceComputeNetworkEndpointRead(d *schema.ResourceData, meta interface{}
 
 func resourceComputeNetworkEndpointDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -305,12 +307,12 @@ func resourceComputeNetworkEndpointDelete(d *schema.ResourceData, meta interface
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "NetworkEndpoint")
 	}
 
-	err = computeOperationWaitTime(
+	err = ComputeOperationWaitTime(
 		config, res, project, "Deleting NetworkEndpoint", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 

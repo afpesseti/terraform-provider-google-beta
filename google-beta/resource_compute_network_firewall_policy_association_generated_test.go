@@ -30,14 +30,14 @@ func TestAccComputeNetworkFirewallPolicyAssociation_GlobalHandWritten(t *testing
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeNetworkFirewallPolicyAssociationDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkFirewallPolicyAssociationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeNetworkFirewallPolicyAssociation_GlobalHandWritten(context),
@@ -117,7 +117,7 @@ func testAccCheckComputeNetworkFirewallPolicyAssociationDestroyProducer(t *testi
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
@@ -132,7 +132,7 @@ func testAccCheckComputeNetworkFirewallPolicyAssociationDestroyProducer(t *testi
 				ShortName:        dcl.StringOrNil(rs.Primary.Attributes["short_name"]),
 			}
 
-			client := NewDCLComputeClient(config, config.userAgent, billingProject, 0)
+			client := NewDCLComputeClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetNetworkFirewallPolicyAssociation(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_compute_network_firewall_policy_association still exists %v", obj)

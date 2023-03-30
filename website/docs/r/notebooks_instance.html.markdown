@@ -114,8 +114,8 @@ resource "google_notebooks_instance" "instance" {
     image_family = "tf-latest-cpu"
   }
 
-  instance_owners = ["admin@hashicorptest.com"]
-  service_account = "emailAddress:my@service-account.com"
+  instance_owners = [ "my@service-account.com"]
+  service_account = "my@service-account.com"
 
   install_gpu_driver = true
   boot_disk_type = "PD_SSD"
@@ -394,6 +394,9 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `proxy_uri` -
   The proxy endpoint that is used to access the Jupyter notebook.
+  Only returned when the resource is in a `PROVISIONED` state. If
+  needed you can utilize `terraform apply -refresh-only` to await
+  the population of this value.
 
 * `state` -
   The state of this instance.

@@ -192,7 +192,7 @@ resource "google_bigquery_dataset" "private" {
   description = "This dataset is private"
   access {
     role          = "OWNER"
-    user_by_email = "emailAddress:my@service-account.com"
+    user_by_email = "my@service-account.com"
   }
   access {
     routine {
@@ -292,6 +292,24 @@ The following arguments are supported:
   all newly-created partitioned tables in the dataset will have encryption key set to
   this value, unless table creation request (or query) overrides the key.
   Structure is [documented below](#nested_default_encryption_configuration).
+
+* `is_case_insensitive` -
+  (Optional)
+  TRUE if the dataset and its table names are case-insensitive, otherwise FALSE.
+  By default, this is FALSE, which means the dataset and its table names are
+  case-sensitive. This field does not affect routine references.
+
+* `default_collation` -
+  (Optional)
+  Defines the default collation specification of future tables created
+  in the dataset. If a table is created in this dataset without table-level
+  default collation, then the table inherits the dataset default collation,
+  which is applied to the string fields that do not have explicit collation
+  specified. A change to this field affects only tables created afterwards,
+  and does not alter the existing tables.
+  The following values are supported:
+  - 'und:ci': undetermined locale, case insensitive.
+  - '': empty string. Default to case-sensitive behavior.
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.

@@ -27,13 +27,13 @@ func TestAccApiGatewayApi_apigatewayApiBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApiGatewayApiDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApiGatewayApiDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApiGatewayApi_apigatewayApiBasicExample(context),
@@ -52,7 +52,7 @@ func testAccApiGatewayApi_apigatewayApiBasicExample(context map[string]interface
 	return Nprintf(`
 resource "google_api_gateway_api" "api" {
   provider = google-beta
-  api_id = "api%{random_suffix}"
+  api_id = "tf-test-my-api%{random_suffix}"
 }
 `, context)
 }
@@ -61,13 +61,13 @@ func TestAccApiGatewayApi_apigatewayApiFullExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckApiGatewayApiDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckApiGatewayApiDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApiGatewayApi_apigatewayApiFullExample(context),
@@ -86,7 +86,7 @@ func testAccApiGatewayApi_apigatewayApiFullExample(context map[string]interface{
 	return Nprintf(`
 resource "google_api_gateway_api" "api" {
   provider = google-beta
-  api_id = "api%{random_suffix}"
+  api_id = "tf-test-my-api%{random_suffix}"
   display_name = "MM Dev API"
   labels = {
     environment = "dev"
@@ -105,7 +105,7 @@ func testAccCheckApiGatewayApiDestroyProducer(t *testing.T) func(s *terraform.St
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ApiGatewayBasePath}}projects/{{project}}/locations/global/apis/{{api_id}}")
 			if err != nil {
@@ -118,7 +118,7 @@ func testAccCheckApiGatewayApiDestroyProducer(t *testing.T) func(s *terraform.St
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ApiGatewayApi still exists at %s", url)
 			}

@@ -27,13 +27,13 @@ func TestAccComputeMachineImage_machineImageBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckComputeMachineImageDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeMachineImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImage_machineImageBasicExample(context),
@@ -52,7 +52,7 @@ func testAccComputeMachineImage_machineImageBasicExample(context map[string]inte
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -68,7 +68,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
 }
 `, context)
@@ -78,13 +78,13 @@ func TestAccComputeMachineImage_computeMachineImageKmsExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckComputeMachineImageDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeMachineImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeMachineImage_computeMachineImageKmsExample(context),
@@ -103,7 +103,7 @@ func testAccComputeMachineImage_computeMachineImageKmsExample(context map[string
 	return Nprintf(`
 resource "google_compute_instance" "vm" {
   provider     = google-beta
-  name         = "vm%{random_suffix}"
+  name         = "tf-test-my-vm%{random_suffix}"
   machine_type = "e2-medium"
 
   boot_disk {
@@ -119,7 +119,7 @@ resource "google_compute_instance" "vm" {
 
 resource "google_compute_machine_image" "image" {
   provider        = google-beta
-  name            = "image%{random_suffix}"
+  name            = "tf-test-my-image%{random_suffix}"
   source_instance = google_compute_instance.vm.self_link
   machine_image_encryption_key {
     kms_key_name = google_kms_crypto_key.crypto_key.id
@@ -162,7 +162,7 @@ func testAccCheckComputeMachineImageDestroyProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/machineImages/{{name}}")
 			if err != nil {
@@ -175,7 +175,7 @@ func testAccCheckComputeMachineImageDestroyProducer(t *testing.T) func(s *terraf
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ComputeMachineImage still exists at %s", url)
 			}

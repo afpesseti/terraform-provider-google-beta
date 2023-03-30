@@ -27,15 +27,15 @@ func TestAccApigeeAddonsConfig_apigeeAddonsTestExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          getTestOrgFromEnv(t),
-		"billing_account": getTestBillingAccountFromEnv(t),
-		"random_suffix":   randString(t, 10),
+		"org_id":          GetTestOrgFromEnv(t),
+		"billing_account": GetTestBillingAccountFromEnv(t),
+		"random_suffix":   RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckApigeeAddonsConfigDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckApigeeAddonsConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeAddonsConfig_apigeeAddonsTestExample(context),
@@ -67,11 +67,13 @@ resource "google_project_service" "apigee" {
 resource "google_project_service" "compute" {
   project = google_project.project.project_id
   service = "compute.googleapis.com"
+  depends_on = [ google_project_service.servicenetworking ]
 }
 
 resource "google_project_service" "servicenetworking" {
   project = google_project.project.project_id
   service = "servicenetworking.googleapis.com"
+  depends_on = [ google_project_service.apigee ]
 }
 
 resource "google_compute_network" "apigee_network" {
@@ -140,7 +142,7 @@ func testAccCheckApigeeAddonsConfigDestroyProducer(t *testing.T) func(s *terrafo
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ApigeeBasePath}}organizations/{{org}}")
 			if err != nil {
@@ -153,11 +155,11 @@ func testAccCheckApigeeAddonsConfigDestroyProducer(t *testing.T) func(s *terrafo
 				billingProject = config.BillingProject
 			}
 
-			res, err := sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			res, err := SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 
 			if err != nil {
 				// If the Apigee org doesn't exist, then a 403 can also be returned.
-				if isGoogleApiErrorWithCode(err, 403) || isGoogleApiErrorWithCode(err, 404) {
+				if IsGoogleApiErrorWithCode(err, 403) || IsGoogleApiErrorWithCode(err, 404) {
 					return nil
 				} else {
 					return err

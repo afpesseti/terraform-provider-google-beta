@@ -27,14 +27,14 @@ func TestAccFirebaseHostingSite_firebasehostingSiteBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_id":    GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseHostingSiteDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseHostingSiteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseHostingSite_firebasehostingSiteBasicExample(context),
@@ -63,14 +63,15 @@ func TestAccFirebaseHostingSite_firebasehostingSiteFullExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_id":    GetTestProjectFromEnv(),
+		"display_name":  "tf-test Test web app for Firebase Hosting",
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseHostingSiteDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseHostingSiteDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseHostingSite_firebasehostingSiteFullExample(context),
@@ -90,7 +91,7 @@ func testAccFirebaseHostingSite_firebasehostingSiteFullExample(context map[strin
 resource "google_firebase_web_app" "default" {
   provider = google-beta
   project  = "%{project_id}"
-  display_name = "Test web app for Firebase Hosting"
+  display_name = "%{display_name}"
   deletion_policy = "DELETE"
 }
 
@@ -113,7 +114,7 @@ func testAccCheckFirebaseHostingSiteDestroyProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FirebaseHostingBasePath}}projects/{{project}}/sites/{{site_id}}")
 			if err != nil {
@@ -126,7 +127,7 @@ func testAccCheckFirebaseHostingSiteDestroyProducer(t *testing.T) func(s *terraf
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("FirebaseHostingSite still exists at %s", url)
 			}

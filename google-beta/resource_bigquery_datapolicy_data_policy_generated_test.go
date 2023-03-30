@@ -27,13 +27,13 @@ func TestAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyBasicExampl
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckBigqueryDatapolicyDataPolicyDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDatapolicyDataPolicyDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyBasicExample(context),
@@ -51,7 +51,6 @@ func TestAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyBasicExampl
 func testAccBigqueryDatapolicyDataPolicy_bigqueryDatapolicyDataPolicyBasicExample(context map[string]interface{}) string {
 	return Nprintf(`
 resource "google_bigquery_datapolicy_data_policy" "data_policy" {
-    provider = google-beta
     location         = "us-central1"
     data_policy_id   = "tf_test_data_policy%{random_suffix}"
     policy_tag       = google_data_catalog_policy_tag.policy_tag.name
@@ -59,14 +58,12 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   }
 
   resource "google_data_catalog_policy_tag" "policy_tag" {
-    provider = google-beta
     taxonomy     = google_data_catalog_taxonomy.taxonomy.id
     display_name = "Low security"
     description  = "A policy tag normally associated with low security items"
   }
   
   resource "google_data_catalog_taxonomy" "taxonomy" {
-    provider = google-beta
     region                 = "us-central1"
     display_name           = "taxonomy%{random_suffix}"
     description            = "A collection of policy tags"
@@ -85,7 +82,7 @@ func testAccCheckBigqueryDatapolicyDataPolicyDestroyProducer(t *testing.T) func(
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{BigqueryDatapolicyBasePath}}projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}")
 			if err != nil {
@@ -98,7 +95,7 @@ func testAccCheckBigqueryDatapolicyDataPolicyDestroyProducer(t *testing.T) func(
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("BigqueryDatapolicyDataPolicy still exists at %s", url)
 			}

@@ -13,20 +13,44 @@ func TestAccFirebaseWebApp_firebaseWebAppFull(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"random_suffix": randString(t, 10),
-		"display_name":  "Display Name N",
+		"org_id":        GetTestOrgFromEnv(t),
+		"random_suffix": RandString(t, 10),
+		"display_name":  "tf-test Display Name N",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+	VcrTest(t, resource.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google-beta",
+					},
+				},
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
 			},
 			{
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google-beta",
+					},
+				},
 				Config: testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),
+					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "auth_domain"),
+					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "storage_bucket"),
+				),
+			},
+			{
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				Config:                   testAccFirebaseWebApp_firebaseWebAppFull(context, ""),
+			},
+			{
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				Config:                   testAccFirebaseWebApp_firebaseWebAppFull(context, "2"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "api_key"),
 					resource.TestCheckResourceAttrSet("data.google_firebase_web_app_config.default", "auth_domain"),
@@ -75,15 +99,15 @@ func TestAccFirebaseWebApp_firebaseWebAppSkipDelete(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_id":    getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
-		"display_name":  "Display Name N",
+		"project_id":    GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
+		"display_name":  "tf-test Display Name N",
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProvidersOiCS,
-		CheckDestroy: testAccCheckFirebaseWebAppNotDestroyedProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFirebaseWebAppNotDestroyedProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaseWebApp_firebaseWebAppSkipDelete(context, ""),
@@ -118,7 +142,7 @@ func testAccCheckFirebaseWebAppNotDestroyedProducer(t *testing.T) func(s *terraf
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{FirebaseBasePath}}{{name}}")
 			if err != nil {
@@ -131,7 +155,7 @@ func testAccCheckFirebaseWebAppNotDestroyedProducer(t *testing.T) func(s *terraf
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err != nil {
 				return fmt.Errorf("FirebaseWebApp doesn't exists at %s", url)
 			}

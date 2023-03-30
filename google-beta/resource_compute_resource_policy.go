@@ -23,7 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceComputeResourcePolicy() *schema.Resource {
+func ResourceComputeResourcePolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeResourcePolicyCreate,
 		Read:   resourceComputeResourcePolicyRead,
@@ -81,6 +81,12 @@ availability domain, they will not be put in the same low latency network`,
 Specify 'COLLOCATED' to enable collocation. Can only be specified with 'vm_count'. If compute instances are created
 with a COLLOCATED policy, then exactly 'vm_count' instances must be created at the same time with the resource policy
 attached. Possible values: ["COLLOCATED"]`,
+						},
+						"max_distance": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Specifies the number of max logical switches.`,
 						},
 						"vm_count": {
 							Type:     schema.TypeInt,
@@ -380,7 +386,7 @@ It must be in format "HH:MM", where HH : [00-23] and MM : [00-00] GMT.`,
 
 func resourceComputeResourcePolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -442,7 +448,7 @@ func resourceComputeResourcePolicyCreate(d *schema.ResourceData, meta interface{
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating ResourcePolicy: %s", err)
 	}
@@ -454,7 +460,7 @@ func resourceComputeResourcePolicyCreate(d *schema.ResourceData, meta interface{
 	}
 	d.SetId(id)
 
-	err = computeOperationWaitTime(
+	err = ComputeOperationWaitTime(
 		config, res, project, "Creating ResourcePolicy", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 
@@ -471,7 +477,7 @@ func resourceComputeResourcePolicyCreate(d *schema.ResourceData, meta interface{
 
 func resourceComputeResourcePolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -494,7 +500,7 @@ func resourceComputeResourcePolicyRead(d *schema.ResourceData, meta interface{})
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("ComputeResourcePolicy %q", d.Id()))
 	}
@@ -530,7 +536,7 @@ func resourceComputeResourcePolicyRead(d *schema.ResourceData, meta interface{})
 
 func resourceComputeResourcePolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -556,12 +562,12 @@ func resourceComputeResourcePolicyDelete(d *schema.ResourceData, meta interface{
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
+	res, err := SendRequestWithTimeout(config, "DELETE", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return handleNotFoundError(err, d, "ResourcePolicy")
 	}
 
-	err = computeOperationWaitTime(
+	err = ComputeOperationWaitTime(
 		config, res, project, "Deleting ResourcePolicy", userAgent,
 		d.Timeout(schema.TimeoutDelete))
 
@@ -654,7 +660,7 @@ func flattenComputeResourcePolicySnapshotSchedulePolicyScheduleHourlySchedule(v 
 func flattenComputeResourcePolicySnapshotSchedulePolicyScheduleHourlyScheduleHoursInCycle(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -690,7 +696,7 @@ func flattenComputeResourcePolicySnapshotSchedulePolicyScheduleDailySchedule(v i
 func flattenComputeResourcePolicySnapshotSchedulePolicyScheduleDailyScheduleDaysInCycle(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -766,7 +772,7 @@ func flattenComputeResourcePolicySnapshotSchedulePolicyRetentionPolicy(v interfa
 func flattenComputeResourcePolicySnapshotSchedulePolicyRetentionPolicyMaxRetentionDays(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -837,12 +843,14 @@ func flattenComputeResourcePolicyGroupPlacementPolicy(v interface{}, d *schema.R
 		flattenComputeResourcePolicyGroupPlacementPolicyAvailabilityDomainCount(original["availabilityDomainCount"], d, config)
 	transformed["collocation"] =
 		flattenComputeResourcePolicyGroupPlacementPolicyCollocation(original["collocation"], d, config)
+	transformed["max_distance"] =
+		flattenComputeResourcePolicyGroupPlacementPolicyMaxDistance(original["maxDistance"], d, config)
 	return []interface{}{transformed}
 }
 func flattenComputeResourcePolicyGroupPlacementPolicyVmCount(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -859,7 +867,7 @@ func flattenComputeResourcePolicyGroupPlacementPolicyVmCount(v interface{}, d *s
 func flattenComputeResourcePolicyGroupPlacementPolicyAvailabilityDomainCount(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := stringToFixed64(strVal); err == nil {
+		if intVal, err := StringToFixed64(strVal); err == nil {
 			return intVal
 		}
 	}
@@ -875,6 +883,23 @@ func flattenComputeResourcePolicyGroupPlacementPolicyAvailabilityDomainCount(v i
 
 func flattenComputeResourcePolicyGroupPlacementPolicyCollocation(v interface{}, d *schema.ResourceData, config *Config) interface{} {
 	return v
+}
+
+func flattenComputeResourcePolicyGroupPlacementPolicyMaxDistance(v interface{}, d *schema.ResourceData, config *Config) interface{} {
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := StringToFixed64(strVal); err == nil {
+			return intVal
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		return intVal
+	}
+
+	return v // let terraform core handle it otherwise
 }
 
 func flattenComputeResourcePolicyInstanceSchedulePolicy(v interface{}, d *schema.ResourceData, config *Config) interface{} {
@@ -1278,6 +1303,13 @@ func expandComputeResourcePolicyGroupPlacementPolicy(v interface{}, d TerraformR
 		transformed["collocation"] = transformedCollocation
 	}
 
+	transformedMaxDistance, err := expandComputeResourcePolicyGroupPlacementPolicyMaxDistance(original["max_distance"], d, config)
+	if err != nil {
+		return nil, err
+	} else if val := reflect.ValueOf(transformedMaxDistance); val.IsValid() && !isEmptyValue(val) {
+		transformed["maxDistance"] = transformedMaxDistance
+	}
+
 	return transformed, nil
 }
 
@@ -1290,6 +1322,10 @@ func expandComputeResourcePolicyGroupPlacementPolicyAvailabilityDomainCount(v in
 }
 
 func expandComputeResourcePolicyGroupPlacementPolicyCollocation(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandComputeResourcePolicyGroupPlacementPolicyMaxDistance(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }
 

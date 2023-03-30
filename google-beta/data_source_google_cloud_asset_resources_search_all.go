@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
+func DataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
 	return &schema.Resource{
 		Read: datasourceGoogleCloudAssetResourcesSearchAllRead,
 		Schema: map[string]*schema.Schema{
@@ -83,7 +83,7 @@ func dataSourceGoogleCloudAssetResourcesSearchAll() *schema.Resource {
 
 func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 			return err
 		}
 
-		res, err := sendRequest(config, "GET", "", url, userAgent, nil)
+		res, err := SendRequest(config, "GET", "", url, userAgent, nil)
 		if err != nil {
 			return fmt.Errorf("Error searching resources: %s", err)
 		}

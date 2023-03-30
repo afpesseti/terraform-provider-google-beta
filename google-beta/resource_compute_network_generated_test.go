@@ -27,13 +27,13 @@ func TestAccComputeNetwork_networkBasicExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeNetwork_networkBasicExample(context),
@@ -59,14 +59,14 @@ func TestAccComputeNetwork_networkCustomMtuExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project":       GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeNetworkDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeNetwork_networkCustomMtuExample(context),
@@ -91,6 +91,42 @@ resource "google_compute_network" "vpc_network" {
 `, context)
 }
 
+func TestAccComputeNetwork_networkCustomFirewallEnforcementOrderExample(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
+	}
+
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_networkCustomFirewallEnforcementOrderExample(context),
+			},
+			{
+				ResourceName:      "google_compute_network.vpc_network",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeNetwork_networkCustomFirewallEnforcementOrderExample(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network" "vpc_network" {
+  project                 = "%{project}"
+  name                    = "tf-test-vpc-network%{random_suffix}"
+  auto_create_subnetworks = true
+  network_firewall_policy_enforcement_order = "BEFORE_CLASSIC_FIREWALL"
+}
+`, context)
+}
+
 func testAccCheckComputeNetworkDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
@@ -101,7 +137,7 @@ func testAccCheckComputeNetworkDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{ComputeBasePath}}projects/{{project}}/global/networks/{{name}}")
 			if err != nil {
@@ -114,7 +150,7 @@ func testAccCheckComputeNetworkDestroyProducer(t *testing.T) func(s *terraform.S
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("ComputeNetwork still exists at %s", url)
 			}

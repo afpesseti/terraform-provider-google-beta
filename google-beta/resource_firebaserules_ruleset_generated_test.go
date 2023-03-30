@@ -30,14 +30,14 @@ func TestAccFirebaserulesRuleset_BasicRuleset(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFirebaserulesRulesetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFirebaserulesRulesetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaserulesRuleset_BasicRuleset(context),
@@ -54,14 +54,14 @@ func TestAccFirebaserulesRuleset_MinimalRuleset(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFirebaserulesRulesetDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFirebaserulesRulesetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirebaserulesRuleset_MinimalRuleset(context),
@@ -122,7 +122,7 @@ func testAccCheckFirebaserulesRulesetDestroyProducer(t *testing.T) func(s *terra
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
@@ -135,7 +135,7 @@ func testAccCheckFirebaserulesRulesetDestroyProducer(t *testing.T) func(s *terra
 				Name:       dcl.StringOrNil(rs.Primary.Attributes["name"]),
 			}
 
-			client := NewDCLFirebaserulesClient(config, config.userAgent, billingProject, 0)
+			client := NewDCLFirebaserulesClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetRuleset(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_firebaserules_ruleset still exists %v", obj)

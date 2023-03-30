@@ -10,7 +10,7 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func dataSourceGoogleComputeAddresses() *schema.Resource {
+func DataSourceGoogleComputeAddresses() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceGoogleComputeAddressesRead,
 
@@ -109,7 +109,7 @@ AND (scheduling.automaticRestart = true) """`,
 
 func dataSourceGoogleComputeAddressesRead(context context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return diag.FromErr(err)
 	}

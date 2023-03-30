@@ -27,13 +27,13 @@ func TestAccBinaryAuthorizationAttestor_binaryAuthorizationAttestorBasicExample(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": randString(t, 10),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBinaryAuthorizationAttestorDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBinaryAuthorizationAttestorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBinaryAuthorizationAttestor_binaryAuthorizationAttestorBasicExample(context),
@@ -97,7 +97,7 @@ func testAccCheckBinaryAuthorizationAttestorDestroyProducer(t *testing.T) func(s
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{BinaryAuthorizationBasePath}}projects/{{project}}/attestors/{{name}}")
 			if err != nil {
@@ -110,7 +110,7 @@ func testAccCheckBinaryAuthorizationAttestorDestroyProducer(t *testing.T) func(s
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil)
 			if err == nil {
 				return fmt.Errorf("BinaryAuthorizationAttestor still exists at %s", url)
 			}

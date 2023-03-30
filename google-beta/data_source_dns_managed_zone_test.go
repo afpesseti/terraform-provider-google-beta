@@ -12,13 +12,18 @@ import (
 func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 	t.Parallel()
 
-	vcrTest(t, resource.TestCase{
+	VcrTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		CheckDestroy: testAccCheckDNSManagedZoneDestroyProducerFramework(t),
 		Steps: []resource.TestStep{
 			{
-				ExternalProviders: providerVersion450(),
-				Config:            testAccDataSourceDnsManagedZone_basic(randString(t, 10)),
+				ExternalProviders: map[string]resource.ExternalProvider{
+					"google": {
+						VersionConstraint: "4.58.0",
+						Source:            "hashicorp/google-beta",
+					},
+				},
+				Config: testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
 				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
@@ -38,8 +43,8 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 				),
 			},
 			{
-				ProtoV5ProviderFactories: protoV5ProviderFactories(t),
-				Config:                   testAccDataSourceDnsManagedZone_basic(randString(t, 10)),
+				ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+				Config:                   testAccDataSourceDnsManagedZone_basic(RandString(t, 10)),
 				Check: checkDataSourceStateMatchesResourceStateWithIgnores(
 					"data.google_dns_managed_zone.qa",
 					"google_dns_managed_zone.foo",
@@ -65,15 +70,15 @@ func TestAccDataSourceDnsManagedZone_basic(t *testing.T) {
 func testAccDataSourceDnsManagedZone_basic(managedZoneName string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "foo" {
-  name        = "qa-zone-%s"
-  dns_name    = "qa.tf-test.club."
-  description = "QA DNS zone"
+  name        = "tf-test-zone-%s"
+  dns_name    = "tf-test-zone-%s.hashicorptest.com."
+  description = "tf test DNS zone"
 }
 
 data "google_dns_managed_zone" "qa" {
   name = google_dns_managed_zone.foo.name
 }
-`, managedZoneName)
+`, managedZoneName, managedZoneName)
 }
 
 // testAccCheckDNSManagedZoneDestroyProducerFramework is the framework version of the generated testAccCheckDNSManagedZoneDestroyProducer
@@ -88,20 +93,20 @@ func testAccCheckDNSManagedZoneDestroyProducerFramework(t *testing.T) func(s *te
 				continue
 			}
 
-			p := getTestFwProvider(t)
+			p := GetFwTestProvider(t)
 
-			url, err := replaceVarsForFrameworkTest(&p.ProdProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
+			url, err := replaceVarsForFrameworkTest(&p.frameworkProvider, rs, "{{DNSBasePath}}projects/{{project}}/managedZones/{{name}}")
 			if err != nil {
 				return err
 			}
 
 			billingProject := ""
 
-			if !p.ProdProvider.billingProject.IsNull() && p.ProdProvider.billingProject.String() != "" {
-				billingProject = p.ProdProvider.billingProject.String()
+			if !p.billingProject.IsNull() && p.billingProject.String() != "" {
+				billingProject = p.billingProject.String()
 			}
 
-			_, diags := sendFrameworkRequest(&p.ProdProvider, "GET", billingProject, url, p.ProdProvider.userAgent, nil)
+			_, diags := sendFrameworkRequest(&p.frameworkProvider, "GET", billingProject, url, p.userAgent, nil)
 			if !diags.HasError() {
 				return fmt.Errorf("DNSManagedZone still exists at %s", url)
 			}

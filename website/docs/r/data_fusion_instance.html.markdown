@@ -62,7 +62,6 @@ resource "google_data_fusion_instance" "extended_instance" {
   enable_stackdriver_logging    = true
   enable_stackdriver_monitoring = true
   private_instance              = true
-  version                       = "6.6.0"
   dataproc_service_account      = data.google_app_engine_default_service_account.default.email
 
   labels = {
@@ -74,6 +73,10 @@ resource "google_data_fusion_instance" "extended_instance" {
     ip_allocation = "${google_compute_global_address.private_ip_alloc.address}/${google_compute_global_address.private_ip_alloc.prefix_length}"
   }
 
+  accelerators {
+    accelerator_type = "CDC"
+    state = "ENABLED"
+  }
   
 }
 
@@ -164,7 +167,6 @@ resource "google_data_fusion_instance" "event" {
   name    = "my-instance"
   region  = "us-central1"
   type    = "BASIC"
-  version = "6.7.0"
 
   event_publish_config {
     enabled = true
@@ -282,6 +284,13 @@ The following arguments are supported:
   Option to enable and pass metadata for event publishing.
   Structure is [documented below](#nested_event_publish_config).
 
+* `accelerators` -
+  (Optional)
+  List of accelerators enabled for this CDF instance.
+  If accelerators are enabled it is possible a permadiff will be created with the Options field. 
+  Users will need to either manually update their state file to include these diffed options, or include the field in a [lifecycle ignore changes block](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes).
+  Structure is [documented below](#nested_accelerators).
+
 * `region` -
   (Optional)
   The region of the Data Fusion instance.
@@ -318,6 +327,18 @@ The following arguments are supported:
 * `topic` -
   (Required)
   The resource name of the Pub/Sub topic. Format: projects/{projectId}/topics/{topic_id}
+
+<a name="nested_accelerators"></a>The `accelerators` block supports:
+
+* `accelerator_type` -
+  (Required)
+  The type of an accelator for a CDF instance.
+  Possible values are `CDC`, `HEALTHCARE`, and `CCAI_INSIGHTS`.
+
+* `state` -
+  (Required)
+  The type of an accelator for a CDF instance.
+  Possible values are `ENABLED` and `DISABLED`.
 
 ## Attributes Reference
 

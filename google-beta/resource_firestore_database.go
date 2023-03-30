@@ -24,7 +24,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceFirestoreDatabase() *schema.Resource {
+func ResourceFirestoreDatabase() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceFirestoreDatabaseCreate,
 		Read:   resourceFirestoreDatabaseRead,
@@ -53,7 +53,7 @@ https://cloud.google.com/firestore/docs/locations.`,
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				Description: `Required. The ID to use for the database, which will become the final
+				Description: `The ID to use for the database, which will become the final
 component of the database's resource name. This value should be 4-63
 characters. Valid characters are /[a-z][0-9]-/ with first character
 a letter and the last a letter or a number. Must not be
@@ -115,7 +115,7 @@ This value may be empty in which case the appid to use for URL-encoded keys is t
 
 func resourceFirestoreDatabaseCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -177,7 +177,7 @@ func resourceFirestoreDatabaseCreate(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
+	res, err := SendRequestWithTimeout(config, "POST", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating Database: %s", err)
 	}
@@ -192,7 +192,7 @@ func resourceFirestoreDatabaseCreate(d *schema.ResourceData, meta interface{}) e
 	// Use the resource in the operation response to populate
 	// identity fields and d.Id() before read
 	var opRes map[string]interface{}
-	err = firestoreOperationWaitTimeWithResponse(
+	err = FirestoreOperationWaitTimeWithResponse(
 		config, res, &opRes, project, "Creating Database", userAgent,
 		d.Timeout(schema.TimeoutCreate))
 	if err != nil {
@@ -220,7 +220,7 @@ func resourceFirestoreDatabaseCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceFirestoreDatabaseRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func resourceFirestoreDatabaseRead(d *schema.ResourceData, meta interface{}) err
 		billingProject = bp
 	}
 
-	res, err := sendRequest(config, "GET", billingProject, url, userAgent, nil)
+	res, err := SendRequest(config, "GET", billingProject, url, userAgent, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("FirestoreDatabase %q", d.Id()))
 	}
@@ -282,7 +282,7 @@ func resourceFirestoreDatabaseRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceFirestoreDatabaseUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	userAgent, err := generateUserAgentString(d, config.userAgent)
+	userAgent, err := generateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -356,7 +356,7 @@ func resourceFirestoreDatabaseUpdate(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
+	res, err := SendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate))
 
 	if err != nil {
 		return fmt.Errorf("Error updating Database %q: %s", d.Id(), err)
@@ -364,7 +364,7 @@ func resourceFirestoreDatabaseUpdate(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[DEBUG] Finished updating Database %q: %#v", d.Id(), res)
 	}
 
-	err = firestoreOperationWaitTime(
+	err = FirestoreOperationWaitTime(
 		config, res, project, "Updating Database", userAgent,
 		d.Timeout(schema.TimeoutUpdate))
 

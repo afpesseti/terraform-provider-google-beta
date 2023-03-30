@@ -30,14 +30,14 @@ func TestAccLoggingLogView_BasicHandWritten(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  getTestProjectFromEnv(),
-		"random_suffix": randString(t, 10),
+		"project_name":  GetTestProjectFromEnv(),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLoggingLogViewDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckLoggingLogViewDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingLogView_BasicHandWritten(context),
@@ -81,7 +81,7 @@ func testAccCheckLoggingLogViewDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			billingProject := ""
 			if config.BillingProject != "" {
@@ -99,7 +99,7 @@ func testAccCheckLoggingLogViewDestroyProducer(t *testing.T) func(s *terraform.S
 				UpdateTime:  dcl.StringOrNil(rs.Primary.Attributes["update_time"]),
 			}
 
-			client := NewDCLLoggingClient(config, config.userAgent, billingProject, 0)
+			client := NewDCLLoggingClient(config, config.UserAgent, billingProject, 0)
 			_, err := client.GetLogView(context.Background(), obj)
 			if err == nil {
 				return fmt.Errorf("google_logging_log_view still exists %v", obj)

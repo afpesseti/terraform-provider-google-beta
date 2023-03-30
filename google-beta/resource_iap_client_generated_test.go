@@ -27,15 +27,15 @@ func TestAccIapClient_iapClientExample(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":        getTestOrgFromEnv(t),
-		"org_domain":    getTestOrgDomainFromEnv(t),
-		"random_suffix": randString(t, 10),
+		"org_id":        GetTestOrgFromEnv(t),
+		"org_domain":    GetTestOrgDomainFromEnv(t),
+		"random_suffix": RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckIapClientDestroyProducer(t),
+	VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIapClientDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIapClient_iapClientExample(context),
@@ -86,7 +86,7 @@ func testAccCheckIapClientDestroyProducer(t *testing.T) func(s *terraform.State)
 				continue
 			}
 
-			config := googleProviderConfig(t)
+			config := GoogleProviderConfig(t)
 
 			url, err := replaceVarsForTest(config, rs, "{{IapBasePath}}{{brand}}/identityAwareProxyClients/{{client_id}}")
 			if err != nil {
@@ -99,7 +99,7 @@ func testAccCheckIapClientDestroyProducer(t *testing.T) func(s *terraform.State)
 				billingProject = config.BillingProject
 			}
 
-			_, err = sendRequest(config, "GET", billingProject, url, config.userAgent, nil, iapClient409Operation)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, iapClient409Operation)
 			if err == nil {
 				return fmt.Errorf("IapClient still exists at %s", url)
 			}
