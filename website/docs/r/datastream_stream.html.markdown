@@ -418,7 +418,7 @@ resource "google_datastream_stream" "stream5" {
     <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
   </a>
 </div>
-## Example Usage - Datastream Stream Postgresql Bigquery Dataset
+## Example Usage - Datastream Stream Postgresql Bigquery Dataset Id
 
 
 ```hcl
@@ -1230,12 +1230,12 @@ The following arguments are supported:
 * `schema_file_format` -
   (Optional)
   The schema file format along JSON data files.
-  Possible values are `NO_SCHEMA_FILE` and `AVRO_SCHEMA_FILE`.
+  Possible values are: `NO_SCHEMA_FILE`, `AVRO_SCHEMA_FILE`.
 
 * `compression` -
   (Optional)
   Compression of the loaded JSON file.
-  Possible values are `NO_COMPRESSION` and `GZIP`.
+  Possible values are: `NO_COMPRESSION`, `GZIP`.
 
 <a name="nested_bigquery_destination_config"></a>The `bigquery_destination_config` block supports:
 

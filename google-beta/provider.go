@@ -682,7 +682,6 @@ func Provider() *schema.Provider {
 			"google_compute_regions":                              DataSourceGoogleComputeRegions(),
 			"google_compute_region_network_endpoint_group":        DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 			"google_compute_region_instance_group":                DataSourceGoogleComputeRegionInstanceGroup(),
-			"google_compute_region_instance_template":             DataSourceGoogleComputeRegionInstanceTemplate(),
 			"google_compute_region_ssl_certificate":               DataSourceGoogleRegionComputeSslCertificate(),
 			"google_compute_resource_policy":                      DataSourceGoogleComputeResourcePolicy(),
 			"google_compute_router":                               DataSourceGoogleComputeRouter(),
@@ -784,9 +783,9 @@ func Provider() *schema.Provider {
 	return provider
 }
 
-// Generated resources: 313
+// Generated resources: 314
 // Generated IAM resources: 213
-// Total generated resources: 526
+// Total generated resources: 527
 func ResourceMap() map[string]*schema.Resource {
 	resourceMap, _ := ResourceMapWithErrors()
 	return resourceMap
@@ -1194,6 +1193,7 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_kms_key_ring":                                          ResourceKMSKeyRing(),
 			"google_kms_key_ring_import_job":                               ResourceKMSKeyRingImportJob(),
 			"google_kms_secret_ciphertext":                                 ResourceKMSSecretCiphertext(),
+			"google_logging_log_view":                                      ResourceLoggingLogView(),
 			"google_logging_metric":                                        ResourceLoggingMetric(),
 			"google_memcache_instance":                                     ResourceMemcacheInstance(),
 			"google_ml_engine_model":                                       ResourceMLEngineModel(),
@@ -1328,6 +1328,7 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_apigee_sharedflow":                      ResourceApigeeSharedFlow(),
 			"google_apigee_sharedflow_deployment":           ResourceApigeeSharedFlowDeployment(),
 			"google_apigee_flowhook":                        ResourceApigeeFlowhook(),
+			"google_apigee_env_keystore_alias_pkcs12":       ResourceApigeeEnvKeystoreAliasPkcs12(),
 			"google_apigee_keystores_aliases_key_cert_file": ResourceApigeeKeystoresAliasesKeyCertFile(),
 			"google_bigquery_table":                         ResourceBigQueryTable(),
 			"google_bigtable_gc_policy":                     ResourceBigtableGCPolicy(),
@@ -1348,7 +1349,6 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_compute_project_metadata":               ResourceComputeProjectMetadata(),
 			"google_compute_project_metadata_item":          ResourceComputeProjectMetadataItem(),
 			"google_compute_region_instance_group_manager":  ResourceComputeRegionInstanceGroupManager(),
-			"google_compute_region_instance_template":       ResourceComputeRegionInstanceTemplate(),
 			"google_compute_router_interface":               ResourceComputeRouterInterface(),
 			"google_compute_security_policy":                ResourceComputeSecurityPolicy(),
 			"google_compute_shared_vpc_host_project":        ResourceComputeSharedVpcHostProject(),
