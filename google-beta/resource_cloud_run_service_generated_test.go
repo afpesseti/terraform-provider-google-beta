@@ -32,7 +32,7 @@ func TestAccCloudRunService_cloudRunServiceBasicExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -80,7 +80,7 @@ func TestAccCloudRunService_cloudRunServiceSqlExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -143,7 +143,7 @@ func TestAccCloudRunService_cloudRunServiceNoauthExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -204,7 +204,7 @@ func TestAccCloudRunService_cloudRunServiceMultipleEnvironmentVariablesExample(t
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -273,7 +273,7 @@ func TestAccCloudRunService_cloudRunServiceSecretEnvironmentVariablesExample(t *
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -367,7 +367,7 @@ func TestAccCloudRunService_cloudRunServiceSecretVolumesExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -468,7 +468,7 @@ func TestAccCloudRunService_cloudRunServiceProbesExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckCloudRunServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -557,7 +557,7 @@ func testAccCheckCloudRunServiceDestroyProducer(t *testing.T) func(s *terraform.
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, isCloudRunCreationConflict)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, IsCloudRunCreationConflict)
 			if err == nil {
 				return fmt.Errorf("CloudRunService still exists at %s", url)
 			}

@@ -13,8 +13,6 @@ import (
 	googleoauth "golang.org/x/oauth2/google"
 )
 
-const TestEnvVar = "TF_ACC"
-
 // Global MutexKV
 var mutexKV = NewMutexKV()
 
@@ -469,6 +467,11 @@ func Provider() *schema.Provider {
 				Optional:     true,
 				ValidateFunc: validateCustomEndpoint,
 			},
+			"network_security_custom_endpoint": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validateCustomEndpoint,
+			},
 			"network_services_custom_endpoint": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -682,6 +685,8 @@ func Provider() *schema.Provider {
 			"google_compute_regions":                              DataSourceGoogleComputeRegions(),
 			"google_compute_region_network_endpoint_group":        DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 			"google_compute_region_instance_group":                DataSourceGoogleComputeRegionInstanceGroup(),
+
+			"google_compute_region_instance_template":             DataSourceGoogleComputeRegionInstanceTemplate(),
 			"google_compute_region_ssl_certificate":               DataSourceGoogleRegionComputeSslCertificate(),
 			"google_compute_resource_policy":                      DataSourceGoogleComputeResourcePolicy(),
 			"google_compute_router":                               DataSourceGoogleComputeRouter(),
@@ -783,9 +788,9 @@ func Provider() *schema.Provider {
 	return provider
 }
 
-// Generated resources: 314
+// Generated resources: 318
 // Generated IAM resources: 213
-// Total generated resources: 527
+// Total generated resources: 531
 func ResourceMap() map[string]*schema.Resource {
 	resourceMap, _ := ResourceMapWithErrors()
 	return resourceMap
@@ -830,7 +835,6 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_apigee_addons_config":                                  ResourceApigeeAddonsConfig(),
 			"google_apigee_endpoint_attachment":                            ResourceApigeeEndpointAttachment(),
 			"google_apigee_env_keystore":                                   ResourceApigeeEnvKeystore(),
-			"google_apigee_env_keystore_alias_self_signed_cert":            ResourceApigeeEnvKeystoreAliasSelfSignedCert(),
 			"google_apigee_env_references":                                 ResourceApigeeEnvReferences(),
 			"google_apigee_envgroup":                                       ResourceApigeeEnvgroup(),
 			"google_apigee_envgroup_attachment":                            ResourceApigeeEnvgroupAttachment(),
@@ -840,6 +844,7 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_apigee_environment_iam_policy":                         ResourceIamPolicy(ApigeeEnvironmentIamSchema, ApigeeEnvironmentIamUpdaterProducer, ApigeeEnvironmentIdParseFunc),
 			"google_apigee_instance":                                       ResourceApigeeInstance(),
 			"google_apigee_instance_attachment":                            ResourceApigeeInstanceAttachment(),
+			"google_apigee_keystores_aliases_self_signed_cert":             ResourceApigeeKeystoresAliasesSelfSignedCert(),
 			"google_apigee_nat_address":                                    ResourceApigeeNatAddress(),
 			"google_apigee_organization":                                   ResourceApigeeOrganization(),
 			"google_apigee_sync_authorization":                             ResourceApigeeSyncAuthorization(),
@@ -1193,6 +1198,7 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_kms_key_ring":                                          ResourceKMSKeyRing(),
 			"google_kms_key_ring_import_job":                               ResourceKMSKeyRingImportJob(),
 			"google_kms_secret_ciphertext":                                 ResourceKMSSecretCiphertext(),
+			"google_logging_linked_dataset":                                ResourceLoggingLinkedDataset(),
 			"google_logging_log_view":                                      ResourceLoggingLogView(),
 			"google_logging_metric":                                        ResourceLoggingMetric(),
 			"google_memcache_instance":                                     ResourceMemcacheInstance(),
@@ -1206,6 +1212,9 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_monitoring_slo":                                        ResourceMonitoringSlo(),
 			"google_monitoring_uptime_check_config":                        ResourceMonitoringUptimeCheckConfig(),
 			"google_network_management_connectivity_test":                  ResourceNetworkManagementConnectivityTest(),
+			"google_network_security_gateway_security_policy":              ResourceNetworkSecurityGatewaySecurityPolicy(),
+			"google_network_security_gateway_security_policy_rule":         ResourceNetworkSecurityGatewaySecurityPolicyRule(),
+			"google_network_security_url_lists":                            ResourceNetworkSecurityUrlLists(),
 			"google_network_services_edge_cache_keyset":                    ResourceNetworkServicesEdgeCacheKeyset(),
 			"google_network_services_edge_cache_origin":                    ResourceNetworkServicesEdgeCacheOrigin(),
 			"google_network_services_edge_cache_service":                   ResourceNetworkServicesEdgeCacheService(),
@@ -1328,7 +1337,7 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_apigee_sharedflow":                      ResourceApigeeSharedFlow(),
 			"google_apigee_sharedflow_deployment":           ResourceApigeeSharedFlowDeployment(),
 			"google_apigee_flowhook":                        ResourceApigeeFlowhook(),
-			"google_apigee_env_keystore_alias_pkcs12":       ResourceApigeeEnvKeystoreAliasPkcs12(),
+			"google_apigee_keystores_aliases_pkcs12":        ResourceApigeeKeystoresAliasesPkcs12(),
 			"google_apigee_keystores_aliases_key_cert_file": ResourceApigeeKeystoresAliasesKeyCertFile(),
 			"google_bigquery_table":                         ResourceBigQueryTable(),
 			"google_bigtable_gc_policy":                     ResourceBigtableGCPolicy(),
@@ -1349,63 +1358,65 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			"google_compute_project_metadata":               ResourceComputeProjectMetadata(),
 			"google_compute_project_metadata_item":          ResourceComputeProjectMetadataItem(),
 			"google_compute_region_instance_group_manager":  ResourceComputeRegionInstanceGroupManager(),
-			"google_compute_router_interface":               ResourceComputeRouterInterface(),
-			"google_compute_security_policy":                ResourceComputeSecurityPolicy(),
-			"google_compute_shared_vpc_host_project":        ResourceComputeSharedVpcHostProject(),
-			"google_compute_shared_vpc_service_project":     ResourceComputeSharedVpcServiceProject(),
-			"google_compute_target_pool":                    ResourceComputeTargetPool(),
-			"google_container_cluster":                      ResourceContainerCluster(),
-			"google_container_node_pool":                    ResourceContainerNodePool(),
-			"google_container_registry":                     ResourceContainerRegistry(),
-			"google_dataflow_job":                           ResourceDataflowJob(),
-			"google_dataflow_flex_template_job":             ResourceDataflowFlexTemplateJob(),
-			"google_dataproc_cluster":                       ResourceDataprocCluster(),
-			"google_dataproc_job":                           ResourceDataprocJob(),
-			"google_dialogflow_cx_version":                  ResourceDialogflowCXVersion(),
-			"google_dialogflow_cx_environment":              ResourceDialogflowCXEnvironment(),
-			"google_dns_record_set":                         ResourceDnsRecordSet(),
-			"google_endpoints_service":                      ResourceEndpointsService(),
-			"google_folder":                                 ResourceGoogleFolder(),
-			"google_folder_organization_policy":             ResourceGoogleFolderOrganizationPolicy(),
-			"google_logging_billing_account_sink":           ResourceLoggingBillingAccountSink(),
-			"google_logging_billing_account_exclusion":      ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, BillingAccountLoggingExclusionIdParseFunc),
-			"google_logging_billing_account_bucket_config":  ResourceLoggingBillingAccountBucketConfig(),
-			"google_logging_organization_sink":              ResourceLoggingOrganizationSink(),
-			"google_logging_organization_exclusion":         ResourceLoggingExclusion(OrganizationLoggingExclusionSchema, NewOrganizationLoggingExclusionUpdater, OrganizationLoggingExclusionIdParseFunc),
-			"google_logging_organization_bucket_config":     ResourceLoggingOrganizationBucketConfig(),
-			"google_logging_folder_sink":                    ResourceLoggingFolderSink(),
-			"google_logging_folder_exclusion":               ResourceLoggingExclusion(FolderLoggingExclusionSchema, NewFolderLoggingExclusionUpdater, FolderLoggingExclusionIdParseFunc),
-			"google_logging_folder_bucket_config":           ResourceLoggingFolderBucketConfig(),
-			"google_logging_project_sink":                   ResourceLoggingProjectSink(),
-			"google_logging_project_exclusion":              ResourceLoggingExclusion(ProjectLoggingExclusionSchema, NewProjectLoggingExclusionUpdater, ProjectLoggingExclusionIdParseFunc),
-			"google_logging_project_bucket_config":          ResourceLoggingProjectBucketConfig(),
-			"google_monitoring_dashboard":                   ResourceMonitoringDashboard(),
-			"google_project_service_identity":               ResourceProjectServiceIdentity(),
-			"google_service_networking_connection":          ResourceServiceNetworkingConnection(),
-			"google_sql_database_instance":                  ResourceSqlDatabaseInstance(),
-			"google_sql_ssl_cert":                           ResourceSqlSslCert(),
-			"google_sql_user":                               ResourceSqlUser(),
-			"google_organization_iam_custom_role":           ResourceGoogleOrganizationIamCustomRole(),
-			"google_organization_policy":                    ResourceGoogleOrganizationPolicy(),
-			"google_project":                                ResourceGoogleProject(),
-			"google_project_default_service_accounts":       ResourceGoogleProjectDefaultServiceAccounts(),
-			"google_project_service":                        ResourceGoogleProjectService(),
-			"google_project_iam_custom_role":                ResourceGoogleProjectIamCustomRole(),
-			"google_project_organization_policy":            ResourceGoogleProjectOrganizationPolicy(),
-			"google_project_usage_export_bucket":            ResourceProjectUsageBucket(),
-			"google_runtimeconfig_config":                   ResourceRuntimeconfigConfig(),
-			"google_runtimeconfig_variable":                 ResourceRuntimeconfigVariable(),
-			"google_service_account":                        ResourceGoogleServiceAccount(),
-			"google_service_account_key":                    ResourceGoogleServiceAccountKey(),
-			"google_service_networking_peered_dns_domain":   ResourceGoogleServiceNetworkingPeeredDNSDomain(),
-			"google_storage_bucket":                         ResourceStorageBucket(),
-			"google_storage_bucket_acl":                     ResourceStorageBucketAcl(),
-			"google_storage_bucket_object":                  ResourceStorageBucketObject(),
-			"google_storage_object_acl":                     ResourceStorageObjectAcl(),
-			"google_storage_default_object_acl":             ResourceStorageDefaultObjectAcl(),
-			"google_storage_notification":                   ResourceStorageNotification(),
-			"google_storage_transfer_job":                   ResourceStorageTransferJob(),
-			"google_tags_location_tag_binding":              ResourceTagsLocationTagBinding(),
+
+			"google_compute_region_instance_template":      ResourceComputeRegionInstanceTemplate(),
+			"google_compute_router_interface":              ResourceComputeRouterInterface(),
+			"google_compute_security_policy":               ResourceComputeSecurityPolicy(),
+			"google_compute_shared_vpc_host_project":       ResourceComputeSharedVpcHostProject(),
+			"google_compute_shared_vpc_service_project":    ResourceComputeSharedVpcServiceProject(),
+			"google_compute_target_pool":                   ResourceComputeTargetPool(),
+			"google_container_cluster":                     ResourceContainerCluster(),
+			"google_container_node_pool":                   ResourceContainerNodePool(),
+			"google_container_registry":                    ResourceContainerRegistry(),
+			"google_dataflow_job":                          ResourceDataflowJob(),
+			"google_dataflow_flex_template_job":            ResourceDataflowFlexTemplateJob(),
+			"google_dataproc_cluster":                      ResourceDataprocCluster(),
+			"google_dataproc_job":                          ResourceDataprocJob(),
+			"google_dialogflow_cx_version":                 ResourceDialogflowCXVersion(),
+			"google_dialogflow_cx_environment":             ResourceDialogflowCXEnvironment(),
+			"google_dns_record_set":                        ResourceDnsRecordSet(),
+			"google_endpoints_service":                     ResourceEndpointsService(),
+			"google_folder":                                ResourceGoogleFolder(),
+			"google_folder_organization_policy":            ResourceGoogleFolderOrganizationPolicy(),
+			"google_logging_billing_account_sink":          ResourceLoggingBillingAccountSink(),
+			"google_logging_billing_account_exclusion":     ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, BillingAccountLoggingExclusionIdParseFunc),
+			"google_logging_billing_account_bucket_config": ResourceLoggingBillingAccountBucketConfig(),
+			"google_logging_organization_sink":             ResourceLoggingOrganizationSink(),
+			"google_logging_organization_exclusion":        ResourceLoggingExclusion(OrganizationLoggingExclusionSchema, NewOrganizationLoggingExclusionUpdater, OrganizationLoggingExclusionIdParseFunc),
+			"google_logging_organization_bucket_config":    ResourceLoggingOrganizationBucketConfig(),
+			"google_logging_folder_sink":                   ResourceLoggingFolderSink(),
+			"google_logging_folder_exclusion":              ResourceLoggingExclusion(FolderLoggingExclusionSchema, NewFolderLoggingExclusionUpdater, FolderLoggingExclusionIdParseFunc),
+			"google_logging_folder_bucket_config":          ResourceLoggingFolderBucketConfig(),
+			"google_logging_project_sink":                  ResourceLoggingProjectSink(),
+			"google_logging_project_exclusion":             ResourceLoggingExclusion(ProjectLoggingExclusionSchema, NewProjectLoggingExclusionUpdater, ProjectLoggingExclusionIdParseFunc),
+			"google_logging_project_bucket_config":         ResourceLoggingProjectBucketConfig(),
+			"google_monitoring_dashboard":                  ResourceMonitoringDashboard(),
+			"google_project_service_identity":              ResourceProjectServiceIdentity(),
+			"google_service_networking_connection":         ResourceServiceNetworkingConnection(),
+			"google_sql_database_instance":                 ResourceSqlDatabaseInstance(),
+			"google_sql_ssl_cert":                          ResourceSqlSslCert(),
+			"google_sql_user":                              ResourceSqlUser(),
+			"google_organization_iam_custom_role":          ResourceGoogleOrganizationIamCustomRole(),
+			"google_organization_policy":                   ResourceGoogleOrganizationPolicy(),
+			"google_project":                               ResourceGoogleProject(),
+			"google_project_default_service_accounts":      ResourceGoogleProjectDefaultServiceAccounts(),
+			"google_project_service":                       ResourceGoogleProjectService(),
+			"google_project_iam_custom_role":               ResourceGoogleProjectIamCustomRole(),
+			"google_project_organization_policy":           ResourceGoogleProjectOrganizationPolicy(),
+			"google_project_usage_export_bucket":           ResourceProjectUsageBucket(),
+			"google_runtimeconfig_config":                  ResourceRuntimeconfigConfig(),
+			"google_runtimeconfig_variable":                ResourceRuntimeconfigVariable(),
+			"google_service_account":                       ResourceGoogleServiceAccount(),
+			"google_service_account_key":                   ResourceGoogleServiceAccountKey(),
+			"google_service_networking_peered_dns_domain":  ResourceGoogleServiceNetworkingPeeredDNSDomain(),
+			"google_storage_bucket":                        ResourceStorageBucket(),
+			"google_storage_bucket_acl":                    ResourceStorageBucketAcl(),
+			"google_storage_bucket_object":                 ResourceStorageBucketObject(),
+			"google_storage_object_acl":                    ResourceStorageObjectAcl(),
+			"google_storage_default_object_acl":            ResourceStorageDefaultObjectAcl(),
+			"google_storage_notification":                  ResourceStorageNotification(),
+			"google_storage_transfer_job":                  ResourceStorageTransferJob(),
+			"google_tags_location_tag_binding":             ResourceTagsLocationTagBinding(),
 			// ####### END handwritten resources ###########
 		},
 		map[string]*schema.Resource{
@@ -1477,7 +1488,10 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
-	HandleSDKDefaults(d)
+	err := HandleSDKDefaults(d)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
 	HandleDCLCustomEndpointDefaults(d)
 
 	config := Config{
@@ -1630,6 +1644,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 	config.MLEngineBasePath = d.Get("ml_engine_custom_endpoint").(string)
 	config.MonitoringBasePath = d.Get("monitoring_custom_endpoint").(string)
 	config.NetworkManagementBasePath = d.Get("network_management_custom_endpoint").(string)
+	config.NetworkSecurityBasePath = d.Get("network_security_custom_endpoint").(string)
 	config.NetworkServicesBasePath = d.Get("network_services_custom_endpoint").(string)
 	config.NotebooksBasePath = d.Get("notebooks_custom_endpoint").(string)
 	config.OrgPolicyBasePath = d.Get("org_policy_custom_endpoint").(string)
@@ -1703,4 +1718,26 @@ func validateCredentials(v interface{}, k string) (warnings []string, errors []e
 	}
 
 	return
+}
+
+func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
+	merged := make(map[string]*schema.Resource)
+	duplicates := []string{}
+
+	for _, m := range ms {
+		for k, v := range m {
+			if _, ok := merged[k]; ok {
+				duplicates = append(duplicates, k)
+			}
+
+			merged[k] = v
+		}
+	}
+
+	var err error
+	if len(duplicates) > 0 {
+		err = fmt.Errorf("saw duplicates in mergeResourceMaps: %v", duplicates)
+	}
+
+	return merged, err
 }

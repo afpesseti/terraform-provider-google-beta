@@ -36,12 +36,12 @@ func TestAccContainerAzureNodePool_BasicHandWritten(t *testing.T) {
 		"azure_tenant":        "00000000-0000-0000-0000-17aad2f0f61f",
 		"byo_prefix":          "mmv2",
 		"project_name":        GetTestProjectFromEnv(),
-		"project_number":      getTestProjectNumberFromEnv(),
+		"project_number":      GetTestProjectNumberFromEnv(),
 		"random_suffix":       RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckContainerAzureNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -74,12 +74,12 @@ func TestAccContainerAzureNodePool_BetaBasicHandWritten(t *testing.T) {
 		"azure_tenant":        "00000000-0000-0000-0000-17aad2f0f61f",
 		"byo_prefix":          "mmv2",
 		"project_name":        GetTestProjectFromEnv(),
-		"project_number":      getTestProjectNumberFromEnv(),
+		"project_number":      GetTestProjectNumberFromEnv(),
 		"random_suffix":       RandString(t, 10),
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
+		PreCheck: func() { AccTestPreCheck(t) },
 
 		ProtoV5ProviderFactories: ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckContainerAzureNodePoolDestroyProducer(t),

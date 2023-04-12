@@ -31,7 +31,7 @@ func TestAccMonitoringNotificationChannel_notificationChannelBasicExample(t *tes
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -84,7 +84,7 @@ func testAccCheckMonitoringNotificationChannelDestroyProducer(t *testing.T) func
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, isMonitoringConcurrentEditError)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, IsMonitoringConcurrentEditError)
 			if err == nil {
 				return fmt.Errorf("MonitoringNotificationChannel still exists at %s", url)
 			}

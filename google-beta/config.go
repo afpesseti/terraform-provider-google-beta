@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -57,7 +58,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-type providerMeta struct {
+type ProviderMeta struct {
 	ModuleName string `cty:"module_name"`
 }
 
@@ -244,6 +245,7 @@ type Config struct {
 	MLEngineBasePath             string
 	MonitoringBasePath           string
 	NetworkManagementBasePath    string
+	NetworkSecurityBasePath      string
 	NetworkServicesBasePath      string
 	NotebooksBasePath            string
 	OrgPolicyBasePath            string
@@ -363,6 +365,7 @@ const MemcacheBasePathKey = "Memcache"
 const MLEngineBasePathKey = "MLEngine"
 const MonitoringBasePathKey = "Monitoring"
 const NetworkManagementBasePathKey = "NetworkManagement"
+const NetworkSecurityBasePathKey = "NetworkSecurity"
 const NetworkServicesBasePathKey = "NetworkServices"
 const NotebooksBasePathKey = "Notebooks"
 const OrgPolicyBasePathKey = "OrgPolicy"
@@ -476,6 +479,7 @@ var DefaultBasePaths = map[string]string{
 	MLEngineBasePathKey:             "https://ml.googleapis.com/v1/",
 	MonitoringBasePathKey:           "https://monitoring.googleapis.com/",
 	NetworkManagementBasePathKey:    "https://networkmanagement.googleapis.com/v1/",
+	NetworkSecurityBasePathKey:      "https://networksecurity.googleapis.com/v1beta1/",
 	NetworkServicesBasePathKey:      "https://networkservices.googleapis.com/v1/",
 	NotebooksBasePathKey:            "https://notebooks.googleapis.com/v1/",
 	OrgPolicyBasePathKey:            "https://orgpolicy.googleapis.com/v2/",
@@ -523,54 +527,62 @@ var DefaultClientScopes = []string{
 	"https://www.googleapis.com/auth/userinfo.email",
 }
 
-func HandleSDKDefaults(d *schema.ResourceData) {
+func HandleSDKDefaults(d *schema.ResourceData) error {
 	if d.Get("impersonate_service_account") == "" {
-		d.Set("impersonate_service_account", MultiEnvSearch([]string{
+		d.Set("impersonate_service_account", MultiEnvDefault([]string{
 			"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
-		}))
+		}, nil))
 	}
 
 	if d.Get("project") == "" {
-		d.Set("project", MultiEnvSearch([]string{
+		d.Set("project", MultiEnvDefault([]string{
 			"GOOGLE_PROJECT",
 			"GOOGLE_CLOUD_PROJECT",
 			"GCLOUD_PROJECT",
 			"CLOUDSDK_CORE_PROJECT",
-		}))
+		}, nil))
 	}
 
 	if d.Get("billing_project") == "" {
-		d.Set("billing_project", MultiEnvSearch([]string{
+		d.Set("billing_project", MultiEnvDefault([]string{
 			"GOOGLE_BILLING_PROJECT",
-		}))
+		}, nil))
 	}
 
 	if d.Get("region") == "" {
-		d.Set("region", MultiEnvSearch([]string{
+		d.Set("region", MultiEnvDefault([]string{
 			"GOOGLE_REGION",
 			"GCLOUD_REGION",
 			"CLOUDSDK_COMPUTE_REGION",
-		}))
+		}, nil))
 	}
 
 	if d.Get("zone") == "" {
-		d.Set("zone", MultiEnvSearch([]string{
+		d.Set("zone", MultiEnvDefault([]string{
 			"GOOGLE_ZONE",
 			"GCLOUD_ZONE",
 			"CLOUDSDK_COMPUTE_ZONE",
-		}))
+		}, nil))
 	}
 
-	if d.Get("user_project_override") == "" {
-		d.Set("user_project_override", MultiEnvSearch([]string{
+	if _, ok := d.GetOkExists("user_project_override"); !ok {
+		override := MultiEnvDefault([]string{
 			"USER_PROJECT_OVERRIDE",
-		}))
+		}, nil)
+
+		if override != nil {
+			b, err := strconv.ParseBool(override.(string))
+			if err != nil {
+				return err
+			}
+			d.Set("user_project_override", b)
+		}
 	}
 
 	if d.Get("request_reason") == "" {
-		d.Set("request_reason", MultiEnvSearch([]string{
+		d.Set("request_reason", MultiEnvDefault([]string{
 			"CLOUDSDK_CORE_REQUEST_REASON",
-		}))
+		}, nil))
 	}
 
 	// Generated Products
@@ -924,6 +936,11 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 			"GOOGLE_NETWORK_MANAGEMENT_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[NetworkManagementBasePathKey]))
 	}
+	if d.Get("network_security_custom_endpoint") == "" {
+		d.Set("network_security_custom_endpoint", MultiEnvDefault([]string{
+			"GOOGLE_NETWORK_SECURITY_CUSTOM_ENDPOINT",
+		}, DefaultBasePaths[NetworkSecurityBasePathKey]))
+	}
 	if d.Get("network_services_custom_endpoint") == "" {
 		d.Set("network_services_custom_endpoint", MultiEnvDefault([]string{
 			"GOOGLE_NETWORK_SERVICES_CUSTOM_ENDPOINT",
@@ -1136,6 +1153,8 @@ func HandleSDKDefaults(d *schema.ResourceData) {
 			"GOOGLE_CONTAINERAZURE_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[ContainerAzureBasePathKey]))
 	}
+
+	return nil
 }
 
 func (c *Config) LoadAndValidate(ctx context.Context) error {
@@ -1238,7 +1257,7 @@ func ExpandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
 	}
 
 	cfgV := ls[0].(map[string]interface{})
-	if sendAfterV, ok := cfgV["send_after"]; ok {
+	if sendAfterV, ok := cfgV["send_after"]; ok && sendAfterV != "" {
 		SendAfter, err := time.ParseDuration(sendAfterV.(string))
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse duration from 'send_after' value %q", sendAfterV)
@@ -1452,7 +1471,7 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
 	pubsubClientBasePath := RemoveBasePathVersion(c.PubsubBasePath)
 	log.Printf("[INFO] Instantiating Google Pubsub client for path %s", pubsubClientBasePath)
-	wrappedPubsubClient := ClientWithAdditionalRetries(c.Client, pubsubTopicProjectNotReady)
+	wrappedPubsubClient := ClientWithAdditionalRetries(c.Client, PubsubTopicProjectNotReady)
 	clientPubsub, err := pubsub.NewService(c.context, option.WithHTTPClient(wrappedPubsubClient))
 	if err != nil {
 		log.Printf("[WARN] Error creating client pubsub: %s", err)
@@ -1635,7 +1654,7 @@ func (c *Config) NewSourceRepoClient(userAgent string) *sourcerepo.Service {
 func (c *Config) NewBigQueryClient(userAgent string) *bigquery.Service {
 	bigQueryClientBasePath := c.BigQueryBasePath
 	log.Printf("[INFO] Instantiating Google Cloud BigQuery client for path %s", bigQueryClientBasePath)
-	wrappedBigQueryClient := ClientWithAdditionalRetries(c.Client, iamMemberMissing)
+	wrappedBigQueryClient := ClientWithAdditionalRetries(c.Client, IamMemberMissing)
 	clientBigQuery, err := bigquery.NewService(c.context, option.WithHTTPClient(wrappedBigQueryClient))
 	if err != nil {
 		log.Printf("[WARN] Error creating client big query: %s", err)
@@ -1834,8 +1853,8 @@ func (c *Config) NewCloudRunV2Client(userAgent string) *runadminv2.Service {
 	return clientRunAdminV2
 }
 
-// staticTokenSource is used to be able to identify static token sources without reflection.
-type staticTokenSource struct {
+// StaticTokenSource is used to be able to identify static token sources without reflection.
+type StaticTokenSource struct {
 	oauth2.TokenSource
 }
 
@@ -1862,7 +1881,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 		log.Printf("[INFO] Authenticating using configured Google JSON 'access_token'...")
 		log.Printf("[INFO]   -- Scopes: %s", clientScopes)
 		return googleoauth.Credentials{
-			TokenSource: staticTokenSource{oauth2.StaticTokenSource(token)},
+			TokenSource: StaticTokenSource{oauth2.StaticTokenSource(token)},
 		}, nil
 	}
 
@@ -1994,6 +2013,7 @@ func ConfigureBasePaths(c *Config) {
 	c.MLEngineBasePath = DefaultBasePaths[MLEngineBasePathKey]
 	c.MonitoringBasePath = DefaultBasePaths[MonitoringBasePathKey]
 	c.NetworkManagementBasePath = DefaultBasePaths[NetworkManagementBasePathKey]
+	c.NetworkSecurityBasePath = DefaultBasePaths[NetworkSecurityBasePathKey]
 	c.NetworkServicesBasePath = DefaultBasePaths[NetworkServicesBasePathKey]
 	c.NotebooksBasePath = DefaultBasePaths[NotebooksBasePathKey]
 	c.OrgPolicyBasePath = DefaultBasePaths[OrgPolicyBasePathKey]
@@ -2036,4 +2056,32 @@ func ConfigureBasePaths(c *Config) {
 	c.BigQueryBasePath = DefaultBasePaths[BigQueryBasePathKey]
 	c.BigtableAdminBasePath = DefaultBasePaths[BigtableAdminBasePathKey]
 	c.TagsLocationBasePath = DefaultBasePaths[TagsLocationBasePathKey]
+}
+
+func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {
+	// When environment variables UserProjectOverride and BillingProject are set for the provider,
+	// the header X-Goog-User-Project is set for the API requests.
+	// But it causes an error when calling GetCurrentUserEmail. Set the project to be "NO_BILLING_PROJECT_OVERRIDE".
+	// And then it triggers the header X-Goog-User-Project to be set to empty string.
+
+	// See https://github.com/golang/oauth2/issues/306 for a recommendation to do this from a Go maintainer
+	// URL retrieved from https://accounts.google.com/.well-known/openid-configuration
+	res, err := SendRequest(config, "GET", "NO_BILLING_PROJECT_OVERRIDE", "https://openidconnect.googleapis.com/v1/userinfo", userAgent, nil)
+
+	if err != nil {
+		return "", fmt.Errorf("error retrieving userinfo for your provider credentials. have you enabled the 'https://www.googleapis.com/auth/userinfo.email' scope? error: %s", err)
+	}
+	if res["email"] == nil {
+		return "", fmt.Errorf("error retrieving email from userinfo. email was nil in the response.")
+	}
+	return res["email"].(string), nil
+}
+
+func MultiEnvSearch(ks []string) string {
+	for _, k := range ks {
+		if v := os.Getenv(k); v != "" {
+			return v
+		}
+	}
+	return ""
 }

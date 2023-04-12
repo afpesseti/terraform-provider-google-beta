@@ -31,7 +31,7 @@ func TestAccPubsubTopic_pubsubTopicBasicExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -69,7 +69,7 @@ func TestAccPubsubTopic_pubsubTopicGeoRestrictedExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -108,7 +108,7 @@ func TestAccPubsubTopic_pubsubTopicSchemaSettingsExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -167,7 +167,7 @@ func testAccCheckPubsubTopicDestroyProducer(t *testing.T) func(s *terraform.Stat
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, pubsubTopicProjectNotReady)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, PubsubTopicProjectNotReady)
 			if err == nil {
 				return fmt.Errorf("PubsubTopic still exists at %s", url)
 			}

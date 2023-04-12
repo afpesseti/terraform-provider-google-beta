@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
+const testOauthScope = "https://www.googleapis.com/auth/compute"
+
 // NewTestConfig create a config using the http test server.
 func NewTestConfig(server *httptest.Server) *Config {
 	cfg := &Config{}
@@ -88,6 +91,7 @@ func configureTestBasePaths(c *Config, url string) {
 	c.MLEngineBasePath = url
 	c.MonitoringBasePath = url
 	c.NetworkManagementBasePath = url
+	c.NetworkSecurityBasePath = url
 	c.NetworkServicesBasePath = url
 	c.NotebooksBasePath = url
 	c.OrgPolicyBasePath = url

@@ -31,7 +31,7 @@ func TestAccFilestoreSnapshot_filestoreSnapshotBasicExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckFilestoreSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -82,7 +82,7 @@ func TestAccFilestoreSnapshot_filestoreSnapshotFullExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckFilestoreSnapshotDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -154,7 +154,7 @@ func testAccCheckFilestoreSnapshotDestroyProducer(t *testing.T) func(s *terrafor
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, isNotFilestoreQuotaError)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, IsNotFilestoreQuotaError)
 			if err == nil {
 				return fmt.Errorf("FilestoreSnapshot still exists at %s", url)
 			}

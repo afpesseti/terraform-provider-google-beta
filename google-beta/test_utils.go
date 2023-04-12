@@ -117,11 +117,11 @@ func (d *ResourceDiffMock) ForceNew(key string) error {
 	return nil
 }
 
-func checkDataSourceStateMatchesResourceState(dataSourceName, resourceName string) func(*terraform.State) error {
-	return checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName, map[string]struct{}{})
+func CheckDataSourceStateMatchesResourceState(dataSourceName, resourceName string) func(*terraform.State) error {
+	return CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName, map[string]struct{}{})
 }
 
-func checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName string, ignoreFields map[string]struct{}) func(*terraform.State) error {
+func CheckDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName string, ignoreFields map[string]struct{}) func(*terraform.State) error {
 	return func(s *terraform.State) error {
 		ds, ok := s.RootModule().Resources[dataSourceName]
 		if !ok {
@@ -242,4 +242,16 @@ func ProtoV5ProviderBetaFactories(t *testing.T) map[string]func() (tfprotov5.Pro
 			return provider(), err
 		},
 	}
+}
+
+type TimeoutError struct {
+	timeout bool
+}
+
+func (e *TimeoutError) Timeout() bool {
+	return e.timeout
+}
+
+func (e *TimeoutError) Error() string {
+	return "timeout error"
 }

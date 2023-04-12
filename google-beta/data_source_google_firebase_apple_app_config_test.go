@@ -9,6 +9,8 @@ import (
 )
 
 func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
+	// TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
+	SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,7 +22,7 @@ func TestAccDataSourceGoogleFirebaseAppleAppConfig(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
+		PreCheck: func() { AccTestPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
 				ExternalProviders: map[string]resource.ExternalProvider{

@@ -31,7 +31,7 @@ func TestAccMonitoringMetricDescriptor_monitoringMetricDescriptorBasicExample(t 
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringMetricDescriptorDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -79,7 +79,7 @@ func TestAccMonitoringMetricDescriptor_monitoringMetricDescriptorAlertExample(t 
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckMonitoringMetricDescriptorDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -145,7 +145,7 @@ func testAccCheckMonitoringMetricDescriptorDestroyProducer(t *testing.T) func(s 
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, isMonitoringConcurrentEditError)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, IsMonitoringConcurrentEditError)
 			if err == nil {
 				return fmt.Errorf("MonitoringMetricDescriptor still exists at %s", url)
 			}

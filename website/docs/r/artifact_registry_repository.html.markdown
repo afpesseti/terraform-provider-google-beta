@@ -45,6 +45,26 @@ resource "google_artifact_registry_repository" "my-repo" {
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_working_dir=artifact_registry_repository_docker&cloudshell_image=gcr.io%2Fgraphite-cloud-shell-images%2Fterraform%3Alatest&open_in_editor=main.tf&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Artifact Registry Repository Docker
+
+
+```hcl
+resource "google_artifact_registry_repository" "my-repo" {
+  location      = "us-central1"
+  repository_id = "my-repository"
+  description   = "example docker repository"
+  format        = "DOCKER"
+
+  docker_config {
+    immutable_tags = true
+  }
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_working_dir=artifact_registry_repository_cmek&cloudshell_image=gcr.io%2Fgraphite-cloud-shell-images%2Fterraform%3Alatest&open_in_editor=main.tf&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md" target="_blank">
     <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
   </a>
@@ -82,7 +102,6 @@ data "google_project" "project" {}
 
 ```hcl
 resource "google_artifact_registry_repository" "my-repo-upstream" {
-  provider      = google-beta
   location      = "us-central1"
   repository_id = "my-repository-upstream"
   description   = "example docker repository (upstream source)"
@@ -91,7 +110,6 @@ resource "google_artifact_registry_repository" "my-repo-upstream" {
 
 resource "google_artifact_registry_repository" "my-repo" {
   depends_on    = []
-  provider      = google-beta
   location      = "us-central1"
   repository_id = "my-repository"
   description   = "example virtual docker repository"
@@ -116,7 +134,6 @@ resource "google_artifact_registry_repository" "my-repo" {
 
 ```hcl
 resource "google_artifact_registry_repository" "my-repo" {
-  provider      = google-beta
   location      = "us-central1"
   repository_id = "my-repository"
   description   = "example remote docker repository"
@@ -175,6 +192,11 @@ The following arguments are supported:
   `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
   This value may not be changed after the Repository has been created.
 
+* `docker_config` -
+  (Optional)
+  Docker repository config contains repository level configuration for the repositories of docker type.
+  Structure is [documented below](#nested_docker_config).
+
 * `maven_config` -
   (Optional)
   MavenRepositoryConfig is maven related repository details.
@@ -183,24 +205,30 @@ The following arguments are supported:
   Structure is [documented below](#nested_maven_config).
 
 * `mode` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   The mode configures the repository to serve artifacts from different sources.
   Default value is `STANDARD_REPOSITORY`.
   Possible values are: `STANDARD_REPOSITORY`, `VIRTUAL_REPOSITORY`, `REMOTE_REPOSITORY`.
 
 * `virtual_repository_config` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   Configuration specific for a Virtual Repository.
   Structure is [documented below](#nested_virtual_repository_config).
 
 * `remote_repository_config` -
-  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+  (Optional)
   Configuration specific for a Remote Repository.
   Structure is [documented below](#nested_remote_repository_config).
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+
+<a name="nested_docker_config"></a>The `docker_config` block supports:
+
+* `immutable_tags` -
+  (Optional)
+  The repository which enabled this flag prevents all tags from being modified, moved or deleted. This does not prevent tags from being created.
 
 <a name="nested_maven_config"></a>The `maven_config` block supports:
 

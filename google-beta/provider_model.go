@@ -1,6 +1,7 @@
 package google
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -91,6 +92,7 @@ type ProviderModel struct {
 	MLEngineCustomEndpoint             types.String `tfsdk:"ml_engine_custom_endpoint"`
 	MonitoringCustomEndpoint           types.String `tfsdk:"monitoring_custom_endpoint"`
 	NetworkManagementCustomEndpoint    types.String `tfsdk:"network_management_custom_endpoint"`
+	NetworkSecurityCustomEndpoint      types.String `tfsdk:"network_security_custom_endpoint"`
 	NetworkServicesCustomEndpoint      types.String `tfsdk:"network_services_custom_endpoint"`
 	NotebooksCustomEndpoint            types.String `tfsdk:"notebooks_custom_endpoint"`
 	OrgPolicyCustomEndpoint            types.String `tfsdk:"org_policy_custom_endpoint"`
@@ -152,6 +154,11 @@ type ProviderModel struct {
 type ProviderBatching struct {
 	SendAfter      types.String `tfsdk:"send_after"`
 	EnableBatching types.Bool   `tfsdk:"enable_batching"`
+}
+
+var ProviderBatchingAttributes = map[string]attr.Type{
+	"send_after":      types.StringType,
+	"enable_batching": types.BoolType,
 }
 
 // ProviderMetaModel describes the provider meta model

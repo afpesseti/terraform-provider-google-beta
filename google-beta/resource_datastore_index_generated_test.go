@@ -31,7 +31,7 @@ func TestAccDatastoreIndex_datastoreIndexExample(t *testing.T) {
 	}
 
 	VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
+		PreCheck:                 func() { AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDatastoreIndexDestroyProducer(t),
 		Steps: []resource.TestStep{
@@ -86,7 +86,7 @@ func testAccCheckDatastoreIndexDestroyProducer(t *testing.T) func(s *terraform.S
 				billingProject = config.BillingProject
 			}
 
-			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, datastoreIndex409Contention)
+			_, err = SendRequest(config, "GET", billingProject, url, config.UserAgent, nil, DatastoreIndex409Contention)
 			if err == nil {
 				return fmt.Errorf("DatastoreIndex still exists at %s", url)
 			}
